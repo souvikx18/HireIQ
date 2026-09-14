@@ -37,16 +37,37 @@
 .back-link {
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  color: #c8d9ee;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(142, 216, 239, 0.22);
+  color: #d1e2f6;
   text-decoration: none;
+  font-family: inherit;
   font-size: 13px;
-  transition: 0.2s;
+  font-weight: 600;
   width: fit-content;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+  transition: all 0.2s ease;
+}
+.back-link i {
+  font-size: 12px;
+  transition: transform 0.2s ease;
 }
 .back-link:hover {
-  color: #fff;
+  background: rgba(255, 255, 255, 0.13);
+  border-color: rgba(142, 216, 239, 0.42);
+  color: #ffffff;
   transform: translateX(-3px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.24);
+}
+.back-link:hover i {
+  transform: translateX(-2px);
+}
+.back-link:active {
+  transform: translateX(-1px) scale(0.98);
 }
 .upgrade-hero {
   text-align: center;

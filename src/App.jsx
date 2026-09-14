@@ -1,6 +1,8 @@
 import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Index from './pages/Index';
+import LandingPage from './pages/LandingPage';
 import ResumeUpload from './pages/ResumeUpload';
 import Candidates from './pages/Candidates';
 import SkillGapAnalysis from './pages/SkillGapAnalysis';
@@ -8,19 +10,34 @@ import JobRole from './pages/JobRole';
 import Report from './pages/Report';
 import Setting from './pages/Setting';
 import Signup from './pages/Signup';
+import Login from './pages/Login';
 import Upgrade from './pages/Upgrade';
 import AIChatbot from './components/AIChatbot';
 
-export default function App() {
+function AppRoutes() {
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
   const path = location.pathname.toLowerCase();
-  const hideChatbot = path.includes('signup') || path.includes('upgrade');
+
+  const hideChatbot =
+    path === '/' ||
+    path === '' ||
+    path.includes('signup') ||
+    path.includes('upgrade') ||
+    path.includes('login');
+
   return (
     <>
       <Routes>
-        <Route path="/" element={<Index />} />
+        {/* When project starts/opens, first enters Landing Page */}
+        <Route path="/" element={<LandingPage />} />
+
+        {/* Dashboard Routes */}
+        <Route path="/dashboard" element={<Index />} />
+        <Route path="/dashboard.html" element={<Index />} />
         <Route path="/index.html" element={<Index />} />
 
+        {/* Authenticated Internal Navigation Routes */}
         <Route path="/resumeupload" element={<ResumeUpload />} />
         <Route path="/resumeupload.html" element={<ResumeUpload />} />
 
@@ -42,15 +59,38 @@ export default function App() {
         <Route path="/settings" element={<Setting />} />
         <Route path="/settings.html" element={<Setting />} />
 
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/signup.html" element={<Signup />} />
-
         <Route path="/upgrade" element={<Upgrade />} />
         <Route path="/upgrade.html" element={<Upgrade />} />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* Auth Routes */}
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/signup.html" element={<Signup />} />
+
+        <Route path="/login" element={<Login />} />
+        <Route path="/login.html" element={<Login />} />
+
+        {/* Fallback */}
+        <Route
+          path="*"
+          element={
+            isAuthenticated ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
       </Routes>
       {!hideChatbot && <AIChatbot />}
     </>
   );
 }
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
+  );
+}
+

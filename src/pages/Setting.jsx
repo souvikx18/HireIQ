@@ -172,6 +172,7 @@ export default function Setting() {
           <Header
             title="Settings"
             subtitle="Manage your account, preferences and system settings."
+            showProfile={false}
           />
 
           {/* SETTINGS GRID */}

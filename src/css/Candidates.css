@@ -51,9 +51,7 @@ body {
 
 .sidebar {
     width: 250px;
-    background: linear-gradient(180deg,
-            #0f1c3e,
-            #1a2d52);
+    background: #000000;
     color: white;
     padding: 20px 15px;
     position: fixed;
@@ -522,7 +520,7 @@ body {
     font-weight: 600;
 }
 
-.candidate-count {
+.table-title .candidate-count {
     padding: 4px 9px;
 
     background: #2b73ec;

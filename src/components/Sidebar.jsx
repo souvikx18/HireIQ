@@ -25,7 +25,7 @@ export default function Sidebar({ activePage }) {
 
       <nav className="menu">
         <Link
-          to="/"
+          to="/dashboard"
           className={`menu-item ${activePage === 'dashboard' ? 'active' : ''}`}
         >
           <i className="fa-solid fa-house"></i>

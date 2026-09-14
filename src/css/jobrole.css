@@ -63,7 +63,7 @@ body {
 
 .sidebar {
     width: 250px;
-    background: linear-gradient(180deg, #071c3b, #062652);
+    background: #000000;
     color: white;
     padding: 24px 15px;
     position: fixed;
@@ -773,23 +773,25 @@ table .skill-tags span:last-child,
    CANDIDATE COUNT
 ========================================================= */
 
+table .candidate-count,
+.table .candidate-count,
 .candidate-count {
     display: inline-flex;
-
     align-items: center;
-
     gap: 7px;
-
+    background: transparent;
+    padding: 0;
+    border: none;
+    border-radius: 0;
     color: #34445d;
-
     font-size: 11px;
-
     font-weight: 500;
 }
 
+table .candidate-count i,
+.table .candidate-count i,
 .candidate-count i {
     color: #5c6b80;
-
     font-size: 12px;
 }
 
@@ -1681,10 +1683,15 @@ body.dark-mode .table .skill-tags span:last-child {
     border-color: #31506f;
 }
 
+body.dark-mode table .candidate-count,
+body.dark-mode .table .candidate-count,
 body.dark-mode .candidate-count {
+    background: transparent;
     color: #d3dfed;
 }
 
+body.dark-mode table .candidate-count i,
+body.dark-mode .table .candidate-count i,
 body.dark-mode .candidate-count i {
     color: #8fa5bf;
 }

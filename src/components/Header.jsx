@@ -69,8 +69,13 @@ export default function Header({
   useEffect(() => {
     if (loginOpen) {
       document.body.classList.add('login-open');
+      document.body.classList.remove('dark-mode');
     } else {
       document.body.classList.remove('login-open');
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+      }
     }
   }, [loginOpen]);
 
@@ -88,8 +93,7 @@ export default function Header({
     if (onProfileClick) {
       onProfileClick(e);
     } else {
-      setLoginOpen(true);
-      document.body.classList.add("login-open");
+      navigate('/setting');
     }
   };
 
@@ -294,10 +298,6 @@ export default function Header({
                   </div>
                   <button className="sign-in-btn" type="submit">
                     Login
-                  </button>
-                  <button className="sso-btn" type="button">
-                    <i className="fa-regular fa-circle-xmark"></i> Login with
-                    Okta SSO
                   </button>
                 </form>
                 <p className="create-account">

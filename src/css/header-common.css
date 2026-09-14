@@ -787,3 +787,59 @@ body.page-leaving .login-panel {
     display: none;
   }
 }
+
+/* =========================================================
+   LOGIN FIXED APPEARANCE - DISCONNECTED FROM DASHBOARD THEME
+========================================================= */
+.login-overlay,
+.login-page,
+body.dark-mode .login-overlay,
+body.dark-mode .login-page {
+  background: #f7f8fa !important;
+}
+
+.login-panel,
+body.dark-mode .login-panel {
+  background: #f7f8fa !important;
+  color: #14213d !important;
+}
+
+.login-form-wrap,
+body.dark-mode .login-form-wrap {
+  color: #14213d !important;
+}
+
+.login-form-wrap h1,
+body.dark-mode .login-form-wrap h1 {
+  color: #14213d !important;
+}
+
+.login-subtitle,
+body.dark-mode .login-subtitle {
+  color: #748092 !important;
+}
+
+.login-form-wrap label,
+body.dark-mode .login-form-wrap label {
+  color: #263247 !important;
+}
+
+.login-form-wrap input,
+body.dark-mode .login-form-wrap input {
+  background: #f9fafb !important;
+  color: #263247 !important;
+  border: 1px solid #dfe5ec !important;
+}
+
+.sso-btn,
+body.dark-mode .sso-btn {
+  background: white !important;
+  color: #263247 !important;
+  border: 1px solid #dfe5ec !important;
+}
+
+.create-account,
+body.dark-mode .create-account {
+  color: #748092 !important;
+}
+

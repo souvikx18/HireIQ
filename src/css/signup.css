@@ -244,68 +244,49 @@ body.page-leaving .signup-form-panel {
 }
 
 .signup-form {
-    width: min(100%, 480px);
-}
-
-.steps {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #2755c8;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.steps > i {
-    flex: 1;
-    height: 1px;
-    background: #ccd6e0;
-}
-
-.step {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-}
-
-.step b {
-    display: grid;
-    width: 22px;
-    height: 22px;
-    place-items: center;
-    border-radius: 50%;
-    color: #fff;
-    background: #2957cf;
-    font-size: 11px;
+    width: min(100%, 420px);
 }
 
 .signup-form h2 {
-    margin: 16px 0 0;
-    font-size: 24px;
-}
-
-.form-intro {
-    margin: 4px 0 16px;
-    color: #65758a;
-    font-size: 13px;
-}
-
-.signup-form label {
-    display: block;
-    margin: 11px 0 5px;
-    font-size: 12px;
+    margin: 0 0 20px;
+    font-size: 26px;
     font-weight: 700;
+    color: #10203a;
+    letter-spacing: -0.3px;
+}
+
+.login-subtitle {
+    margin: -12px 0 20px 0;
+    color: #65758a;
+    font-size: 13.5px;
+    line-height: 1.4;
+}
+
+.signup-field {
+    margin-bottom: 12px;
+    position: relative;
 }
 
 .signup-form input {
     width: 100%;
-    padding: 10px 14px;
+    padding: 12px 14px;
     border: 1px solid #d6dee7;
     border-radius: 8px;
     color: #14243b;
     background: #fff;
     font: inherit;
+    font-size: 13.5px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+.signup-form input:focus {
+    border-color: #2555d4;
+    box-shadow: 0 0 0 3px rgba(37, 85, 212, .12);
+}
+
+.signup-form input::placeholder {
+    color: #8c9ba8;
     font-size: 13px;
 }
 
@@ -335,55 +316,122 @@ body.page-leaving .signup-form-panel {
     line-height: 1;
 }
 
-.form-actions {
+.login-options-row {
     display: flex;
-    gap: 10px;
-    margin-top: 18px;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: -2px;
+    margin-bottom: 16px;
 }
 
-.back-button,
-.create-button {
-    min-height: 40px;
-    border-radius: 8px;
-    font: inherit;
+.forgot-password-link {
+    color: #2555c8;
     font-size: 13px;
-    font-weight: 700;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color .2s ease;
 }
 
-.back-button {
-    display: grid;
-    min-width: 84px;
-    place-items: center;
-    border: 1px solid #d6dee7;
-    color: #596b7e;
-    text-decoration: none;
+.forgot-password-link:hover {
+    color: #1b45b8;
+    text-decoration: underline;
 }
 
 .create-button {
-    flex: 1;
+    width: 100%;
+    min-height: 44px;
+    margin-top: 6px;
     border: 0;
+    border-radius: 8px;
     color: #fff;
     background: #2555d4;
     cursor: pointer;
     box-shadow: 0 8px 18px rgba(37, 85, 212, .18);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s ease, transform .15s ease, box-shadow .2s ease;
 }
 
-.create-button span {
-    margin-left: 8px;
-    font-size: 18px;
+.create-button:hover {
+    background: #1b45b8;
+    box-shadow: 0 10px 22px rgba(37, 85, 212, .26);
+    transform: translateY(-1px);
 }
 
 .existing-account {
-    margin-top: 16px;
-    color: #718096;
+    margin: 16px 0 0;
+    color: #65758a;
     text-align: center;
-    font-size: 13px;
+    font-size: 13.5px;
 }
 
 .existing-account a {
     color: #2555c8;
     font-weight: 700;
     text-decoration: none;
+    margin-left: 3px;
+}
+
+.existing-account a:hover {
+    text-decoration: underline;
+}
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    margin: 18px 0;
+    text-align: center;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #d6dee7;
+}
+
+.auth-divider span {
+    padding: 0 14px;
+    color: #8c9ba8;
+    font-size: 13px;
+    text-transform: lowercase;
+}
+
+.google-btn {
+    width: 100%;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 1px solid #d6dee7;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #1e293b;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(16, 32, 58, .04);
+    transition: background .2s ease, border-color .2s ease, box-shadow .2s ease, transform .15s ease;
+}
+
+.google-btn:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(16, 32, 58, .08);
+    transform: translateY(-1px);
+}
+
+.google-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
 }
 
 .login-visual {
@@ -668,3 +716,64 @@ body.page-leaving .signup-form-panel {
         font-size: 25px;
     }
 }
+
+/* =========================================================
+   FIXED APPEARANCE - DISCONNECTED FROM DASHBOARD THEME
+========================================================= */
+.signup-page,
+body.dark-mode .signup-page {
+    background: #eaf1f7 !important;
+    color: #10203a !important;
+}
+
+.signup-form-panel,
+body.dark-mode .signup-form-panel {
+    background: #eaf1f7 !important;
+    color: #10203a !important;
+}
+
+.signup-form,
+body.dark-mode .signup-form {
+    color: #10203a !important;
+}
+
+.signup-form h2,
+body.dark-mode .signup-form h2 {
+    color: #10203a !important;
+}
+
+.signup-form .form-intro,
+body.dark-mode .signup-form .form-intro {
+    color: #65758a !important;
+}
+
+.signup-form label,
+body.dark-mode .signup-form label {
+    color: #10203a !important;
+}
+
+.signup-form input,
+body.dark-mode .signup-form input {
+    background: #fff !important;
+    color: #14243b !important;
+    border: 1px solid #d6dee7 !important;
+}
+
+.existing-account,
+body.dark-mode .existing-account {
+    color: #65758a !important;
+}
+
+.google-btn,
+body.dark-mode .google-btn {
+    background: #ffffff !important;
+    color: #1e293b !important;
+    border: 1px solid #d6dee7 !important;
+}
+
+.create-button,
+body.dark-mode .create-button {
+    background: #2555d4 !important;
+    color: #ffffff !important;
+}
+
