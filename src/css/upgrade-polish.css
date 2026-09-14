@@ -1,0 +1,11 @@
+.upgrade-page-layout{background:radial-gradient(circle at 12% 18%,rgba(66,185,220,.2),transparent 24%),radial-gradient(circle at 88% 82%,rgba(124,92,230,.2),transparent 28%),linear-gradient(135deg,#061936,#0a3158 52%,#102f59)}
+.upgrade-hero{padding-top:50px}
+.crown{background:linear-gradient(145deg,rgba(119,220,231,.18),rgba(190,151,255,.2));border:1px solid rgba(177,225,255,.2);box-shadow:0 0 38px rgba(74,192,224,.22),inset 0 1px 0 rgba(255,255,255,.14)}
+.upgrade-hero h1{background:linear-gradient(100deg,#fff 20%,#a9ebf2 52%,#d9c5ff 85%);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 8px 35px rgba(92,190,220,.12)}
+.plans{gap:24px}
+.plan-card,.benefit-panel{background:linear-gradient(145deg,rgba(18,54,100,.86),rgba(9,30,66,.84));border-color:rgba(142,216,239,.2);box-shadow:0 22px 60px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.06);backdrop-filter:blur(8px)}
+.plan-card.featured{border-color:rgba(79,210,231,.72);box-shadow:0 22px 60px rgba(0,0,0,.24),0 0 32px rgba(53,171,207,.12),inset 0 1px 0 rgba(255,255,255,.08)}
+.plan-badge{background:linear-gradient(100deg,#27a8c2,#6a76e8);box-shadow:0 5px 14px rgba(39,168,194,.25)}
+.plan-card button{background:linear-gradient(100deg,#2876ed,#40bfd9);box-shadow:0 10px 22px rgba(38,133,229,.3)}
+.benefit>i{background:linear-gradient(145deg,rgba(66,185,220,.2),rgba(124,92,230,.2));box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+@media(max-width:700px){.upgrade-hero{padding-top:38px}.plans{gap:16px}}
