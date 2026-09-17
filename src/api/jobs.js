@@ -17,6 +17,17 @@ export const jobsApi = {
     });
   },
 
+  updateJob: async (id, jobData) => {
+    return apiClient(`/jobs/${id}`, {
+      method: 'PUT',
+      body: jobData,
+    });
+  },
+
+  getJobCandidates: async (id) => {
+    return apiClient(`/jobs/${id}/candidates`);
+  },
+
   deleteJob: async (id) => {
     return apiClient(`/jobs/${id}`, {
       method: 'DELETE',

@@ -11,6 +11,28 @@ export const updateCandidateStatusSchema = z.object({
   }),
 });
 
+export const createCandidateSchema = z.object({
+  body: z.object({
+    name: z.string().min(1, 'Candidate name is required'),
+    email: z.string().email('Valid email is required'),
+    phone: z.string().optional(),
+    location: z.string().optional(),
+    roleApplied: z.string().optional(),
+    jobRoleId: z.string().optional(),
+    experienceYears: z.number().or(z.string()).transform((v) => parseFloat(String(v)) || 0).optional(),
+    skills: z.array(z.string()).or(z.string().transform((v) => v.split(',').map((s) => s.trim()).filter(Boolean))).optional(),
+    notes: z.string().optional(),
+    currentStage: z.string().optional(),
+    status: z.string().optional(),
+  }),
+});
+
+export const assignCandidateSchema = z.object({
+  body: z.object({
+    jobRoleId: z.string().nullable().optional(),
+  }),
+});
+
 export const addReviewSchema = z.object({
   body: z.object({
     reviewText: z.string().min(1, 'Review text is required'),
@@ -21,18 +43,21 @@ export const addReviewSchema = z.object({
 export const candidateController = {
   async listCandidates(req, res, next) {
     try {
-      const { role, status, search } = req.query;
+      const { role, status, search, jobRoleId } = req.query;
 
       const where = {};
       if (search) {
         where.OR = [
-          { name: { contains: search } },
-          { email: { contains: search } },
-          { roleApplied: { contains: search } },
+          { name: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+          { roleApplied: { contains: search, mode: 'insensitive' } },
         ];
       }
       if (role && role !== 'All Roles') {
-        where.roleApplied = { contains: role };
+        where.roleApplied = { contains: role, mode: 'insensitive' };
+      }
+      if (jobRoleId && jobRoleId !== 'all') {
+        where.jobRoleId = jobRoleId;
       }
       if (status && status !== 'All Status') {
         const normalized = status.toUpperCase().replace(/\s+/g, '_');
@@ -42,6 +67,7 @@ export const candidateController = {
       const candidates = await prisma.candidate.findMany({
         where,
         include: {
+          jobRole: true,
           reviews: {
             orderBy: { createdAt: 'desc' },
             take: 1,
@@ -74,6 +100,9 @@ export const candidateController = {
           avatar: initials,
           avatarColor,
           role: c.roleApplied,
+          jobRoleId: c.jobRoleId,
+          jobRole: c.jobRole ? { id: c.jobRole.id, title: c.jobRole.title, department: c.jobRole.department } : null,
+          department: c.jobRole ? c.jobRole.department : 'General',
           views: String(c.views),
           viewsThisWeek: c.viewsThisWeek,
           reviews: String(c.reviewsCount || c.reviews.length),
@@ -295,6 +324,204 @@ export const candidateController = {
       });
 
       return sendSuccess(res, review, 'Review added successfully', 201);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async createCandidate(req, res, next) {
+    try {
+      const {
+        name,
+        email,
+        phone,
+        location = 'Remote / Hybrid',
+        roleApplied,
+        jobRoleId,
+        experienceYears = 2,
+        education = "Bachelor's Degree",
+        skills = [],
+        notes = '',
+        currentStage = 'UNDER_REVIEW',
+        status = 'ACTIVE',
+      } = req.body;
+
+      const existing = await prisma.candidate.findUnique({
+        where: { email: email.trim().toLowerCase() },
+      });
+      if (existing) {
+        return sendError(res, 'A candidate with this email address already exists', 400);
+      }
+
+      let finalRoleTitle = roleApplied || 'Software Engineer';
+      let validJobRoleId = null;
+
+      if (jobRoleId) {
+        const jobRole = await prisma.jobRole.findFirst({
+          where: { OR: [{ id: jobRoleId }, { code: jobRoleId }] },
+        });
+        if (jobRole) {
+          validJobRoleId = jobRole.id;
+          finalRoleTitle = jobRole.title;
+        }
+      }
+
+      const candidate = await prisma.candidate.create({
+        data: {
+          name: name.trim(),
+          email: email.trim().toLowerCase(),
+          phone: phone ? phone.trim() : null,
+          location: location.trim(),
+          roleApplied: finalRoleTitle,
+          jobRoleId: validJobRoleId,
+          experienceYears: parseFloat(experienceYears) || 0,
+          education,
+          notes,
+          currentStage: currentStage.toUpperCase().replace(/\s+/g, '_'),
+          status: status.toUpperCase().replace(/\s+/g, '_'),
+          matchScore: 82,
+          atsScore: 88,
+        },
+      });
+
+      // Link skills
+      const skillList = Array.isArray(skills)
+        ? skills
+        : typeof skills === 'string'
+        ? skills.split(',').map((s) => s.trim()).filter(Boolean)
+        : [];
+
+      for (const skillName of skillList) {
+        const trimmed = String(skillName).trim();
+        if (!trimmed) continue;
+        const skill = await prisma.skill.upsert({
+          where: { name: trimmed },
+          update: {},
+          create: { name: trimmed },
+        });
+        await prisma.candidateSkill.upsert({
+          where: { candidateId_skillId: { candidateId: candidate.id, skillId: skill.id } },
+          update: {},
+          create: { candidateId: candidate.id, skillId: skill.id },
+        });
+      }
+
+      // Add default review
+      await prisma.candidateReview.create({
+        data: {
+          candidateId: candidate.id,
+          reviewerName: req.user?.name || 'Recruiter Team',
+          reviewText: 'Candidate profile successfully created and assigned to pipeline.',
+          rating: 4.5,
+          reviewDate: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          reviewClass: 'green-review',
+        },
+      });
+
+      // Audit log
+      await auditService.log({
+        userId: req.user?.userId || null,
+        actorEmail: req.user?.email || 'recruiter',
+        action: 'CANDIDATE_CREATED',
+        resource: 'Candidate',
+        targetEntity: 'Candidate',
+        targetId: candidate.id,
+        details: { name: candidate.name, email: candidate.email, role: candidate.roleApplied, jobRoleId: validJobRoleId },
+        ipAddress: req.ip,
+      });
+
+      const fullCandidate = await prisma.candidate.findUnique({
+        where: { id: candidate.id },
+        include: {
+          jobRole: true,
+          skills: { include: { skill: true } },
+          reviews: true,
+        },
+      });
+
+      return sendSuccess(res, fullCandidate, 'Candidate created and assigned successfully', 201);
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async assignCandidate(req, res, next) {
+    try {
+      const { id } = req.params;
+      const { jobRoleId } = req.body;
+
+      const candidate = await prisma.candidate.findUnique({ where: { id } });
+      if (!candidate) {
+        return sendError(res, 'Candidate not found', 404);
+      }
+
+      if (!jobRoleId || jobRoleId === 'unassigned') {
+        const updated = await prisma.candidate.update({
+          where: { id },
+          data: {
+            jobRoleId: null,
+            roleApplied: 'General Talent Pool',
+          },
+          include: {
+            jobRole: true,
+            skills: { include: { skill: true } },
+          },
+        });
+
+        await auditService.log({
+          userId: req.user?.userId || null,
+          actorEmail: req.user?.email || 'recruiter',
+          action: 'CANDIDATE_UNASSIGNED_ROLE',
+          resource: 'Candidate',
+          targetEntity: 'Candidate',
+          targetId: candidate.id,
+          details: {
+            candidateName: candidate.name,
+            previousRole: candidate.roleApplied,
+          },
+          ipAddress: req.ip,
+        });
+
+        return sendSuccess(res, updated, 'Candidate unassigned from role');
+      }
+
+      const jobRole = await prisma.jobRole.findFirst({
+        where: { OR: [{ id: jobRoleId }, { code: jobRoleId }] },
+      });
+      if (!jobRole) {
+        return sendError(res, 'Selected job role does not exist', 404);
+      }
+
+      const updated = await prisma.candidate.update({
+        where: { id },
+        data: {
+          jobRoleId: jobRole.id,
+          roleApplied: jobRole.title,
+        },
+        include: {
+          jobRole: true,
+          skills: { include: { skill: true } },
+        },
+      });
+
+      // Audit log
+      await auditService.log({
+        userId: req.user?.userId || null,
+        actorEmail: req.user?.email || 'recruiter',
+        action: 'CANDIDATE_ASSIGNED_ROLE',
+        resource: 'Candidate',
+        targetEntity: 'Candidate',
+        targetId: candidate.id,
+        details: {
+          candidateName: candidate.name,
+          previousRole: candidate.roleApplied,
+          newRole: jobRole.title,
+          jobRoleId: jobRole.id,
+        },
+        ipAddress: req.ip,
+      });
+
+      return sendSuccess(res, updated, `Candidate successfully assigned to ${jobRole.title}`);
     } catch (err) {
       next(err);
     }

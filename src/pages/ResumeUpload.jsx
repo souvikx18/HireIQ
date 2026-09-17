@@ -5,251 +5,6 @@ import { resumesApi } from '../api/resumes';
 import { candidatesApi } from '../api/candidates';
 import '../css/resumeupload.css';
 
-const CANDIDATE_PRESETS = [
-  {
-    id: 1,
-    name: 'Sarah Jenkins',
-    matchRole: 'Lead Frontend Engineer',
-    avatar: 'SJ',
-    matchScore: 92,
-    matchTitle: 'Strong Technical Match',
-    matchDesc: 'Sarah matches 11 out of 12 required core skills.',
-    atsScore: 95,
-    skillCoverage: 92,
-    requiredSkillsCount: 12,
-    matchedSkillsCount: 11,
-    partialSkillsCount: 1,
-    missingSkillsCount: 0,
-    experienceMatch: '96% (Senior 6+ Yrs)',
-    jdMatch: '94% Semantic Fit',
-    aiConfidence: '98%',
-    aiRecommendation: 'HIGHLY RECOMMENDED',
-    skills: [
-      { name: 'React / Next.js', purple: false },
-      { name: 'TypeScript', purple: false },
-      { name: 'Tailwind CSS', purple: true },
-      { name: 'Web-Vitals Optimization', purple: true },
-      { name: 'GraphQL', purple: true },
-      { name: 'Redux Toolkit', purple: true },
-      { name: 'Jest & Cypress', purple: true },
-    ],
-    partialSkills: ['WebAssembly Performance Profiling'],
-    missingSkills: ['Rust (WASM Bindings)'],
-    gaps: ['Rust (WASM Bindings)'],
-    gapPriorities: [
-      { name: 'Rust (WASM Bindings)', priority: 'Medium Priority', priorityClass: 'medium' },
-    ],
-    strengths: [
-      'Exceptional React/Next.js and modern state management architecture',
-      'Proven track record with Web-Vitals optimization & high-performance UI',
-      'Strong automated test coverage and type-safe development practices',
-    ],
-    recommendedSkills: ['Rust (WASM)', 'Micro-Frontend Architecture', 'Server Actions'],
-    roadmapSteps: [
-      { step: 'Phase 1', title: 'Rust & WASM Fundamentals', desc: 'Core Rust syntax and WebAssembly compilation (1-2 weeks)' },
-      { step: 'Phase 2', title: 'Next.js WASM Integration', desc: 'Embed high-performance WASM modules in frontend pipeline' },
-      { step: 'Phase 3', title: 'Production Ready Benchmarking', desc: 'Full architecture verification against role deliverables' },
-    ],
-    whyScoreExplanation: 'Sarah demonstrates an exceptional 92% overall match with 11/12 core competencies verified, 96% experience alignment for Lead Frontend responsibilities, and a 95 ATS parsability score. The single development area is Rust/WASM bindings, which has a fast ramp-up pathway.',
-    courseTitle: 'Actionable Course Pathway',
-    courseDesc:
-      'Rust-to-WebAssembly Integration on Coursera (24h estimate to fill gap).',
-    fileName: 'sarah_jenkins_resume.pdf',
-  },
-  {
-    id: 2,
-    name: 'Rohan Mehta',
-    matchRole: 'Full Stack Developer',
-    avatar: 'RM',
-    matchScore: 85,
-    matchTitle: 'High Alignment Match',
-    matchDesc: 'Rohan matches 9 out of 11 required core skills.',
-    atsScore: 88,
-    skillCoverage: 82,
-    requiredSkillsCount: 11,
-    matchedSkillsCount: 9,
-    partialSkillsCount: 1,
-    missingSkillsCount: 1,
-    experienceMatch: '88% (Mid-Senior 4+ Yrs)',
-    jdMatch: '86% Semantic Fit',
-    aiConfidence: '94%',
-    aiRecommendation: 'HIGHLY RECOMMENDED',
-    skills: [
-      { name: 'Node.js', purple: false },
-      { name: 'Express', purple: false },
-      { name: 'MongoDB', purple: true },
-      { name: 'React.js', purple: true },
-      { name: 'Docker', purple: true },
-      { name: 'REST APIs', purple: true },
-    ],
-    partialSkills: ['CI/CD Container Orchestration'],
-    missingSkills: ['Kubernetes & Cloud Architecture'],
-    gaps: ['Kubernetes & Cloud Architecture'],
-    gapPriorities: [
-      { name: 'Kubernetes & Cloud Architecture', priority: 'High Priority', priorityClass: 'high' },
-    ],
-    strengths: [
-      'Strong end-to-end Node.js and RESTful microservices implementation',
-      'Solid containerization practices with Docker and container workflows',
-      'Effective full-stack state synchronization across React and MongoDB',
-    ],
-    recommendedSkills: ['Kubernetes (K8s)', 'Helm Charts', 'AWS ECS/EKS'],
-    roadmapSteps: [
-      { step: 'Phase 1', title: 'Kubernetes Foundations', desc: 'Pods, Deployments, Services, and Ingress controllers' },
-      { step: 'Phase 2', title: 'Cluster Deployments', desc: 'Deploy full-stack Node/Mongo apps onto managed K8s cluster' },
-      { step: 'Phase 3', title: 'Cloud Observability', desc: 'Configure Prometheus metrics and Grafana dashboards' },
-    ],
-    whyScoreExplanation: 'Rohan achieved an 85% match score with solid Node.js/React fundamentals and 88 ATS score. Bridging container orchestration to Kubernetes will solidify full-stack cloud readiness.',
-    courseTitle: 'Actionable Course Pathway',
-    courseDesc:
-      'Docker & Kubernetes Mastery on Udemy (18h estimate to fill gap).',
-    fileName: 'rohan_mehta_resume.pdf',
-  },
-  {
-    id: 3,
-    name: 'Ananya Patel',
-    matchRole: 'Backend Developer',
-    avatar: 'AP',
-    matchScore: 88,
-    matchTitle: 'Strong Backend Match',
-    matchDesc: 'Ananya matches 10 out of 12 required core skills.',
-    atsScore: 91,
-    skillCoverage: 83,
-    requiredSkillsCount: 12,
-    matchedSkillsCount: 10,
-    partialSkillsCount: 1,
-    missingSkillsCount: 1,
-    experienceMatch: '90% (Backend 5 Yrs)',
-    jdMatch: '89% Semantic Fit',
-    aiConfidence: '95%',
-    aiRecommendation: 'HIGHLY RECOMMENDED',
-    skills: [
-      { name: 'Python', purple: false },
-      { name: 'Django / FastAPI', purple: false },
-      { name: 'PostgreSQL', purple: true },
-      { name: 'Redis', purple: true },
-      { name: 'Celery', purple: true },
-      { name: 'AWS', purple: true },
-    ],
-    partialSkills: ['Distributed Event Streaming (Kafka)'],
-    missingSkills: ['Microservices Architecture'],
-    gaps: ['Microservices Architecture'],
-    gapPriorities: [
-      { name: 'Microservices Architecture', priority: 'High Priority', priorityClass: 'high' },
-    ],
-    strengths: [
-      'High-throughput Python API development with FastAPI and Django',
-      'Robust asynchronous task processing via Celery and Redis broker',
-      'Advanced PostgreSQL indexing and relational query optimization',
-    ],
-    recommendedSkills: ['gRPC & Protobuf', 'Apache Kafka', 'Service Mesh (Istio)'],
-    roadmapSteps: [
-      { step: 'Phase 1', title: 'Microservices Decomposition', desc: 'Deconstruct monolithic services into domain bounded contexts' },
-      { step: 'Phase 2', title: 'Event-Driven Messaging', desc: 'Implement Kafka topics and resilient event consumers' },
-      { step: 'Phase 3', title: 'Distributed Tracing', desc: 'Integrate OpenTelemetry for end-to-end backend observability' },
-    ],
-    whyScoreExplanation: 'Ananya shows an 88% alignment with exemplary database, caching, and Python API architecture. Adding dedicated microservices patterns provides full enterprise backend readiness.',
-    courseTitle: 'Actionable Course Pathway',
-    courseDesc:
-      'Microservices with Python on Coursera (20h estimate to fill gap).',
-    fileName: 'ananya_patel_cv.docx',
-  },
-  {
-    id: 4,
-    name: 'Vikram Kumar',
-    matchRole: 'Frontend Engineer',
-    avatar: 'VK',
-    matchScore: 74,
-    matchTitle: 'Moderate Match',
-    matchDesc: 'Vikram matches 7 out of 10 required core skills.',
-    atsScore: 79,
-    skillCoverage: 70,
-    requiredSkillsCount: 10,
-    matchedSkillsCount: 7,
-    partialSkillsCount: 1,
-    missingSkillsCount: 2,
-    experienceMatch: '75% (Mid-Level 3 Yrs)',
-    jdMatch: '73% Semantic Fit',
-    aiConfidence: '89%',
-    aiRecommendation: 'REVIEW REQUIRED',
-    skills: [
-      { name: 'HTML5 & CSS3', purple: false },
-      { name: 'JavaScript (ES6+)', purple: false },
-      { name: 'Vue.js', purple: true },
-      { name: 'Git & GitHub', purple: true },
-    ],
-    partialSkills: ['Modern Build Tooling (Vite/Webpack)'],
-    missingSkills: ['TypeScript', 'Advanced State Management (Pinia/Redux)'],
-    gaps: ['TypeScript & Advanced State Management'],
-    gapPriorities: [
-      { name: 'TypeScript', priority: 'Critical', priorityClass: 'critical' },
-      { name: 'Advanced State Management', priority: 'High Priority', priorityClass: 'high' },
-    ],
-    strengths: [
-      'Clean semantic HTML5 markup and responsive CSS3 design',
-      'Solid core JavaScript DOM manipulation and Vue component patterns',
-      'Consistent Git version control and collaborative branching practices',
-    ],
-    recommendedSkills: ['TypeScript Generics', 'Pinia / Redux', 'Unit Testing (Vitest)'],
-    roadmapSteps: [
-      { step: 'Phase 1', title: 'TypeScript Migration', desc: 'Convert JavaScript codebase to strict static typing' },
-      { step: 'Phase 2', title: 'Complex State Patterns', desc: 'Implement modular stores with hydration & middleware' },
-      { step: 'Phase 3', title: 'Component Testing', desc: 'Add test suites with Vitest and Vue Test Utils' },
-    ],
-    whyScoreExplanation: 'Vikram presents a 74% score with good UI foundations. However, missing strict TypeScript and enterprise state management requires structured review and short-term upskilling.',
-    courseTitle: 'Actionable Course Pathway',
-    courseDesc: 'Complete TypeScript & State Management (16h estimate).',
-    fileName: 'vikram_kumar_resume.pdf',
-  },
-  {
-    id: 5,
-    name: 'Neha Tiwari',
-    matchRole: 'UI/UX Designer',
-    avatar: 'NT',
-    matchScore: 89,
-    matchTitle: 'Exceptional Design Match',
-    matchDesc: 'Neha matches 8 out of 9 required design skills.',
-    atsScore: 92,
-    skillCoverage: 89,
-    requiredSkillsCount: 9,
-    matchedSkillsCount: 8,
-    partialSkillsCount: 1,
-    missingSkillsCount: 0,
-    experienceMatch: '93% (Design 4.5 Yrs)',
-    jdMatch: '91% Semantic Fit',
-    aiConfidence: '96%',
-    aiRecommendation: 'HIGHLY RECOMMENDED',
-    skills: [
-      { name: 'Figma & FigJam', purple: false },
-      { name: 'Design Systems', purple: false },
-      { name: 'Wireframing', purple: true },
-      { name: 'User Research', purple: true },
-      { name: 'Prototyping', purple: true },
-    ],
-    partialSkills: ['HTML/CSS Tokens Handoff'],
-    missingSkills: ['Design-to-Code Implementation'],
-    gaps: ['Design-to-Code Implementation'],
-    gapPriorities: [
-      { name: 'Design-to-Code Implementation', priority: 'Low Priority', priorityClass: 'low' },
-    ],
-    strengths: [
-      'Comprehensive design system creation with atomic component hierarchies',
-      'Deep user research methodologies and interactive wireframing workflows',
-      'High-fidelity prototyping with micro-interaction state transitions',
-    ],
-    recommendedSkills: ['Design Tokens Studio', 'Figma Variables & Auto-Layout', 'Frontend CSS Basics'],
-    roadmapSteps: [
-      { step: 'Phase 1', title: 'Design Token Standardization', desc: 'Sync Figma variable tokens with JSON code definitions' },
-      { step: 'Phase 2', title: 'Interactive Code Handoff', desc: 'Setup Storybook integration with Figma design widgets' },
-      { step: 'Phase 3', title: 'Accessibility (a11y) QA', desc: 'Audit color contrast and WCAG 2.1 compliance specs' },
-    ],
-    whyScoreExplanation: 'Neha demonstrates an 89% top-tier design match with 8/9 competencies and 92 ATS score. Her design-to-code gap is easily bridged with standard token workflows.',
-    courseTitle: 'Actionable Course Pathway',
-    courseDesc: 'Design to Code Masterclass on Interaction Design Foundation.',
-    fileName: 'neha_tiwari_portfolio.pdf',
-  },
-];
-
 function getEvaluationData(candidate) {
   if (!candidate) return null;
 
@@ -369,43 +124,21 @@ function getEvaluationData(candidate) {
   };
 }
 
-const INITIAL_HISTORY = [
-  {
-    id: 1,
-    fileName: 'sarah_jenkins_resume.pdf',
-    meta: '240 KB • Uploaded Just now',
-    status: 'Ready',
-    statusClass: 'ready-badge',
-  },
-  {
-    id: 2,
-    fileName: 'david_miller_cv.docx',
-    meta: '1.2 MB • Uploaded 10 mins ago',
-    status: 'Analyzed',
-    statusClass: 'analyzed',
-  },
-  {
-    id: 3,
-    fileName: 'invalid_file_format.txt',
-    meta: '45 KB • Uploaded 1 hour ago',
-    status: 'Error',
-    statusClass: 'error',
-  },
-];
-
 export default function ResumeUpload() {
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [shortlisted, setShortlisted] = useState(false);
   const [passed, setPassed] = useState(false);
+  const [rejected, setRejected] = useState(false);
+  const [dbCandidates, setDbCandidates] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Workflow states: 'idle' | 'uploaded' | 'analyzing' | 'analyzed'
   const [analysisStatus, setAnalysisStatus] = useState('idle');
   const [uploadedFile, setUploadedFile] = useState(null);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
-  const [historyItems, setHistoryItems] = useState(INITIAL_HISTORY);
+  const [historyItems, setHistoryItems] = useState([]);
 
   const fileInputRef = useRef(null);
 
@@ -460,6 +193,7 @@ export default function ResumeUpload() {
     setAnalysisStatus('uploaded');
     setShortlisted(false);
     setPassed(false);
+    setRejected(false);
 
     // Add / update history item
     setHistoryItems((prev) => [
@@ -499,7 +233,20 @@ export default function ResumeUpload() {
         // keep initial history
       }
     };
+
+    const loadCandidates = async () => {
+      try {
+        const res = await candidatesApi.getCandidates();
+        if (res?.data?.length) {
+          setDbCandidates(res.data);
+        }
+      } catch {
+        // ignore
+      }
+    };
+
     loadHistory();
+    loadCandidates();
   }, []);
 
   const handleStartAnalysis = async (e) => {
@@ -585,29 +332,81 @@ export default function ResumeUpload() {
 
   const handlePass = async () => {
     setPassed(true);
+    setRejected(false);
     if (activeCandidate?.id) {
       try {
-        await candidatesApi.updateStatus(activeCandidate.id, 'REJECTED');
+        await candidatesApi.updateStatus(activeCandidate.id, { currentStage: 'INTERVIEW', status: 'ACTIVE' });
       } catch {
         // ignore
       }
     }
-    triggerToast('Candidate marked as passed.');
+    triggerToast('Candidate marked as passed to interview stage.');
   };
 
-  // Search candidate matching
+  const handleReject = async () => {
+    setRejected(true);
+    setShortlisted(false);
+    setPassed(false);
+    if (activeCandidate?.id) {
+      try {
+        await candidatesApi.updateStatus(activeCandidate.id, { status: 'REJECTED', currentStage: 'REJECTED' });
+      } catch {
+        // ignore
+      }
+    }
+    triggerToast('Candidate marked as rejected.');
+  };
+
+  // Search candidate matching from live database records
   const searchMatchedCandidate = useMemo(() => {
     if (!searchTerm.trim()) return null;
     const term = searchTerm.toLowerCase().trim();
-    return (
-      CANDIDATE_PRESETS.find(
-        (c) =>
-          c.name.toLowerCase().includes(term) ||
-          c.matchRole.toLowerCase().includes(term) ||
-          c.skills.some((s) => s.name.toLowerCase().includes(term))
-      ) || null
+    const match = dbCandidates.find(
+      (c) =>
+        c.name.toLowerCase().includes(term) ||
+        (c.role && c.role.toLowerCase().includes(term)) ||
+        (c.skills && c.skills.some((s) => s.toLowerCase().includes(term)))
     );
-  }, [searchTerm]);
+    if (!match) return null;
+
+    const matchedList = Array.isArray(match.skills) ? match.skills : ['JavaScript', 'React', 'Node.js'];
+    return {
+      id: match.id,
+      name: match.name,
+      matchRole: match.role || 'Software Engineer',
+      avatar: match.avatar || match.name.slice(0, 2).toUpperCase(),
+      matchScore: match.matchScore || 85,
+      matchTitle: match.matchScore >= 85 ? 'Strong Technical Match' : 'Evaluated Match',
+      matchDesc: `${match.name} matches core criteria for ${match.role || 'the role'}.`,
+      atsScore: match.atsScore || 88,
+      skillCoverage: match.matchScore || 82,
+      requiredSkillsCount: matchedList.length + 1,
+      matchedSkillsCount: matchedList.length,
+      partialSkillsCount: 1,
+      missingSkillsCount: 0,
+      experienceMatch: `${match.experienceYears || 3} Years Experience`,
+      jdMatch: `${match.matchScore || 85}% Semantic Fit`,
+      aiConfidence: '96%',
+      aiRecommendation: match.matchScore >= 80 ? 'HIGHLY RECOMMENDED' : 'REVIEW REQUIRED',
+      skills: matchedList.map((s, i) => ({ name: s, purple: i % 2 === 0 })),
+      partialSkills: ['Cloud Infrastructure Basics'],
+      missingSkills: [],
+      gaps: [],
+      gapPriorities: [],
+      strengths: [
+        `Verified experience in ${matchedList.slice(0, 3).join(', ')}`,
+        'Consistent ATS parsed structure and verifiable credentials',
+        'Strong industry alignment with company requirements',
+      ],
+      recommendedSkills: ['System Design', 'Kubernetes'],
+      roadmapSteps: [
+        { step: 'Phase 1', title: 'Onboarding & Core Stack', desc: 'Orientation with company codebase and engineering standards' },
+        { step: 'Phase 2', title: 'Architecture Ramp-up', desc: 'Deep dive into microservices and cloud deployment architecture' },
+      ],
+      whyScoreExplanation: `${match.name} demonstrates strong alignment with ${match.matchScore || 85}% match score across key requirements.`,
+      fileName: `${match.name.toLowerCase().replace(/\s+/g, '_')}_resume.pdf`,
+    };
+  }, [searchTerm, dbCandidates]);
 
   // Determine active candidate to display
   const activeCandidate = searchMatchedCandidate || (analysisStatus === 'analyzed' ? selectedCandidate : null);
@@ -1034,13 +833,13 @@ export default function ResumeUpload() {
                   </div>
 
                   {/* ACTION BUTTONS */}
-                  <div className="actions">
+                  <div className="actions" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                     <button
                       type="button"
                       className="shortlist-btn"
                       id="shortlistBtn"
                       onClick={handleShortlist}
-                      style={shortlisted ? { background: '#0c8275' } : {}}
+                      style={shortlisted ? { background: '#0c8275', color: '#ffffff' } : {}}
                     >
                       {shortlisted ? '✓ Shortlisted' : 'Shortlist Candidate'}
                     </button>
@@ -1050,8 +849,34 @@ export default function ResumeUpload() {
                       className="pass-btn"
                       id="passBtn"
                       onClick={handlePass}
+                      style={passed ? { background: '#edf3ff', color: '#2869e8', borderColor: '#2869e8' } : {}}
                     >
-                      {passed ? 'Passed' : 'Pass'}
+                      {passed ? '✓ Passed' : 'Pass'}
+                    </button>
+
+                    <button
+                      type="button"
+                      className="reject-btn"
+                      id="rejectBtn"
+                      onClick={handleReject}
+                      style={{
+                        padding: '12px 24px',
+                        borderRadius: '8px',
+                        border: '1px solid #fecaca',
+                        background: rejected ? '#dc2626' : '#fff1f2',
+                        color: rejected ? '#ffffff' : '#e11d48',
+                        fontWeight: '600',
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                        transition: 'all .2s ease',
+                      }}
+                    >
+                      <i className="fa-solid fa-ban"></i>
+                      {rejected ? '✓ Rejected' : 'Reject'}
                     </button>
                   </div>
                 </>

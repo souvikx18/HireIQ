@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { candidatesApi } from '../api/candidates';
+import { jobsApi } from '../api/jobs';
 import '../css/candidates.css';
 
 export default function Candidates() {
   const [candidatesList, setCandidatesList] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [jobRoles, setJobRoles] = useState([]);
 
   const [roleFilter, setRoleFilter] = useState('All Roles');
   const [statusFilter, setStatusFilter] = useState('All Status');
@@ -17,6 +19,23 @@ export default function Candidates() {
   const [isComparing, setIsComparing] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
+
+  // Add candidate modal states
+  const [addCandidateModalOpen, setAddCandidateModalOpen] = useState(false);
+  const [newCandName, setNewCandName] = useState('');
+  const [newCandEmail, setNewCandEmail] = useState('');
+  const [newCandPhone, setNewCandPhone] = useState('');
+  const [newCandJobRoleId, setNewCandJobRoleId] = useState('');
+  const [newCandExperience, setNewCandExperience] = useState('3');
+  const [newCandSkills, setNewCandSkills] = useState('');
+  const [newCandStage, setNewCandStage] = useState('UNDER_REVIEW');
+  const [newCandNotes, setNewCandNotes] = useState('');
+  const [isSubmittingCandidate, setIsSubmittingCandidate] = useState(false);
+
+  // Reassign modal states
+  const [reassignModalCandidate, setReassignModalCandidate] = useState(null);
+  const [selectedNewRoleForCand, setSelectedNewRoleForCand] = useState('');
+  const [isReassigning, setIsReassigning] = useState(false);
 
   const handleToggleCompare = (id) => {
     setSelectedForCompare((prev) =>
@@ -76,14 +95,84 @@ export default function Candidates() {
     }
   };
 
+  const loadRoles = async () => {
+    try {
+      const res = await jobsApi.getJobs();
+      if (res?.data) {
+        setJobRoles(res.data);
+      }
+    } catch {
+      // keep fallback
+    }
+  };
+
   useEffect(() => {
     loadCandidates();
+    loadRoles();
   }, []);
+
+  const handleCreateCandidate = async (e) => {
+    e.preventDefault();
+    if (!newCandName.trim() || !newCandEmail.trim()) {
+      triggerToast('Candidate name and email are required');
+      return;
+    }
+    setIsSubmittingCandidate(true);
+    try {
+      const selectedRole = jobRoles.find((r) => r.id === newCandJobRoleId);
+      await candidatesApi.createCandidate({
+        name: newCandName.trim(),
+        email: newCandEmail.trim(),
+        phone: newCandPhone.trim() || undefined,
+        jobRoleId: newCandJobRoleId || undefined,
+        roleApplied: selectedRole ? selectedRole.name : 'General Talent Pool',
+        experienceYears: parseFloat(newCandExperience) || 0,
+        skills: newCandSkills.split(',').map((s) => s.trim()).filter(Boolean),
+        currentStage: newCandStage,
+        notes: newCandNotes.trim() || undefined,
+      });
+
+      triggerToast(`Candidate "${newCandName}" added and assigned successfully!`);
+      setAddCandidateModalOpen(false);
+      setNewCandName('');
+      setNewCandEmail('');
+      setNewCandPhone('');
+      setNewCandJobRoleId('');
+      setNewCandExperience('3');
+      setNewCandSkills('');
+      setNewCandStage('UNDER_REVIEW');
+      setNewCandNotes('');
+      loadCandidates();
+      loadRoles();
+    } catch (err) {
+      triggerToast(err.message || 'Failed to create candidate');
+    } finally {
+      setIsSubmittingCandidate(false);
+    }
+  };
+
+  const handleReassignSubmit = async (e) => {
+    e?.preventDefault();
+    if (!reassignModalCandidate) return;
+    setIsReassigning(true);
+    try {
+      await candidatesApi.assignJobRole(reassignModalCandidate.id, selectedNewRoleForCand || 'unassigned');
+      triggerToast(`${reassignModalCandidate.name} reassigned successfully!`);
+      setReassignModalCandidate(null);
+      loadCandidates();
+      loadRoles();
+    } catch (err) {
+      triggerToast(err.message || 'Failed to update candidate role');
+    } finally {
+      setIsReassigning(false);
+    }
+  };
 
   const filteredCandidates = candidatesList.filter((c) => {
     const matchesRole =
       roleFilter === 'All Roles' ||
-      c.role.toLowerCase() === roleFilter.toLowerCase();
+      c.role.toLowerCase().includes(roleFilter.toLowerCase()) ||
+      (c.jobRole && c.jobRole.title.toLowerCase().includes(roleFilter.toLowerCase()));
     const matchesStatus =
       statusFilter === 'All Status' ||
       c.status.toLowerCase() === statusFilter.toLowerCase();
@@ -156,9 +245,30 @@ export default function Candidates() {
         {/* TOP HEADER */}
         <Header
           title="Candidates"
-          subtitle="View candidate activity, reviews and ratings."
+          subtitle="View candidate activity, reviews, ratings, and role field assignments."
           showUploadBtn={false}
-        />
+        >
+          <button
+            type="button"
+            onClick={() => setAddCandidateModalOpen(true)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '9px 18px',
+              borderRadius: '8px',
+              fontSize: '13px',
+              fontWeight: '600',
+              background: '#2563eb',
+              color: '#ffffff',
+              border: 'none',
+              cursor: 'pointer',
+              boxShadow: '0 2px 6px rgba(37,99,235,0.3)',
+            }}
+          >
+            <i className="fa-solid fa-user-plus"></i> Add Candidate
+          </button>
+        </Header>
 
         <div className="content">
           {/* CANDIDATE STATISTICS */}
@@ -229,10 +339,17 @@ export default function Candidates() {
                   onChange={(e) => setRoleFilter(e.target.value)}
                 >
                   <option>All Roles</option>
-                  <option>Frontend Engineer</option>
-                  <option>Backend Developer</option>
-                  <option>Full Stack Developer</option>
-                  <option>UI/UX Designer</option>
+                  {jobRoles.map((r) => (
+                    <option key={r.id} value={r.name}>{r.name}</option>
+                  ))}
+                  {jobRoles.length === 0 && (
+                    <>
+                      <option>Frontend Engineer</option>
+                      <option>Backend Developer</option>
+                      <option>Full Stack Developer</option>
+                      <option>UI/UX Designer</option>
+                    </>
+                  )}
                 </select>
 
                 <select
@@ -256,6 +373,28 @@ export default function Candidates() {
                     }
                   }}
                 />
+
+                <button
+                  type="button"
+                  onClick={() => setAddCandidateModalOpen(true)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    height: '36px',
+                    padding: '0 14px',
+                    borderRadius: '7px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    background: '#16a34a',
+                    color: '#ffffff',
+                    border: 'none',
+                    transition: 'all .2s ease',
+                  }}
+                >
+                  <i className="fa-solid fa-user-plus"></i> Add Candidate
+                </button>
 
                 <button
                   type="button"
@@ -312,7 +451,7 @@ export default function Candidates() {
                       />
                     </th>
                     <th>Candidate</th>
-                    <th>Role</th>
+                    <th>Role & Department</th>
                     <th>Pipeline Stage</th>
                     <th>Views</th>
                     <th>Reviews</th>
@@ -346,7 +485,25 @@ export default function Candidates() {
                         </div>
                       </td>
 
-                      <td>{c.role}</td>
+                      <td>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                          <span style={{ fontWeight: '600', color: '#0f172a' }}>
+                            {c.jobRole ? c.jobRole.title : (c.role || 'Unassigned')}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: '11px',
+                              color: '#64748b',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                            }}
+                          >
+                            <i className="fa-solid fa-layer-group" style={{ fontSize: '10px', color: '#2563eb' }}></i>
+                            {c.department || c.jobRole?.department || 'General Talent Pool'}
+                          </span>
+                        </div>
+                      </td>
 
                       <td>
                         <select
@@ -535,6 +692,32 @@ export default function Candidates() {
           >
             <i className="fa-regular fa-file-lines"></i>
             View Resume
+          </button>
+
+          <button
+            type="button"
+            style={{
+              width: '100%',
+              padding: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '9px',
+              border: 'none',
+              background: 'transparent',
+              color: '#38bdf8',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              textAlign: 'left',
+              fontSize: '12px',
+            }}
+            onClick={() => {
+              setReassignModalCandidate(actionMenu.candidate);
+              setSelectedNewRoleForCand(actionMenu.candidate.jobRoleId || '');
+              setActionMenu(null);
+            }}
+          >
+            <i className="fa-solid fa-arrows-split-up-and-left"></i>
+            Assign / Reassign Role
           </button>
 
           <button
@@ -765,6 +948,63 @@ export default function Candidates() {
             </div>
 
             <div
+              style={{
+                marginTop: '16px',
+                padding: '14px',
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '8px',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <span style={{ fontSize: '11px', fontWeight: '600', color: '#475569' }}>
+                  Assigned Job Role & Field
+                </span>
+                <span style={{ fontSize: '11px', color: '#2563eb', fontWeight: '600' }}>
+                  {selectedCandidateModal.department || selectedCandidateModal.jobRole?.department || 'General Talent Pool'}
+                </span>
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <select
+                  value={selectedCandidateModal.jobRoleId || ''}
+                  onChange={async (e) => {
+                    const newRoleId = e.target.value;
+                    try {
+                      await candidatesApi.assignJobRole(selectedCandidateModal.id, newRoleId || 'unassigned');
+                      triggerToast('Candidate role reassigned successfully!');
+                      const found = jobRoles.find((r) => r.id === newRoleId);
+                      setSelectedCandidateModal((prev) => ({
+                        ...prev,
+                        jobRoleId: newRoleId || null,
+                        role: found ? found.name : 'General Talent Pool',
+                        department: found ? found.department : 'General',
+                      }));
+                      loadCandidates();
+                    } catch (err) {
+                      triggerToast(err.message || 'Failed to reassign role');
+                    }
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: '8px 10px',
+                    borderRadius: '6px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '12px',
+                    background: '#ffffff',
+                    color: '#1e293b',
+                  }}
+                >
+                  <option value="">General Talent Pool (Unassigned)</option>
+                  {jobRoles.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name} — {r.department}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div
               className="modal-rating"
               style={{
                 marginTop: '18px',
@@ -774,7 +1014,7 @@ export default function Candidates() {
                 borderRadius: '8px',
               }}
             >
-              <span style={{ color: '#647084', fontSize: '11px' }}>
+              <span style={{ color: '#64748b', fontSize: '11px' }}>
                 Candidate Rating
               </span>
               <div
@@ -1112,6 +1352,435 @@ export default function Candidates() {
                 Close Comparison
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ADD CANDIDATE MODAL */}
+      {addCandidateModalOpen && (
+        <div
+          className="candidate-modal-overlay show"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(2, 11, 24, .75)',
+            backdropFilter: 'blur(3px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            zIndex: 100000,
+          }}
+          onClick={() => setAddCandidateModalOpen(false)}
+        >
+          <div
+            className="candidate-modal"
+            style={{
+              position: 'relative',
+              width: '620px',
+              maxWidth: '100%',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              padding: '28px',
+              background: '#ffffff',
+              border: '1px solid #d9e2ef',
+              borderRadius: '14px',
+              boxShadow: '0 25px 70px rgba(0,0,0,.45)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="modal-close"
+              style={{
+                position: 'absolute',
+                top: '18px',
+                right: '18px',
+                width: '34px',
+                height: '34px',
+                border: '1px solid #d9e2ef',
+                borderRadius: '8px',
+                background: '#f8fafc',
+                color: '#64748b',
+                cursor: 'pointer',
+                display: 'grid',
+                placeItems: 'center',
+                fontSize: '15px',
+              }}
+              onClick={() => setAddCandidateModalOpen(false)}
+            >
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+
+            <div style={{ marginBottom: '20px' }}>
+              <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px' }}>
+                Add New Candidate
+              </h2>
+              <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
+                Create a candidate profile and assign them directly to a specific field or job role.
+              </p>
+            </div>
+
+            <form onSubmit={handleCreateCandidate}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '14px', marginBottom: '14px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
+                    Candidate Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Maya Chen"
+                    value={newCandName}
+                    onChange={(e) => setNewCandName(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '13px',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
+                    Email Address *
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    placeholder="e.g. maya.chen@example.com"
+                    value={newCandEmail}
+                    onChange={(e) => setNewCandEmail(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '13px',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '14px', marginBottom: '14px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
+                    Phone Number
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. +1 555 382 9102"
+                    value={newCandPhone}
+                    onChange={(e) => setNewCandPhone(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '13px',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
+                    Years of Experience
+                  </label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    placeholder="3"
+                    value={newCandExperience}
+                    onChange={(e) => setNewCandExperience(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '13px',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* SPECIFIC FIELD / JOB ROLE SELECTION */}
+              <div style={{ marginBottom: '14px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
+                  Assign to Specific Field / Job Role
+                </label>
+                <select
+                  value={newCandJobRoleId}
+                  onChange={(e) => setNewCandJobRoleId(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #2563eb',
+                    background: '#eff6ff',
+                    color: '#1e3a8a',
+                    fontWeight: '500',
+                    fontSize: '13px',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  <option value="">General Talent Pool (Unassigned)</option>
+                  {jobRoles.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name} — Department: {r.department} ({r.experience || 'All levels'})
+                    </option>
+                  ))}
+                </select>
+                <span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginTop: '4px' }}>
+                  Selecting a role will assign this candidate directly to the role's active roster and track their fit.
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '14px', marginBottom: '14px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
+                    Pipeline Stage
+                  </label>
+                  <select
+                    value={newCandStage}
+                    onChange={(e) => setNewCandStage(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '13px',
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    <option value="UPLOADED">Uploaded</option>
+                    <option value="PARSED">Parsed</option>
+                    <option value="UNDER_REVIEW">Under Review</option>
+                    <option value="SHORTLISTED">Shortlisted</option>
+                    <option value="INTERVIEW">Interview</option>
+                    <option value="SELECTED">Selected</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
+                    Skills (Comma separated)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. React, TypeScript, Node.js"
+                    value={newCandSkills}
+                    onChange={(e) => setNewCandSkills(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      border: '1px solid #cbd5e1',
+                      fontSize: '13px',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
+                  Recruiter Notes
+                </label>
+                <textarea
+                  rows="3"
+                  placeholder="Candidate background, referral notes, or target timeline..."
+                  value={newCandNotes}
+                  onChange={(e) => setNewCandNotes(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '13px',
+                    boxSizing: 'border-box',
+                    fontFamily: 'inherit',
+                  }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', paddingTop: '10px', borderTop: '1px solid #e2e8f0' }}>
+                <button
+                  type="button"
+                  onClick={() => setAddCandidateModalOpen(false)}
+                  style={{
+                    padding: '9px 18px',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    border: '1px solid #cbd5e1',
+                    background: '#f8fafc',
+                    color: '#475569',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={isSubmittingCandidate}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '9px 20px',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    border: 'none',
+                    background: '#2563eb',
+                    color: '#ffffff',
+                    cursor: isSubmittingCandidate ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  <i className="fa-solid fa-user-plus"></i>
+                  {isSubmittingCandidate ? 'Creating...' : 'Create & Assign Candidate'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* QUICK REASSIGN ROLE MODAL */}
+      {reassignModalCandidate && (
+        <div
+          className="candidate-modal-overlay show"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(2, 11, 24, .75)',
+            backdropFilter: 'blur(3px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            zIndex: 100000,
+          }}
+          onClick={() => setReassignModalCandidate(null)}
+        >
+          <div
+            className="candidate-modal"
+            style={{
+              position: 'relative',
+              width: '460px',
+              maxWidth: '100%',
+              padding: '24px',
+              background: '#ffffff',
+              border: '1px solid #d9e2ef',
+              borderRadius: '12px',
+              boxShadow: '0 25px 70px rgba(0,0,0,.45)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="modal-close"
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                width: '32px',
+                height: '32px',
+                border: '1px solid #d9e2ef',
+                borderRadius: '8px',
+                background: '#f8fafc',
+                color: '#64748b',
+                cursor: 'pointer',
+                display: 'grid',
+                placeItems: 'center',
+              }}
+              onClick={() => setReassignModalCandidate(null)}
+            >
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+
+            <div style={{ marginBottom: '18px' }}>
+              <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', margin: '0 0 4px' }}>
+                Reassign Candidate Role
+              </h2>
+              <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>
+                Candidate: <strong style={{ color: '#1e293b' }}>{reassignModalCandidate.name}</strong>
+              </p>
+              <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0' }}>
+                Current Role: <span style={{ color: '#2563eb' }}>{reassignModalCandidate.role || 'Unassigned'}</span>
+              </p>
+            </div>
+
+            <form onSubmit={handleReassignSubmit}>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
+                  Target Job Role / Field
+                </label>
+                <select
+                  value={selectedNewRoleForCand}
+                  onChange={(e) => setSelectedNewRoleForCand(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '13px',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  <option value="">General Talent Pool (Unassigned)</option>
+                  {jobRoles.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.name} — {r.department}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setReassignModalCandidate(null)}
+                  style={{
+                    padding: '8px 16px',
+                    borderRadius: '7px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    border: '1px solid #cbd5e1',
+                    background: '#f8fafc',
+                    color: '#475569',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={isReassigning}
+                  style={{
+                    padding: '8px 18px',
+                    borderRadius: '7px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    border: 'none',
+                    background: '#2563eb',
+                    color: '#ffffff',
+                    cursor: isReassigning ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  {isReassigning ? 'Saving...' : 'Confirm Reassignment'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

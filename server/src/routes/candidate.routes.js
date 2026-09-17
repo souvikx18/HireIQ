@@ -2,6 +2,8 @@ import { Router } from 'express';
 import {
   candidateController,
   updateCandidateStatusSchema,
+  createCandidateSchema,
+  assignCandidateSchema,
   addReviewSchema,
 } from '../controllers/candidate.controller.js';
 import { authenticate } from '../middleware/auth.js';
@@ -16,6 +18,20 @@ router.get('/', candidateController.listCandidates);
 router.post('/compare', candidateController.compareCandidates);
 router.get('/compare', candidateController.compareCandidates);
 router.get('/:id', candidateController.getCandidate);
+
+router.post(
+  '/',
+  requireRole([ROLES.ADMIN, ROLES.HR_MANAGER, ROLES.RECRUITER]),
+  validate(createCandidateSchema),
+  candidateController.createCandidate
+);
+
+router.patch(
+  '/:id/assign',
+  requireRole([ROLES.ADMIN, ROLES.HR_MANAGER, ROLES.RECRUITER]),
+  validate(assignCandidateSchema),
+  candidateController.assignCandidate
+);
 
 router.patch(
   '/:id/status',

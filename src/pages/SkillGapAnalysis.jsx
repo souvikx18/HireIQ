@@ -72,8 +72,10 @@ export default function SkillGapAnalysis() {
     triggerToast('Skill gap analysis exported successfully.');
   };
 
-  const handleRowAction = (skill) => {
-    triggerToast(`Learning plan for ${skill} is ready to review.`);
+  const [selectedPlanModal, setSelectedPlanModal] = useState(null);
+
+  const handleRowAction = (item) => {
+    setSelectedPlanModal(item);
   };
 
   return (
@@ -312,7 +314,7 @@ export default function SkillGapAnalysis() {
                         className="row-action"
                         type="button"
                         data-skill={item.skill}
-                        onClick={() => handleRowAction(item.skill)}
+                        onClick={() => handleRowAction(item)}
                       >
                         View plan <i className="fa-solid fa-arrow-right"></i>
                       </button>
@@ -331,6 +333,377 @@ export default function SkillGapAnalysis() {
           </div>
         </section>
       </main>
+
+      {/* ACTIONABLE LEARNING & UPSKILLING PLAN MODAL */}
+      {selectedPlanModal && (
+        <div
+          className="plan-modal-overlay"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(2, 11, 24, .75)',
+            backdropFilter: 'blur(3px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            zIndex: 100000,
+          }}
+          onClick={() => setSelectedPlanModal(null)}
+        >
+          <div
+            className="plan-modal-card"
+            style={{
+              position: 'relative',
+              width: '680px',
+              maxWidth: '100%',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              background: '#ffffff',
+              borderRadius: '14px',
+              padding: '28px',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              type="button"
+              style={{
+                position: 'absolute',
+                top: '18px',
+                right: '18px',
+                width: '34px',
+                height: '34px',
+                border: '1px solid #d9e2ef',
+                borderRadius: '8px',
+                background: '#f8fafc',
+                color: '#64748b',
+                cursor: 'pointer',
+                display: 'grid',
+                placeItems: 'center',
+                fontSize: '15px',
+              }}
+              onClick={() => setSelectedPlanModal(null)}
+            >
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+
+            {/* Modal Header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
+              <span
+                className={selectedPlanModal.iconClass}
+                style={{
+                  width: '46px',
+                  height: '46px',
+                  borderRadius: '10px',
+                  display: 'grid',
+                  placeItems: 'center',
+                  fontSize: '20px',
+                  background: '#eff6ff',
+                  color: '#2563eb',
+                }}
+              >
+                <i className={selectedPlanModal.iconFa}></i>
+              </span>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#0f172a' }}>
+                    {selectedPlanModal.skill}
+                  </h2>
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      padding: '3px 8px',
+                      borderRadius: '12px',
+                      background: '#f1f5f9',
+                      color: '#475569',
+                    }}
+                  >
+                    {selectedPlanModal.categoryLabel}
+                  </span>
+                  <span
+                    className={`severity ${selectedPlanModal.severityClass}`}
+                    style={{ fontSize: '11px', padding: '3px 8px', borderRadius: '12px' }}
+                  >
+                    {selectedPlanModal.severityLabel} {selectedPlanModal.severityPercent}
+                  </span>
+                </div>
+                <p style={{ fontSize: '13px', color: '#64748b', marginTop: '3px' }}>
+                  Actionable Upskilling & Learning Roadmap for Candidate Pipeline
+                </p>
+              </div>
+            </div>
+
+            {/* Metrics Row */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '12px',
+                marginBottom: '24px',
+              }}
+            >
+              <div
+                style={{
+                  padding: '12px 14px',
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                }}
+              >
+                <div style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>
+                  Required Benchmark
+                </div>
+                <div style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', marginTop: '2px' }}>
+                  {selectedPlanModal.required}
+                </div>
+                <div style={{ fontSize: '10px', color: '#059669', marginTop: '2px' }}>
+                  Company Target Level
+                </div>
+              </div>
+
+              <div
+                style={{
+                  padding: '12px 14px',
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                }}
+              >
+                <div style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>
+                  Candidate Pool Avg
+                </div>
+                <div style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', marginTop: '2px' }}>
+                  {selectedPlanModal.candidateAvg}
+                </div>
+                <div style={{ fontSize: '10px', color: '#d97706', marginTop: '2px' }}>
+                  Current Applicant Signal
+                </div>
+              </div>
+
+              <div
+                style={{
+                  padding: '12px 14px',
+                  background: '#fff1f2',
+                  border: '1px solid #fecdd3',
+                  borderRadius: '8px',
+                }}
+              >
+                <div style={{ fontSize: '11px', color: '#e11d48', fontWeight: '500' }}>
+                  Identified Talent Gap
+                </div>
+                <div style={{ fontSize: '18px', fontWeight: '700', color: '#e11d48', marginTop: '2px' }}>
+                  {selectedPlanModal.severityPercent}
+                </div>
+                <div style={{ fontSize: '10px', color: '#be123c', marginTop: '2px' }}>
+                  Gap to Bridge
+                </div>
+              </div>
+            </div>
+
+            {/* Curriculum Roadmap */}
+            <div style={{ marginBottom: '24px' }}>
+              <h3
+                style={{
+                  fontSize: '14px',
+                  fontWeight: '700',
+                  color: '#1e293b',
+                  marginBottom: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                <i className="fa-solid fa-graduation-cap" style={{ color: '#2563eb' }}></i>
+                Structured 3-Phase Upskilling Roadmap
+              </h3>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div
+                  style={{
+                    padding: '12px 16px',
+                    background: '#f8fafc',
+                    borderRadius: '8px',
+                    borderLeft: '4px solid #3b82f6',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <strong style={{ fontSize: '13px', color: '#1e293b' }}>
+                      Phase 1: Foundational Remediation & Core Concepts
+                    </strong>
+                    <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>
+                      Est. 12 Hours
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '12px', color: '#475569', marginTop: '4px', lineHeight: '1.5' }}>
+                    Comprehensive review of {selectedPlanModal.skill} architecture, syntax patterns, syntax best practices, and runtime debugging.
+                  </p>
+                </div>
+
+                <div
+                  style={{
+                    padding: '12px 16px',
+                    background: '#f8fafc',
+                    borderRadius: '8px',
+                    borderLeft: '4px solid #10b981',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <strong style={{ fontSize: '13px', color: '#1e293b' }}>
+                      Phase 2: Production Sandbox & Real-World Lab Projects
+                    </strong>
+                    <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>
+                      Est. 18 Hours
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '12px', color: '#475569', marginTop: '4px', lineHeight: '1.5' }}>
+                    Hands-on containerized sandbox lab. Building high-availability services and integrating telemetry, unit tests, and performance profiles.
+                  </p>
+                </div>
+
+                <div
+                  style={{
+                    padding: '12px 16px',
+                    background: '#f8fafc',
+                    borderRadius: '8px',
+                    borderLeft: '4px solid #8b5cf6',
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <strong style={{ fontSize: '13px', color: '#1e293b' }}>
+                      Phase 3: Benchmark Assessment & Skill Certification
+                    </strong>
+                    <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>
+                      Est. 6 Hours
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '12px', color: '#475569', marginTop: '4px', lineHeight: '1.5' }}>
+                    Timed algorithmic & architectural interview simulation. Fulfill {selectedPlanModal.required} benchmark score for automated interview fast-track.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Recommended Enterprise Resource */}
+            <div
+              style={{
+                padding: '14px 16px',
+                background: '#eff6ff',
+                border: '1px solid #bfdbfe',
+                borderRadius: '8px',
+                marginBottom: '24px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div>
+                <div style={{ fontSize: '11px', fontWeight: '700', color: '#1d4ed8', textTransform: 'uppercase' }}>
+                  Recommended Enterprise Track
+                </div>
+                <div style={{ fontSize: '13px', fontWeight: '600', color: '#1e3a8a', marginTop: '2px' }}>
+                  {selectedPlanModal.skill} Production Mastery (Coursera & Linux Foundation)
+                </div>
+                <div style={{ fontSize: '11px', color: '#3b82f6', marginTop: '2px' }}>
+                  Includes 24 interactive coding labs & verified certification
+                </div>
+              </div>
+              <span
+                style={{
+                  padding: '5px 10px',
+                  borderRadius: '6px',
+                  background: '#2563eb',
+                  color: '#ffffff',
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Accredited
+              </span>
+            </div>
+
+            {/* Modal Actions */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', paddingTop: '12px', borderTop: '1px solid #e2e8f0' }}>
+              <button
+                type="button"
+                onClick={() => {
+                  const content = `HIREIQ ACTIONABLE LEARNING PLAN\nSkill: ${selectedPlanModal.skill}\nCategory: ${selectedPlanModal.categoryLabel}\nRequired Benchmark: ${selectedPlanModal.required}\nCandidate Average: ${selectedPlanModal.candidateAvg}\nGap Severity: ${selectedPlanModal.severityPercent}\n\nCURRICULUM ROADMAP:\nPhase 1: Foundational Remediation (12 Hours)\nPhase 2: Production Sandbox & Real-World Lab (18 Hours)\nPhase 3: Benchmark Assessment & Skill Certification (6 Hours)\n\nRecommended Track: ${selectedPlanModal.skill} Production Mastery (Coursera & Linux Foundation)\n`;
+                  const blob = new Blob([content], { type: 'text/plain' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `hireiq-learning-plan-${selectedPlanModal.skill.toLowerCase().replace(/\s+/g, '-')}.txt`;
+                  document.body.appendChild(a);
+                  a.click();
+                  a.remove();
+                  URL.revokeObjectURL(url);
+                  triggerToast(`Curriculum syllabus for ${selectedPlanModal.skill} downloaded.`);
+                }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '9px 16px',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#334155',
+                  cursor: 'pointer',
+                }}
+              >
+                <i className="fa-solid fa-download"></i> Download Syllabus
+              </button>
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPlanModal(null)}
+                  style={{
+                    padding: '9px 18px',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    border: '1px solid #cbd5e1',
+                    background: '#f8fafc',
+                    color: '#475569',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Close
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerToast(`Upskilling track for ${selectedPlanModal.skill} successfully assigned to candidate cohort!`);
+                    setSelectedPlanModal(null);
+                  }}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '9px 18px',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    border: 'none',
+                    background: '#2563eb',
+                    color: '#ffffff',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <i className="fa-solid fa-user-check"></i> Assign to Candidate Cohort
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div
         className={`toast ${showToast ? 'show' : ''}`}

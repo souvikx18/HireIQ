@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { jobsApi } from '../api/jobs';
+import { candidatesApi } from '../api/candidates';
 import '../css/jobrole.css';
 
 export default function JobRole() {
@@ -23,7 +24,27 @@ export default function JobRole() {
   const [newMinExperience, setNewMinExperience] = useState('2');
   const [newOpenPositions, setNewOpenPositions] = useState('1');
 
+  // Edit role states
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingRoleId, setEditingRoleId] = useState(null);
+  const [editRoleName, setEditRoleName] = useState('');
+  const [editDepartment, setEditDepartment] = useState('');
+  const [editExperience, setEditExperience] = useState('');
+  const [editSkills, setEditSkills] = useState('');
+  const [editPreferredSkills, setEditPreferredSkills] = useState('');
+  const [editEducationLevel, setEditEducationLevel] = useState("Bachelor's or equivalent");
+  const [editMinExperience, setEditMinExperience] = useState('2');
+  const [editOpenPositions, setEditOpenPositions] = useState('1');
+  const [editStatus, setEditStatus] = useState('ACTIVE');
+
+  // Role candidate roster & assignment states
   const [selectedRoleDetails, setSelectedRoleDetails] = useState(null);
+  const [assignedCandidates, setAssignedCandidates] = useState([]);
+  const [loadingAssigned, setLoadingAssigned] = useState(false);
+  const [allAvailableCandidates, setAllAvailableCandidates] = useState([]);
+  const [selectedCandidateToAssign, setSelectedCandidateToAssign] = useState('');
+  const [isAssigning, setIsAssigning] = useState(false);
+
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
 
@@ -123,6 +144,110 @@ export default function JobRole() {
       loadRoles();
     } catch (err) {
       triggerToast(err.message || 'Failed to create role');
+    }
+  };
+
+  const handleOpenEditModal = (role) => {
+    setEditingRoleId(role.id);
+    setEditRoleName(role.name || role.title || '');
+    setEditDepartment(role.department || '');
+    setEditExperience(role.experience || role.experienceLevel || '');
+    setEditSkills((role.skills || []).join(', '));
+    setEditPreferredSkills((role.preferredSkills || []).join(', '));
+    setEditEducationLevel(role.educationLevel || "Bachelor's or equivalent");
+    setEditMinExperience(String(role.minExperience ?? 2));
+    setEditOpenPositions(String(role.openPositions ?? 1));
+    setEditStatus(role.statusVal ? role.statusVal.toUpperCase() : 'ACTIVE');
+    setEditModalOpen(true);
+  };
+
+  const handleEditRoleSubmit = async (e) => {
+    e.preventDefault();
+    if (!editRoleName.trim() || !editDepartment) {
+      triggerToast('Please enter the required information');
+      return;
+    }
+
+    try {
+      const reqSkills = editSkills.split(',').map((s) => s.trim()).filter(Boolean);
+      const prefSkills = editPreferredSkills.split(',').map((s) => s.trim()).filter(Boolean);
+
+      await jobsApi.updateJob(editingRoleId, {
+        title: editRoleName.trim(),
+        department: editDepartment.trim(),
+        experienceLevel: editExperience.trim(),
+        openPositions: parseInt(editOpenPositions, 10) || 1,
+        minExperience: parseFloat(editMinExperience) || 2,
+        educationLevel: editEducationLevel,
+        requiredSkills: reqSkills,
+        preferredSkills: prefSkills,
+        skills: [...reqSkills, ...prefSkills],
+        status: editStatus,
+      });
+
+      setEditModalOpen(false);
+      triggerToast(`Job role "${editRoleName}" updated successfully`);
+      loadRoles();
+    } catch (err) {
+      triggerToast(err.message || 'Failed to update job role');
+    }
+  };
+
+  const handleOpenRoleDetails = async (role) => {
+    setSelectedRoleDetails(role);
+    setLoadingAssigned(true);
+    setSelectedCandidateToAssign('');
+    try {
+      const [candRes, allRes] = await Promise.all([
+        jobsApi.getJobCandidates(role.id),
+        candidatesApi.getCandidates(),
+      ]);
+      if (candRes?.data) setAssignedCandidates(candRes.data);
+      if (allRes?.data) setAllAvailableCandidates(allRes.data);
+    } catch (err) {
+      console.error('Failed to load role candidates:', err);
+    } finally {
+      setLoadingAssigned(false);
+    }
+  };
+
+  const handleAssignCandidateToRole = async () => {
+    if (!selectedCandidateToAssign) {
+      triggerToast('Please select a candidate to assign');
+      return;
+    }
+    setIsAssigning(true);
+    try {
+      await candidatesApi.assignJobRole(selectedCandidateToAssign, selectedRoleDetails.id);
+      triggerToast(`Candidate assigned to ${selectedRoleDetails.name}`);
+      const [candRes, allRes] = await Promise.all([
+        jobsApi.getJobCandidates(selectedRoleDetails.id),
+        candidatesApi.getCandidates(),
+      ]);
+      if (candRes?.data) setAssignedCandidates(candRes.data);
+      if (allRes?.data) setAllAvailableCandidates(allRes.data);
+      setSelectedCandidateToAssign('');
+      loadRoles();
+    } catch (err) {
+      triggerToast(err.message || 'Failed to assign candidate');
+    } finally {
+      setIsAssigning(false);
+    }
+  };
+
+  const handleUnassignCandidate = async (cand) => {
+    try {
+      await candidatesApi.assignJobRole(cand.id, 'unassigned');
+      triggerToast(`${cand.name} unassigned from role`);
+      const [candRes, allRes] = await Promise.all([
+        jobsApi.getJobCandidates(selectedRoleDetails.id),
+        candidatesApi.getCandidates(),
+      ]);
+      if (candRes?.data) setAssignedCandidates(candRes.data);
+      if (allRes?.data) setAllAvailableCandidates(allRes.data);
+      loadRoles();
+    } catch (err) {
+      triggerToast(err.message || 'Failed to unassign candidate');
     }
   };
 
@@ -383,8 +508,8 @@ export default function JobRole() {
                           <button
                             type="button"
                             className="action-btn view-btn"
-                            title="View"
-                            onClick={() => setSelectedRoleDetails(r)}
+                            title="View Role & Assigned Candidates"
+                            onClick={() => handleOpenRoleDetails(r)}
                           >
                             <i className="fa-regular fa-eye"></i>
                           </button>
@@ -392,8 +517,8 @@ export default function JobRole() {
                           <button
                             type="button"
                             className="action-btn edit-btn"
-                            title="Edit"
-                            onClick={() => triggerToast(`Editing ${r.name}`)}
+                            title="Edit Role Requirements"
+                            onClick={() => handleOpenEditModal(r)}
                           >
                             <i className="fa-regular fa-pen-to-square"></i>
                           </button>
@@ -568,14 +693,172 @@ export default function JobRole() {
         </div>
       )}
 
-      {/* ROLE DETAILS OVERLAY */}
+      {/* EDIT ROLE MODAL */}
+      {editModalOpen && (
+        <div
+          className="role-modal-overlay show"
+          id="editRoleModal"
+          onClick={() => setEditModalOpen(false)}
+        >
+          <div className="role-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="modal-close"
+              id="closeEditRoleModal"
+              onClick={() => setEditModalOpen(false)}
+            >
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+
+            <div className="modal-header">
+              <h2>Edit Job Role Criteria</h2>
+              <p>Modify role requirements, required skills, and hiring targets.</p>
+            </div>
+
+            <form id="editRoleForm" onSubmit={handleEditRoleSubmit}>
+              <div className="form-group">
+                <label>Job Role</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Full Stack Developer"
+                  required
+                  value={editRoleName}
+                  onChange={(e) => setEditRoleName(e.target.value)}
+                />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Department</label>
+                  <select
+                    value={editDepartment}
+                    onChange={(e) => setEditDepartment(e.target.value)}
+                    required
+                  >
+                    <option value="">Select Department</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="Product">Product</option>
+                    <option value="Design">Design</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Data & Analytics">Data & Analytics</option>
+                    <option value="Security">Security</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Experience Level</label>
+                  <select
+                    value={editExperience}
+                    onChange={(e) => setEditExperience(e.target.value)}
+                    required
+                  >
+                    <option value="">Select Experience</option>
+                    <option value="Entry Level (0-2 yrs)">Entry Level (0-2 yrs)</option>
+                    <option value="Mid Level (2-5 yrs)">Mid Level (2-5 yrs)</option>
+                    <option value="Senior Level (5+ yrs)">Senior Level (5+ yrs)</option>
+                    <option value="Lead / Principal">Lead / Principal</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Status</label>
+                  <select
+                    value={editStatus}
+                    onChange={(e) => setEditStatus(e.target.value)}
+                  >
+                    <option value="ACTIVE">Active</option>
+                    <option value="ARCHIVED">Archived</option>
+                    <option value="CLOSED">Closed</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Number of Open Positions</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={editOpenPositions}
+                    onChange={(e) => setEditOpenPositions(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Required Skills (Must have, comma separated)</label>
+                <input
+                  type="text"
+                  placeholder="e.g. React, Node.js, TypeScript, PostgreSQL"
+                  required
+                  value={editSkills}
+                  onChange={(e) => setEditSkills(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Preferred Skills (Bonus / nice to have, comma separated)</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Docker, GraphQL, Kubernetes, Redis"
+                  value={editPreferredSkills}
+                  onChange={(e) => setEditPreferredSkills(e.target.value)}
+                />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Minimum Experience (Years)</label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="0"
+                    value={editMinExperience}
+                    onChange={(e) => setEditMinExperience(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Minimum Education Level</label>
+                  <select
+                    value={editEducationLevel}
+                    onChange={(e) => setEditEducationLevel(e.target.value)}
+                  >
+                    <option value="Bachelor's or equivalent">Bachelor's or equivalent</option>
+                    <option value="Master's / Advanced Degree">Master's / Advanced Degree</option>
+                    <option value="Associate / Technical Degree">Associate / Technical Degree</option>
+                    <option value="Any / Experience Equivalent">Any / Experience Equivalent</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="modal-form-actions">
+                <button
+                  type="button"
+                  className="cancel-btn"
+                  onClick={() => setEditModalOpen(false)}
+                >
+                  Cancel
+                </button>
+
+                <button type="submit" className="save-role-btn">
+                  <i className="fa-solid fa-check"></i> Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ROLE DETAILS & CANDIDATES ROSTER OVERLAY */}
       {selectedRoleDetails && (
         <div
           className="role-details-overlay"
           style={{
             position: 'fixed',
             inset: 0,
-            background: 'rgba(2, 11, 24, .72)',
+            background: 'rgba(2, 11, 24, .75)',
+            backdropFilter: 'blur(3px)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -588,11 +871,14 @@ export default function JobRole() {
             className="role-modal role-details-modal"
             style={{
               position: 'relative',
-              width: '450px',
+              width: '820px',
               maxWidth: '100%',
-              padding: '24px',
+              maxHeight: '92vh',
+              overflowY: 'auto',
+              padding: '28px',
               background: '#ffffff',
-              borderRadius: '12px',
+              borderRadius: '14px',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -601,129 +887,349 @@ export default function JobRole() {
               className="modal-close role-details-close"
               style={{
                 position: 'absolute',
-                top: '15px',
-                right: '15px',
+                top: '18px',
+                right: '18px',
                 width: '34px',
                 height: '34px',
                 border: '1px solid #d9e2ef',
-                borderRadius: '7px',
-                background: '#ffffff',
-                color: '#647084',
+                borderRadius: '8px',
+                background: '#f8fafc',
+                color: '#64748b',
                 cursor: 'pointer',
+                display: 'grid',
+                placeItems: 'center',
+                fontSize: '15px',
               }}
               onClick={() => setSelectedRoleDetails(null)}
             >
               <i className="fa-solid fa-xmark"></i>
             </button>
 
-            <div className="modal-header">
-              <h2>{selectedRoleDetails.name}</h2>
-              <p>Job role details</p>
+            {/* Header */}
+            <div className="modal-header" style={{ marginBottom: '18px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <h2 style={{ fontSize: '22px', fontWeight: '700', color: '#0f172a' }}>
+                  {selectedRoleDetails.name}
+                </h2>
+                <span
+                  style={{
+                    fontSize: '11px',
+                    fontWeight: '700',
+                    padding: '3px 8px',
+                    borderRadius: '12px',
+                    background: '#e0f2fe',
+                    color: '#0369a1',
+                  }}
+                >
+                  {selectedRoleDetails.code}
+                </span>
+                <span
+                  className={`status ${selectedRoleDetails.statusVal}`}
+                  style={{ fontSize: '11px', padding: '3px 9px', borderRadius: '12px' }}
+                >
+                  {selectedRoleDetails.status}
+                </span>
+              </div>
+              <p style={{ color: '#64748b', fontSize: '13px', marginTop: '3px' }}>
+                Role specifications and candidates assigned to this field
+              </p>
             </div>
 
+            {/* Quick Metadata Grid */}
             <div
               className="role-detail-list"
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
+                gridTemplateColumns: 'repeat(4, 1fr)',
                 gap: '12px',
-                margin: '20px 0',
+                margin: '16px 0 20px 0',
               }}
             >
-              <div
-                style={{
-                  padding: '12px',
-                  background: '#f8fafc',
-                  borderRadius: '8px',
-                }}
-              >
-                <span
-                  style={{
-                    display: 'block',
-                    fontSize: '11px',
-                    color: '#64748b',
-                    marginBottom: '4px',
-                  }}
-                >
-                  Department
-                </span>
-                <strong style={{ color: '#1e293b' }}>
-                  {selectedRoleDetails.department}
-                </strong>
+              <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '3px' }}>Department</span>
+                <strong style={{ color: '#1e293b', fontSize: '13px' }}>{selectedRoleDetails.department}</strong>
               </div>
 
-              <div
-                style={{
-                  padding: '12px',
-                  background: '#f8fafc',
-                  borderRadius: '8px',
-                }}
-              >
-                <span
-                  style={{
-                    display: 'block',
-                    fontSize: '11px',
-                    color: '#64748b',
-                    marginBottom: '4px',
-                  }}
-                >
-                  Experience
-                </span>
-                <strong style={{ color: '#1e293b' }}>
-                  {selectedRoleDetails.experience}
-                </strong>
+              <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '3px' }}>Experience</span>
+                <strong style={{ color: '#1e293b', fontSize: '13px' }}>{selectedRoleDetails.experience}</strong>
               </div>
 
-              <div
-                style={{
-                  padding: '12px',
-                  background: '#f8fafc',
-                  borderRadius: '8px',
-                }}
-              >
-                <span
-                  style={{
-                    display: 'block',
-                    fontSize: '11px',
-                    color: '#64748b',
-                    marginBottom: '4px',
-                  }}
-                >
-                  Candidates
-                </span>
-                <strong style={{ color: '#1e293b' }}>
-                  {selectedRoleDetails.candidates}
-                </strong>
+              <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '3px' }}>Open Positions</span>
+                <strong style={{ color: '#1e293b', fontSize: '13px' }}>{selectedRoleDetails.openPositions || 1}</strong>
               </div>
 
-              <div
-                style={{
-                  padding: '12px',
-                  background: '#f8fafc',
-                  borderRadius: '8px',
-                }}
-              >
-                <span
-                  style={{
-                    display: 'block',
-                    fontSize: '11px',
-                    color: '#64748b',
-                    marginBottom: '4px',
-                  }}
-                >
-                  Status
-                </span>
-                <strong className="detail-active" style={{ color: '#0c8275' }}>
-                  Active
+              <div style={{ padding: '12px', background: '#eff6ff', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
+                <span style={{ display: 'block', fontSize: '11px', color: '#1d4ed8', marginBottom: '3px' }}>Assigned Candidates</span>
+                <strong style={{ color: '#1e3a8a', fontSize: '14px' }}>
+                  {loadingAssigned ? '...' : assignedCandidates.length}
                 </strong>
               </div>
             </div>
 
-            <div className="modal-form-actions">
+            {/* Required & Preferred Skills */}
+            <div style={{ marginBottom: '22px', padding: '14px 16px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+              <div style={{ fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
+                Required Skill Criteria
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                {(selectedRoleDetails.skills || []).map((s, idx) => (
+                  <span
+                    key={idx}
+                    style={{
+                      padding: '4px 10px',
+                      background: '#ffffff',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      color: '#1e293b',
+                    }}
+                  >
+                    {s}
+                  </span>
+                ))}
+                {selectedRoleDetails.skills?.length === 0 && (
+                  <span style={{ fontSize: '12px', color: '#94a3b8' }}>No criteria specified</span>
+                )}
+              </div>
+            </div>
+
+            {/* ASSIGNED CANDIDATES ROSTER */}
+            <div style={{ marginBottom: '24px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <i className="fa-solid fa-users-viewfinder" style={{ color: '#2563eb' }}></i>
+                  Assigned Candidates Roster ({assignedCandidates.length})
+                </h3>
+                <span style={{ fontSize: '11px', color: '#64748b' }}>
+                  Real-time pipeline tracking for this role
+                </span>
+              </div>
+
+              {loadingAssigned ? (
+                <div style={{ padding: '24px', textAlign: 'center', color: '#64748b', fontSize: '13px' }}>
+                  <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px' }}></i>
+                  Loading assigned candidates...
+                </div>
+              ) : assignedCandidates.length === 0 ? (
+                <div
+                  style={{
+                    padding: '24px',
+                    textAlign: 'center',
+                    background: '#f8fafc',
+                    borderRadius: '8px',
+                    border: '1px dashed #cbd5e1',
+                    color: '#64748b',
+                    fontSize: '13px',
+                  }}
+                >
+                  <i className="fa-solid fa-user-clock" style={{ fontSize: '24px', color: '#94a3b8', display: 'block', marginBottom: '8px' }}></i>
+                  No candidates currently assigned to this role.
+                  <br />
+                  <span style={{ fontSize: '12px', color: '#94a3b8' }}>
+                    Select a candidate below to assign them to this position.
+                  </span>
+                </div>
+              ) : (
+                <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                    <thead>
+                      <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textAlign: 'left' }}>
+                        <th style={{ padding: '10px 14px', color: '#475569', fontWeight: '600' }}>Candidate</th>
+                        <th style={{ padding: '10px 14px', color: '#475569', fontWeight: '600' }}>Stage</th>
+                        <th style={{ padding: '10px 14px', color: '#475569', fontWeight: '600' }}>Match Score</th>
+                        <th style={{ padding: '10px 14px', color: '#475569', fontWeight: '600' }}>ATS Score</th>
+                        <th style={{ padding: '10px 14px', color: '#475569', fontWeight: '600', textAlign: 'right' }}>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {assignedCandidates.map((cand) => (
+                        <tr key={cand.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                          <td style={{ padding: '10px 14px' }}>
+                            <div style={{ fontWeight: '600', color: '#0f172a' }}>{cand.name}</div>
+                            <div style={{ fontSize: '11px', color: '#64748b' }}>{cand.email}</div>
+                          </td>
+                          <td style={{ padding: '10px 14px' }}>
+                            <span
+                              style={{
+                                padding: '3px 8px',
+                                borderRadius: '12px',
+                                fontSize: '10px',
+                                fontWeight: '700',
+                                textTransform: 'uppercase',
+                                background:
+                                  cand.currentStage === 'SHORTLISTED'
+                                    ? '#dcfce7'
+                                    : cand.currentStage === 'INTERVIEW'
+                                    ? '#dbeafe'
+                                    : cand.currentStage === 'SELECTED'
+                                    ? '#f3e8ff'
+                                    : cand.currentStage === 'REJECTED'
+                                    ? '#fee2e2'
+                                    : '#f1f5f9',
+                                color:
+                                  cand.currentStage === 'SHORTLISTED'
+                                    ? '#15803d'
+                                    : cand.currentStage === 'INTERVIEW'
+                                    ? '#1d4ed8'
+                                    : cand.currentStage === 'SELECTED'
+                                    ? '#7e22ce'
+                                    : cand.currentStage === 'REJECTED'
+                                    ? '#b91c1c'
+                                    : '#475569',
+                              }}
+                            >
+                              {(cand.currentStage || 'Screening').replace('_', ' ')}
+                            </span>
+                          </td>
+                          <td style={{ padding: '10px 14px' }}>
+                            <strong style={{ color: (cand.matchScore || 85) >= 80 ? '#16a34a' : '#d97706' }}>
+                              {cand.matchScore ? `${cand.matchScore}%` : '85%'}
+                            </strong>
+                          </td>
+                          <td style={{ padding: '10px 14px' }}>
+                            <strong style={{ color: '#2563eb' }}>
+                              {cand.atsScore || 90}
+                            </strong>
+                          </td>
+                          <td style={{ padding: '10px 14px', textAlign: 'right' }}>
+                            <button
+                              type="button"
+                              onClick={() => handleUnassignCandidate(cand)}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                padding: '5px 9px',
+                                border: '1px solid #fecdd3',
+                                borderRadius: '6px',
+                                background: '#fff1f2',
+                                color: '#be123c',
+                                fontSize: '11px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                              }}
+                              title="Unassign candidate from this role"
+                            >
+                              <i className="fa-solid fa-user-minus"></i> Unassign
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* QUICK ASSIGN TOOL */}
+            <div
+              style={{
+                padding: '16px',
+                background: '#f8fafc',
+                border: '1px solid #e2e8f0',
+                borderRadius: '10px',
+                marginBottom: '20px',
+              }}
+            >
+              <div style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <i className="fa-solid fa-user-plus" style={{ color: '#16a34a' }}></i>
+                Assign Candidate to this Role
+              </div>
+              <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '12px' }}>
+                Assign an unassigned applicant or transfer an active candidate directly to {selectedRoleDetails.name}.
+              </p>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <select
+                  value={selectedCandidateToAssign}
+                  onChange={(e) => setSelectedCandidateToAssign(e.target.value)}
+                  style={{
+                    flex: 1,
+                    padding: '8px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid #cbd5e1',
+                    fontSize: '12px',
+                    background: '#ffffff',
+                    color: '#1e293b',
+                  }}
+                >
+                  <option value="">Select Candidate to Assign...</option>
+                  {allAvailableCandidates
+                    .filter((c) => c.jobRoleId !== selectedRoleDetails.id)
+                    .map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name} ({c.email}) — Current Role: {c.role || 'Unassigned'}
+                      </option>
+                    ))}
+                </select>
+
+                <button
+                  type="button"
+                  disabled={!selectedCandidateToAssign || isAssigning}
+                  onClick={handleAssignCandidateToRole}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: selectedCandidateToAssign ? '#16a34a' : '#94a3b8',
+                    color: '#ffffff',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    cursor: selectedCandidateToAssign ? 'pointer' : 'not-allowed',
+                  }}
+                >
+                  <i className="fa-solid fa-check"></i>
+                  {isAssigning ? 'Assigning...' : 'Assign to Role'}
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="modal-form-actions" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <button
+                type="button"
+                className="action-btn edit-btn"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '9px 16px',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  border: '1px solid #cbd5e1',
+                  background: '#ffffff',
+                  color: '#334155',
+                  cursor: 'pointer',
+                }}
+                onClick={() => {
+                  const roleToEdit = selectedRoleDetails;
+                  setSelectedRoleDetails(null);
+                  handleOpenEditModal(roleToEdit);
+                }}
+              >
+                <i className="fa-regular fa-pen-to-square"></i> Edit Role Criteria
+              </button>
+
               <button
                 type="button"
                 className="cancel-btn role-details-close-btn"
                 onClick={() => setSelectedRoleDetails(null)}
+                style={{
+                  padding: '9px 20px',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  border: '1px solid #cbd5e1',
+                  background: '#f8fafc',
+                  color: '#475569',
+                  cursor: 'pointer',
+                }}
               >
                 Close
               </button>
