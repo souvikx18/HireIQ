@@ -102,21 +102,27 @@ model JobRole {
 model Skill {
   id                  String           @id @default(uuid())
   name                String           @unique
-  category            String           @default("TECHNICAL") // SkillCategory
+  category            String           @default("TECHNICAL") // TECHNICAL, TOOLS, SOFT_SKILLS, DOMAIN
   marketDemandPercent Int              @default(50)
+  requiredBenchmark   Int              @default(70) // % proficiency required by company benchmark (0-100)
+  isCompanyRequired   Boolean          @default(false) // Mandatory company hiring requirement
+  importance          String           @default("HIGH") // CRITICAL, HIGH, MEDIUM, LOW
+  description         String?
   jobSkills           JobSkill[]
   candidateSkills     CandidateSkill[]
   skillGaps           SkillGap[]
   createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @default(now()) @updatedAt
 }
 
 model JobSkill {
-  id        String   @id @default(uuid())
-  jobRoleId String
-  jobRole   JobRole  @relation(fields: [jobRoleId], references: [id], onDelete: Cascade)
-  skillId   String
-  skill     Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
-  required  Boolean  @default(true)
+  id             String   @id @default(uuid())
+  jobRoleId      String
+  jobRole        JobRole  @relation(fields: [jobRoleId], references: [id], onDelete: Cascade)
+  skillId        String
+  skill          Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  required       Boolean  @default(true)
+  minProficiency Int      @default(70)
 
   @@unique([jobRoleId, skillId])
 }

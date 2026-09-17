@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { analyticsApi } from '../api/analytics';
 import '../css/skillgapanalysis.css';
 
 export default function SkillGapAnalysis() {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [toastMessage, setToastMessage] = useState('');
@@ -83,14 +85,35 @@ export default function SkillGapAnalysis() {
           title="Skill Gap Analysis"
           subtitle="See where your talent pool is strongest and where focused growth can unlock better matches."
         >
-          <button
-            className="primary-button"
-            id="exportAnalysis"
-            type="button"
-            onClick={handleExport}
-          >
-            <i className="fa-solid fa-download"></i> Export Analysis
-          </button>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button
+              type="button"
+              onClick={() => navigate('/setting')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '9px 16px',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: '600',
+                border: '1px solid #cbd5e1',
+                background: '#ffffff',
+                color: '#2869e8',
+                cursor: 'pointer',
+              }}
+            >
+              <i className="fa-solid fa-sliders"></i> Edit Benchmarks
+            </button>
+            <button
+              className="primary-button"
+              id="exportAnalysis"
+              type="button"
+              onClick={handleExport}
+            >
+              <i className="fa-solid fa-download"></i> Export Analysis
+            </button>
+          </div>
         </Header>
 
         <section className="hero-grid">

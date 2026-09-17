@@ -4,6 +4,8 @@ import Header from '../components/Header';
 import { useAuth } from '../context/AuthContext.jsx';
 import { authApi } from '../api/auth.js';
 import { adminApi } from '../api/admin.js';
+import { skillsApi } from '../api/skills.js';
+import '../css/setting.css';
 
 export default function Setting() {
   const { user, updateUser } = useAuth();
@@ -78,6 +80,142 @@ export default function Setting() {
     setTimeout(() => {
       setShowToast(false);
     }, 2500);
+  };
+
+  // Company Skills Benchmark Management
+  const [skillsList, setSkillsList] = useState([]);
+  const [skillStats, setSkillStats] = useState({
+    totalSkills: 0,
+    mandatoryCount: 0,
+    avgBenchmark: 75,
+    categoryCounts: {},
+  });
+  const [skillsLoading, setSkillsLoading] = useState(false);
+  const [skillFilter, setSkillFilter] = useState('all');
+  const [skillSearch, setSkillSearch] = useState('');
+  const [newSkill, setNewSkill] = useState({
+    name: '',
+    category: 'TECHNICAL',
+    requiredBenchmark: 75,
+    isCompanyRequired: true,
+    importance: 'HIGH',
+    description: '',
+  });
+  const [tempBenchmark, setTempBenchmark] = useState({});
+
+  const loadSkills = async () => {
+    setSkillsLoading(true);
+    try {
+      const res = await skillsApi.getSkills({
+        search: skillSearch,
+        category: skillFilter,
+      });
+      if (res?.data) {
+        setSkillsList(res.data.skills || []);
+        if (res.data.stats) setSkillStats(res.data.stats);
+      }
+    } catch {
+      triggerToast('Failed to load company skill benchmarks');
+    } finally {
+      setSkillsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'criteria') {
+      loadSkills();
+    }
+  }, [activeTab, skillFilter]);
+
+  const handleCreateSkill = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!newSkill.name.trim()) {
+      triggerToast('Skill name is required');
+      return;
+    }
+    try {
+      await skillsApi.createSkill(newSkill);
+      triggerToast(`Added ${newSkill.name} to company hiring criteria`);
+      setNewSkill({
+        name: '',
+        category: 'TECHNICAL',
+        requiredBenchmark: 75,
+        isCompanyRequired: true,
+        importance: 'HIGH',
+        description: '',
+      });
+      loadSkills();
+    } catch (err) {
+      triggerToast(err.message || 'Failed to add skill requirement');
+    }
+  };
+
+  const handleBenchmarkSliderChange = (skillId, val) => {
+    const num = Math.min(100, Math.max(0, parseInt(val, 10) || 0));
+    setTempBenchmark((prev) => ({ ...prev, [skillId]: num }));
+    setSkillsList((prev) =>
+      prev.map((s) => (s.id === skillId ? { ...s, requiredBenchmark: num } : s))
+    );
+  };
+
+  const handleSaveSkillBenchmark = async (skill) => {
+    try {
+      const benchmarkVal =
+        tempBenchmark[skill.id] !== undefined
+          ? tempBenchmark[skill.id]
+          : skill.requiredBenchmark;
+      await skillsApi.updateSkill(skill.id, {
+        requiredBenchmark: benchmarkVal,
+        isCompanyRequired: skill.isCompanyRequired,
+        importance: skill.importance,
+        description: skill.description,
+      });
+      triggerToast(`Updated ${skill.name} requirement benchmark to ${benchmarkVal}%`);
+      loadSkills();
+    } catch (err) {
+      triggerToast(err.message || 'Failed to update benchmark');
+    }
+  };
+
+  const handleToggleRequired = async (skill) => {
+    try {
+      const updatedRequired = !skill.isCompanyRequired;
+      await skillsApi.updateSkill(skill.id, {
+        isCompanyRequired: updatedRequired,
+      });
+      setSkillsList((prev) =>
+        prev.map((s) =>
+          s.id === skill.id ? { ...s, isCompanyRequired: updatedRequired } : s
+        )
+      );
+      triggerToast(
+        `${skill.name} marked as ${updatedRequired ? 'MANDATORY requirement' : 'PREFERRED bonus'}`
+      );
+      loadSkills();
+    } catch (err) {
+      triggerToast(err.message || 'Failed to update requirement status');
+    }
+  };
+
+  const handleDeleteSkill = async (skillId, skillName) => {
+    if (!window.confirm(`Remove ${skillName} from company hiring benchmarks?`)) return;
+    try {
+      await skillsApi.deleteSkill(skillId);
+      triggerToast(`Removed ${skillName} from company criteria`);
+      loadSkills();
+    } catch (err) {
+      triggerToast(err.message || 'Failed to delete skill');
+    }
+  };
+
+  const handleSeedDefaults = async () => {
+    try {
+      await skillsApi.seedDefaultSkills();
+      triggerToast('Standard industry skill benchmarks seeded successfully');
+      loadSkills();
+    } catch {
+      triggerToast('Failed to seed default skill benchmarks');
+    }
   };
 
   const loadAdminData = async () => {
@@ -251,6 +389,27 @@ export default function Setting() {
 
             <button
               type="button"
+              onClick={() => setActiveTab('criteria')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '9px 18px',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                border: 'none',
+                background: activeTab === 'criteria' ? '#2869e8' : '#f1f5f9',
+                color: activeTab === 'criteria' ? '#ffffff' : '#64748b',
+                transition: 'all .2s ease',
+              }}
+            >
+              <i className="fa-solid fa-sliders"></i> Company Hiring Criteria & Benchmarks
+            </button>
+
+            <button
+              type="button"
               onClick={() => setActiveTab('admin')}
               style={{
                 display: 'inline-flex',
@@ -271,7 +430,7 @@ export default function Setting() {
             </button>
           </div>
 
-          {activeTab === 'account' ? (
+          {activeTab === 'account' && (
             <>
               {/* SETTINGS GRID */}
               <div className="settings-grid">
@@ -599,9 +758,10 @@ export default function Setting() {
               type="button"
               className="save-btn"
               id="saveChangesBtn"
+              disabled={saving}
               onClick={handleSave}
             >
-              <i className="fa-regular fa-floppy-disk"></i> Save Changes
+              <i className="fa-regular fa-floppy-disk"></i> {saving ? 'Saving...' : 'Save Changes'}
             </button>
 
             <button
@@ -614,7 +774,433 @@ export default function Setting() {
             </button>
           </div>
             </>
-          ) : (
+          )}
+
+          {activeTab === 'criteria' && (
+            <div className="criteria-console-view">
+              {/* BENCHMARK OVERVIEW KPI CARDS */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gap: '16px',
+                  marginBottom: '24px',
+                }}
+              >
+                <div style={{ background: '#ffffff', padding: '18px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 2px 6px rgba(0,0,0,.03)' }}>
+                  <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>Tracked Skills</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <i className="fa-solid fa-layer-group" style={{ color: '#2869e8', fontSize: '16px' }}></i>
+                    <strong style={{ fontSize: '20px', color: '#0f172a' }}>{skillStats.totalSkills}</strong>
+                  </div>
+                  <small style={{ color: '#64748b', fontSize: '11px' }}>Company criteria library</small>
+                </div>
+
+                <div style={{ background: '#ffffff', padding: '18px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 2px 6px rgba(0,0,0,.03)' }}>
+                  <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>Mandatory For Hire</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <i className="fa-solid fa-circle-check" style={{ color: '#10b981', fontSize: '16px' }}></i>
+                    <strong style={{ fontSize: '20px', color: '#10b981' }}>{skillStats.mandatoryCount}</strong>
+                  </div>
+                  <small style={{ color: '#64748b', fontSize: '11px' }}>Must-have competencies</small>
+                </div>
+
+                <div style={{ background: '#ffffff', padding: '18px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 2px 6px rgba(0,0,0,.03)' }}>
+                  <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>Avg Benchmark Target</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <i className="fa-solid fa-chart-line" style={{ color: '#8b5cf6', fontSize: '16px' }}></i>
+                    <strong style={{ fontSize: '20px', color: '#8b5cf6' }}>{skillStats.avgBenchmark}%</strong>
+                  </div>
+                  <small style={{ color: '#64748b', fontSize: '11px' }}>Company passing threshold</small>
+                </div>
+
+                <div style={{ background: '#ffffff', padding: '18px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 2px 6px rgba(0,0,0,.03)' }}>
+                  <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '6px' }}>Quick Actions</span>
+                  <button
+                    type="button"
+                    onClick={handleSeedDefaults}
+                    style={{
+                      width: '100%',
+                      padding: '7px 10px',
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      background: '#f8fafc',
+                      color: '#2869e8',
+                      border: '1px solid #cbd5e1',
+                      borderRadius: '6px',
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                    }}
+                  >
+                    <i className="fa-solid fa-sparkles"></i> Seed Defaults
+                  </button>
+                  <small style={{ color: '#94a3b8', fontSize: '10px', display: 'block', marginTop: '4px', textAlign: 'center' }}>Reset to tech industry standards</small>
+                </div>
+              </div>
+
+              {/* ADD NEW SKILL CRITERION CARD */}
+              <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '22px', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#edf3ff', color: '#2869e8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <i className="fa-solid fa-bullseye"></i>
+                  </div>
+                  <div>
+                    <h3 style={{ fontSize: '16px', color: '#0f172a', margin: 0 }}>Add Company Skill Benchmark & Hiring Requirement</h3>
+                    <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0' }}>Define what skills are required for hiring and how much proficiency is expected.</p>
+                  </div>
+                </div>
+
+                <form onSubmit={handleCreateSkill}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
+                        Skill Name *
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. React, Docker, Python, System Design, SQL"
+                        value={newSkill.name}
+                        onChange={(e) => setNewSkill({ ...newSkill, name: e.target.value })}
+                        required
+                        style={{ width: '100%', padding: '9px 12px', fontSize: '13px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }}
+                      />
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
+                        Category
+                      </label>
+                      <select
+                        value={newSkill.category}
+                        onChange={(e) => setNewSkill({ ...newSkill, category: e.target.value })}
+                        style={{ width: '100%', padding: '9px 12px', fontSize: '13px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff', boxSizing: 'border-box' }}
+                      >
+                        <option value="TECHNICAL">Technical Skills</option>
+                        <option value="TOOLS">Tools & Frameworks</option>
+                        <option value="SOFT_SKILLS">Soft Skills</option>
+                        <option value="DOMAIN">Domain Knowledge</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
+                        Importance Level
+                      </label>
+                      <select
+                        value={newSkill.importance}
+                        onChange={(e) => setNewSkill({ ...newSkill, importance: e.target.value })}
+                        style={{ width: '100%', padding: '9px 12px', fontSize: '13px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff', boxSizing: 'border-box' }}
+                      >
+                        <option value="CRITICAL">Critical (Must-Have)</option>
+                        <option value="HIGH">High Priority</option>
+                        <option value="MEDIUM">Medium Priority</option>
+                        <option value="LOW">Low / Preferred</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '14px', marginBottom: '14px', alignItems: 'center' }}>
+                    <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <span style={{ fontSize: '12px', fontWeight: '600', color: '#334155' }}>Required Benchmark Threshold (%):</span>
+                        <strong style={{ fontSize: '14px', color: '#2869e8', background: '#edf3ff', padding: '2px 8px', borderRadius: '4px' }}>
+                          {newSkill.requiredBenchmark}% Required
+                        </strong>
+                      </div>
+                      <input
+                        type="range"
+                        min="10"
+                        max="100"
+                        step="5"
+                        value={newSkill.requiredBenchmark}
+                        onChange={(e) => setNewSkill({ ...newSkill, requiredBenchmark: parseInt(e.target.value, 10) })}
+                        style={{ width: '100%', cursor: 'pointer' }}
+                      />
+                      <small style={{ color: '#64748b', fontSize: '11px', display: 'block', marginTop: '2px' }}>
+                        Candidates scoring below this proficiency will trigger an evaluation gap.
+                      </small>
+                    </div>
+
+                    <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <input
+                        type="checkbox"
+                        id="isCompanyRequired"
+                        checked={newSkill.isCompanyRequired}
+                        onChange={(e) => setNewSkill({ ...newSkill, isCompanyRequired: e.target.checked })}
+                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                      />
+                      <label htmlFor="isCompanyRequired" style={{ fontSize: '12px', fontWeight: '600', color: '#1e293b', cursor: 'pointer' }}>
+                        Mandatory For Hiring
+                        <span style={{ display: 'block', fontSize: '11px', fontWeight: 'normal', color: '#64748b' }}>Candidates without this skill are flagged as unqualified</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
+                      Evaluation Criteria & Minimum Expectations (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Must have hands-on production experience designing scalable APIs and optimizing SQL queries"
+                      value={newSkill.description}
+                      onChange={(e) => setNewSkill({ ...newSkill, description: e.target.value })}
+                      style={{ width: '100%', padding: '9px 12px', fontSize: '13px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }}
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '10px 22px',
+                      background: '#2869e8',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      transition: 'background .2s ease',
+                    }}
+                  >
+                    <i className="fa-solid fa-plus"></i> Add Skill Benchmark Requirement
+                  </button>
+                </form>
+              </div>
+
+              {/* COMPANY CRITERIA LIST & INLINE BENCHMARK EDITOR */}
+              <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '22px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+                  <div>
+                    <h3 style={{ fontSize: '16px', color: '#0f172a', margin: 0 }}>Company Skill Benchmarks & Thresholds</h3>
+                    <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0' }}>
+                      Directly edit how much proficiency is required per skill. Changes immediately impact candidate scoring and gap analysis.
+                    </p>
+                  </div>
+
+                  {/* SEARCH & FILTER */}
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <input
+                      type="text"
+                      placeholder="Search company skills..."
+                      value={skillSearch}
+                      onChange={(e) => setSkillSearch(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && loadSkills()}
+                      style={{ padding: '7px 12px', fontSize: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', width: '180px' }}
+                    />
+
+                    <select
+                      value={skillFilter}
+                      onChange={(e) => setSkillFilter(e.target.value)}
+                      style={{ padding: '7px 10px', fontSize: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff' }}
+                    >
+                      <option value="all">All Categories</option>
+                      <option value="TECHNICAL">Technical Skills</option>
+                      <option value="TOOLS">Tools & Frameworks</option>
+                      <option value="SOFT_SKILLS">Soft Skills</option>
+                      <option value="DOMAIN">Domain Knowledge</option>
+                    </select>
+
+                    <button
+                      type="button"
+                      onClick={loadSkills}
+                      style={{ padding: '7px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#f8fafc', fontSize: '12px', cursor: 'pointer' }}
+                    >
+                      <i className="fa-solid fa-rotate-right"></i>
+                    </button>
+                  </div>
+                </div>
+
+                {/* SKILLS TABLE WITH INLINE BENCHMARK SLIDERS */}
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '2px solid #e2e8f0', textAlign: 'left', color: '#64748b' }}>
+                        <th style={{ padding: '12px 10px', width: '22%' }}>Skill Name</th>
+                        <th style={{ padding: '12px 10px', width: '16%' }}>Category</th>
+                        <th style={{ padding: '12px 10px', width: '14%' }}>Status</th>
+                        <th style={{ padding: '12px 10px', width: '32%' }}>Required Benchmark (%)</th>
+                        <th style={{ padding: '12px 10px', width: '16%', textAlign: 'right' }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {skillsList.length > 0 ? (
+                        skillsList.map((skill) => {
+                          const currentVal =
+                            tempBenchmark[skill.id] !== undefined
+                              ? tempBenchmark[skill.id]
+                              : skill.requiredBenchmark || 70;
+                          const hasUnsavedChanges =
+                            tempBenchmark[skill.id] !== undefined &&
+                            tempBenchmark[skill.id] !== skill.requiredBenchmark;
+
+                          return (
+                            <tr key={skill.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                              <td style={{ padding: '12px 10px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <strong style={{ color: '#0f172a' }}>{skill.name}</strong>
+                                  <span
+                                    style={{
+                                      fontSize: '10px',
+                                      fontWeight: '600',
+                                      padding: '2px 6px',
+                                      borderRadius: '4px',
+                                      background:
+                                        skill.importance === 'CRITICAL'
+                                          ? '#fee2e2'
+                                          : skill.importance === 'HIGH'
+                                          ? '#fef3c7'
+                                          : '#f1f5f9',
+                                      color:
+                                        skill.importance === 'CRITICAL'
+                                          ? '#991b1b'
+                                          : skill.importance === 'HIGH'
+                                          ? '#92400e'
+                                          : '#475569',
+                                    }}
+                                  >
+                                    {skill.importance || 'HIGH'}
+                                  </span>
+                                </div>
+                                {skill.description && (
+                                  <small style={{ color: '#64748b', display: 'block', fontSize: '11px', marginTop: '2px' }}>
+                                    {skill.description}
+                                  </small>
+                                )}
+                              </td>
+
+                              <td style={{ padding: '12px 10px', color: '#475569', fontSize: '12px' }}>
+                                {skill.category}
+                              </td>
+
+                              <td style={{ padding: '12px 10px' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => handleToggleRequired(skill)}
+                                  title="Click to toggle Mandatory status"
+                                  style={{
+                                    border: 'none',
+                                    padding: '4px 10px',
+                                    borderRadius: '20px',
+                                    fontSize: '11px',
+                                    fontWeight: '700',
+                                    cursor: 'pointer',
+                                    background: skill.isCompanyRequired ? '#dbeafe' : '#f1f5f9',
+                                    color: skill.isCompanyRequired ? '#1e40af' : '#64748b',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                  }}
+                                >
+                                  <i className={`fa-solid fa-${skill.isCompanyRequired ? 'circle-check' : 'circle-dot'}`}></i>
+                                  {skill.isCompanyRequired ? 'MANDATORY' : 'PREFERRED'}
+                                </button>
+                              </td>
+
+                              {/* INLINE EDITABLE BENCHMARK SLIDER */}
+                              <td style={{ padding: '12px 10px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                  <input
+                                    type="range"
+                                    min="10"
+                                    max="100"
+                                    step="5"
+                                    value={currentVal}
+                                    onChange={(e) => handleBenchmarkSliderChange(skill.id, e.target.value)}
+                                    style={{ flex: 1, cursor: 'pointer' }}
+                                  />
+                                  <span
+                                    style={{
+                                      minWidth: '46px',
+                                      textAlign: 'right',
+                                      fontSize: '13px',
+                                      fontWeight: '700',
+                                      color: currentVal >= 80 ? '#1e40af' : '#0f172a',
+                                    }}
+                                  >
+                                    {currentVal}%
+                                  </span>
+                                  {hasUnsavedChanges && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleSaveSkillBenchmark(skill)}
+                                      style={{
+                                        padding: '4px 8px',
+                                        fontSize: '11px',
+                                        fontWeight: '600',
+                                        background: '#2869e8',
+                                        color: '#ffffff',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        cursor: 'pointer',
+                                      }}
+                                    >
+                                      Save
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+
+                              <td style={{ padding: '12px 10px', textAlign: 'right' }}>
+                                <div style={{ display: 'inline-flex', gap: '8px' }}>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleSaveSkillBenchmark(skill)}
+                                    title="Save Benchmark"
+                                    style={{
+                                      padding: '6px 10px',
+                                      border: '1px solid #cbd5e1',
+                                      background: '#f8fafc',
+                                      color: '#2869e8',
+                                      borderRadius: '6px',
+                                      cursor: 'pointer',
+                                      fontSize: '12px',
+                                    }}
+                                  >
+                                    <i className="fa-solid fa-floppy-disk"></i>
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteSkill(skill.id, skill.name)}
+                                    title="Delete Skill"
+                                    style={{
+                                      padding: '6px 10px',
+                                      border: '1px solid #fee2e2',
+                                      background: '#fff1f2',
+                                      color: '#e11d48',
+                                      borderRadius: '6px',
+                                      cursor: 'pointer',
+                                      fontSize: '12px',
+                                    }}
+                                  >
+                                    <i className="fa-regular fa-trash-can"></i>
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      ) : (
+                        <tr>
+                          <td colSpan="5" style={{ padding: '24px', textAlign: 'center', color: '#94a3b8' }}>
+                            {skillsLoading ? 'Loading skills...' : 'No skill criteria found matching your filters.'}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'admin' && (
             <div className="admin-console-view">
               {/* SYSTEM HEALTH CARDS */}
               <div

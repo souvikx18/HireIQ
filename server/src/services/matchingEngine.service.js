@@ -1,5 +1,5 @@
 export const matchingEngineService = {
-  evaluateMatch({ candidateSkills = [], candidateInfo = {}, jobRole = null }) {
+  evaluateMatch({ candidateSkills = [], candidateInfo = {}, jobRole = null, companySkills = [] }) {
     let requiredCriteria = [];
     let preferredCriteria = [];
 
@@ -10,6 +10,18 @@ export const matchingEngineService = {
           preferredCriteria.push(name);
         } else {
           requiredCriteria.push(name);
+        }
+      });
+    }
+
+    // Incorporate company-wide mandatory skills
+    if (Array.isArray(companySkills) && companySkills.length > 0) {
+      companySkills.forEach((cs) => {
+        const name = cs.name || String(cs);
+        if (cs.isCompanyRequired && !requiredCriteria.includes(name)) {
+          requiredCriteria.push(name);
+        } else if (!requiredCriteria.includes(name) && !preferredCriteria.includes(name)) {
+          preferredCriteria.push(name);
         }
       });
     }
