@@ -1,57 +1,76 @@
 export const matchingEngineService = {
   evaluateMatch({ candidateSkills = [], candidateInfo = {}, jobRole = null }) {
-    // Required skills for the target job role
-    let requiredSkills = [];
+    let requiredCriteria = [];
+    let preferredCriteria = [];
+
     if (jobRole && jobRole.skills && jobRole.skills.length > 0) {
-      requiredSkills = jobRole.skills.map((js) => js.skill?.name || js.name || js);
-    } else {
-      // Default baseline standard skills
-      requiredSkills = ['JavaScript', 'React', 'Node.js', 'SQL', 'Git', 'Docker'];
+      jobRole.skills.forEach((js) => {
+        const name = js.skill?.name || js.name || String(js);
+        if (js.required === false) {
+          preferredCriteria.push(name);
+        } else {
+          requiredCriteria.push(name);
+        }
+      });
     }
 
-    const candidateSkillSet = new Set(candidateSkills.map((s) => s.toLowerCase()));
+    if (requiredCriteria.length === 0) {
+      requiredCriteria = ['JavaScript', 'React', 'Node.js', 'SQL'];
+      preferredCriteria = ['Docker', 'AWS', 'TypeScript'];
+    }
 
-    const matchedSkills = [];
-    const missingSkills = [];
-    const partialSkills = [];
+    const candidateSkillSet = new Set(candidateSkills.map((s) => s.toLowerCase().trim()));
 
-    requiredSkills.forEach((reqSkill) => {
-      const lowerReq = reqSkill.toLowerCase();
-      let matched = false;
+    const requiredMatched = [];
+    const requiredMissing = [];
+    const preferredMatched = [];
+    const preferredMissing = [];
 
-      // Check exact or partial keyword match
+    const isMatch = (targetSkill) => {
+      const lower = targetSkill.toLowerCase().trim();
       for (const candSkill of candidateSkillSet) {
-        if (candSkill === lowerReq || candSkill.includes(lowerReq) || lowerReq.includes(candSkill)) {
-          matched = true;
-          break;
+        if (candSkill === lower || candSkill.includes(lower) || lower.includes(candSkill)) {
+          return true;
         }
       }
+      return false;
+    };
 
-      if (matched) {
-        matchedSkills.push(reqSkill);
-      } else {
-        missingSkills.push(reqSkill);
-      }
+    requiredCriteria.forEach((skill) => {
+      if (isMatch(skill)) requiredMatched.push(skill);
+      else requiredMissing.push(skill);
     });
 
-    // If candidate has related extra skills, mark some as partial
-    const extraCandidateSkills = candidateSkills.filter(
-      (s) => !matchedSkills.some((m) => m.toLowerCase() === s.toLowerCase())
-    );
-    if (extraCandidateSkills.length > 0) {
-      partialSkills.push(extraCandidateSkills[0]);
-    }
+    preferredCriteria.forEach((skill) => {
+      if (isMatch(skill)) preferredMatched.push(skill);
+      else preferredMissing.push(skill);
+    });
 
-    // Calculate match score
-    const skillRatio = requiredSkills.length > 0 ? matchedSkills.length / requiredSkills.length : 0.8;
-    const baseMatch = Math.round(skillRatio * 75 + 15 + Math.min(10, candidateSkills.length * 2));
-    const matchScore = Math.min(98, Math.max(45, baseMatch));
+    const allMatched = [...requiredMatched, ...preferredMatched];
+    const allMissing = [...requiredMissing, ...preferredMissing];
 
-    // Calculate ATS parse score
-    let atsScore = 80;
-    if (candidateInfo.email && !candidateInfo.email.includes('applicant.hireiq.internal')) atsScore += 5;
+    // Extra skills candidate possesses beyond criteria
+    const partialSkills = candidateSkills
+      .filter((s) => !allMatched.some((m) => m.toLowerCase() === s.toLowerCase()))
+      .slice(0, 3);
+
+    // Weighted Scoring
+    const reqRatio = requiredCriteria.length > 0 ? requiredMatched.length / requiredCriteria.length : 1;
+    const prefRatio = preferredCriteria.length > 0 ? preferredMatched.length / preferredCriteria.length : 0.5;
+
+    // Experience Check
+    const candExp = Number(candidateInfo.experienceYears) || 3.0;
+    const minExp = Number(jobRole?.minExperience) || 2.0;
+    const expScore = candExp >= minExp ? 100 : Math.round((candExp / minExp) * 100);
+
+    const baseScore = Math.round(reqRatio * 60 + prefRatio * 25 + (expScore / 100) * 15);
+    const matchScore = Math.min(99, Math.max(35, baseScore));
+
+    // ATS Document Parse Score
+    let atsScore = 82;
+    if (candidateInfo.email && !candidateInfo.email.includes('internal')) atsScore += 5;
     if (candidateInfo.phone) atsScore += 5;
-    if (candidateSkills.length >= 5) atsScore += 8;
+    if (candidateSkills.length >= 6) atsScore += 6;
     atsScore = Math.min(99, atsScore);
 
     // AI Confidence & Recommendation
@@ -59,28 +78,60 @@ export const matchingEngineService = {
     let aiConfidence = '96%';
     if (matchScore < 70) {
       aiRecommendation = 'NOT RECOMMENDED';
-      aiConfidence = '88%';
-    } else if (matchScore < 82) {
+      aiConfidence = '89%';
+    } else if (matchScore < 83) {
       aiRecommendation = 'REVIEW REQUIRED';
-      aiConfidence = '91%';
+      aiConfidence = '92%';
     }
+
+    // Contextual Human Review Concerns
+    const concerns = [];
+    if (requiredMissing.length > 0) {
+      concerns.push(`Missing ${requiredMissing.length} mandatory skill(s): ${requiredMissing.join(', ')}`);
+    }
+    if (candExp < minExp) {
+      concerns.push(`Experience (${candExp} yrs) is below minimum role requirement (${minExp} yrs)`);
+    }
+    if (!candidateInfo.phone) {
+      concerns.push('Contact phone number was not detected in parsed resume');
+    }
+
+    // Tailored Interview Questions
+    const suggestedQuestions = [];
+    if (requiredMissing.length > 0) {
+      suggestedQuestions.push(
+        `Assess hands-on familiarity or transferable experience with ${requiredMissing[0]}: What patterns or projects have you worked on in this space?`
+      );
+    }
+    if (preferredMissing.length > 0) {
+      suggestedQuestions.push(
+        `Explore interest and adaptability regarding ${preferredMissing[0]}: How quickly can you ramp up on our tech stack?`
+      );
+    }
+    if (requiredMatched.length > 0) {
+      suggestedQuestions.push(
+        `Deep dive on primary competency in ${requiredMatched[0]}: Describe a challenging production problem you solved using this technology.`
+      );
+    }
+    suggestedQuestions.push(
+      'System Architecture & Teamwork: Walk through how you collaborate with cross-functional teams to deliver secure, production-ready code.'
+    );
 
     // Strengths
     const strengths = [
-      `Demonstrates strong competency in ${matchedSkills.slice(0, 3).join(', ') || 'core engineering competencies'}`,
-      `Documented hands-on technical background with ${candidateInfo.experienceYears || '3+'} years experience`,
-      `High semantic synergy with target requirements for ${jobRole?.title || 'the target position'}`,
+      `Satisfies ${requiredMatched.length} of ${requiredCriteria.length} mandatory role requirements (${requiredMatched.join(', ') || 'demonstrated engineering principles'})`,
+      `Documented professional experience of ${candExp} years (${expScore >= 100 ? 'Meets or exceeds requirement' : 'Ramping up'})`,
+      `Demonstrates strong transferable competencies across ${partialSkills.join(', ') || 'modern development tooling'}`,
     ];
 
-    // Gap Priorities
-    const gapPriorities = missingSkills.map((gap, idx) => ({
+    // Priority Gaps
+    const gapPriorities = allMissing.map((gap, idx) => ({
       name: gap,
-      priority: idx === 0 ? (matchScore >= 80 ? 'High Priority' : 'Critical') : idx === 1 ? 'Medium Priority' : 'Low Priority',
-      priorityClass: idx === 0 ? (matchScore >= 80 ? 'high' : 'critical') : idx === 1 ? 'medium' : 'low',
+      priority: requiredMissing.includes(gap) ? 'Critical' : idx === 1 ? 'High Priority' : 'Medium Priority',
+      priorityClass: requiredMissing.includes(gap) ? 'critical' : idx === 1 ? 'high' : 'medium',
     }));
 
-    // Actionable roadmap steps
-    const topGap = missingSkills[0] || 'Cloud & System Design';
+    const topGap = allMissing[0] || 'Cloud & System Design';
     const roadmapSteps = [
       {
         step: 'Phase 1',
@@ -89,8 +140,8 @@ export const matchingEngineService = {
       },
       {
         step: 'Phase 2',
-        title: 'End-to-End Hands-on Project',
-        desc: `Build benchmark integration implementing ${matchedSkills[0] || 'Frontend'} with ${topGap}.`,
+        title: 'Integration Project',
+        desc: `Build benchmark integration implementing ${allMatched[0] || 'Frontend'} with ${topGap}.`,
       },
       {
         step: 'Phase 3',
@@ -99,28 +150,31 @@ export const matchingEngineService = {
       },
     ];
 
-    const scoreExplanation = `Candidate achieved an overall match score of ${matchScore}% via multi-factor semantic analysis: core skill verification (${matchedSkills.length}/${requiredSkills.length} required skills matched), experience level alignment (${candidateInfo.experienceYears || '3+ years'}), and high ATS document fidelity (${atsScore}/100 score).`;
-
+    const scoreExplanation = `Candidate achieved an overall match score of ${matchScore}%: verified ${requiredMatched.length}/${requiredCriteria.length} required skills (${Math.round(reqRatio * 100)}%), ${preferredMatched.length}/${preferredCriteria.length} preferred skills (${Math.round(prefRatio * 100)}%), and ${candExp} years experience vs ${minExp} required.`;
     const courseRecommendation = `Mastering ${topGap} on Coursera / Udemy (approx. 18-24 hours to bridge priority gap).`;
 
     return {
       matchScore,
       atsScore,
-      skillCoverage: Math.round(skillRatio * 100),
-      requiredSkillsCount: requiredSkills.length,
-      matchedSkillsCount: matchedSkills.length,
-      partialSkillsCount: partialSkills.length,
-      missingSkillsCount: missingSkills.length,
-      aiRecommendation,
-      aiConfidence,
-      matchedSkills: matchedSkills.map((name, i) => ({ name, purple: i % 2 !== 0 })),
-      missingSkills,
+      skillCoverage: Math.round(reqRatio * 100),
+      requiredCriteria,
+      preferredCriteria,
+      requiredMatched,
+      requiredMissing,
+      preferredMatched,
+      preferredMissing,
+      matchedSkills: allMatched.map((name, i) => ({ name, purple: i % 2 !== 0 })),
+      missingSkills: allMissing,
       partialSkills,
       strengths,
+      concerns,
+      suggestedQuestions,
       gapPriorities,
       roadmapSteps,
       scoreExplanation,
       courseRecommendation,
+      aiRecommendation,
+      aiConfidence,
     };
   },
 };

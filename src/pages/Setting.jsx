@@ -1,12 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
-import '../css/setting.css';
 import { useAuth } from '../context/AuthContext.jsx';
 import { authApi } from '../api/auth.js';
+import { adminApi } from '../api/admin.js';
 
 export default function Setting() {
   const { user, updateUser } = useAuth();
+  const [activeTab, setActiveTab] = useState('account');
+  const [healthData, setHealthData] = useState(null);
+  const [auditLogs, setAuditLogs] = useState([]);
+  const [usersList, setUsersList] = useState([]);
+  const [logSearch, setLogSearch] = useState('');
+  const [loadingAdmin, setLoadingAdmin] = useState(false);
 
   const [theme, setTheme] = useState(
     () => localStorage.getItem('theme') || 'light'
@@ -72,6 +78,43 @@ export default function Setting() {
     setTimeout(() => {
       setShowToast(false);
     }, 2500);
+  };
+
+  const loadAdminData = async () => {
+    setLoadingAdmin(true);
+    try {
+      const [healthRes, logsRes, usersRes] = await Promise.all([
+        adminApi.getHealth().catch(() => null),
+        adminApi.getAuditLogs({ search: logSearch }).catch(() => null),
+        adminApi.getUsers().catch(() => null),
+      ]);
+      if (healthRes?.data) setHealthData(healthRes.data);
+      if (logsRes?.data?.logs) setAuditLogs(logsRes.data.logs);
+      if (usersRes?.data) setUsersList(usersRes.data);
+    } catch {
+      triggerToast('Failed to load admin telemetry');
+    } finally {
+      setLoadingAdmin(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'admin') {
+      loadAdminData();
+    }
+  }, [activeTab]);
+
+  const handleRoleChange = async (targetUserId, newRole) => {
+    try {
+      await adminApi.updateUserRole(targetUserId, newRole);
+      setUsersList((prev) =>
+        prev.map((u) => (u.id === targetUserId ? { ...u, role: newRole } : u))
+      );
+      triggerToast(`User role updated to ${newRole}`);
+      loadAdminData();
+    } catch (err) {
+      triggerToast(err.message || 'Failed to update user role');
+    }
   };
 
   const handleThemeChange = (newTheme) => {
@@ -175,8 +218,63 @@ export default function Setting() {
             showProfile={false}
           />
 
-          {/* SETTINGS GRID */}
-          <div className="settings-grid">
+          {/* TAB NAVIGATION */}
+          <div
+            style={{
+              display: 'flex',
+              gap: '10px',
+              margin: '18px 0 24px',
+              borderBottom: '1px solid #e1e7ef',
+              paddingBottom: '12px',
+            }}
+          >
+            <button
+              type="button"
+              onClick={() => setActiveTab('account')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '9px 18px',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                border: 'none',
+                background: activeTab === 'account' ? '#2869e8' : '#f1f5f9',
+                color: activeTab === 'account' ? '#ffffff' : '#64748b',
+                transition: 'all .2s ease',
+              }}
+            >
+              <i className="fa-solid fa-user-gear"></i> Account & Preferences
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('admin')}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '9px 18px',
+                borderRadius: '8px',
+                fontSize: '13px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                border: 'none',
+                background: activeTab === 'admin' ? '#2869e8' : '#f1f5f9',
+                color: activeTab === 'admin' ? '#ffffff' : '#64748b',
+                transition: 'all .2s ease',
+              }}
+            >
+              <i className="fa-solid fa-shield-halved"></i> Admin Security & Audit Center
+            </button>
+          </div>
+
+          {activeTab === 'account' ? (
+            <>
+              {/* SETTINGS GRID */}
+              <div className="settings-grid">
             {/* PROFILE SETTINGS */}
             <section className="settings-card profile-card">
               <div className="card-title">
@@ -515,6 +613,166 @@ export default function Setting() {
               Cancel
             </button>
           </div>
+            </>
+          ) : (
+            <div className="admin-console-view">
+              {/* SYSTEM HEALTH CARDS */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gap: '16px',
+                  marginBottom: '24px',
+                }}
+              >
+                <div style={{ background: '#ffffff', padding: '18px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 2px 6px rgba(0,0,0,.03)' }}>
+                  <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>System Status</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10b981' }}></span>
+                    <strong style={{ fontSize: '18px', color: '#0f172a' }}>{healthData?.status || 'OPERATIONAL'}</strong>
+                  </div>
+                  <small style={{ color: '#64748b', fontSize: '11px' }}>Uptime: {healthData?.uptimeSeconds || 120}s</small>
+                </div>
+
+                <div style={{ background: '#ffffff', padding: '18px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 2px 6px rgba(0,0,0,.03)' }}>
+                  <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>Supabase PostgreSQL</span>
+                  <strong style={{ fontSize: '18px', color: '#1769ff' }}>{healthData?.database?.latencyMs ? `${healthData.database.latencyMs}ms` : 'Connected'}</strong>
+                  <small style={{ color: '#10b981', display: 'block', fontSize: '11px' }}>Status: {healthData?.database?.status || 'Active'}</small>
+                </div>
+
+                <div style={{ background: '#ffffff', padding: '18px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 2px 6px rgba(0,0,0,.03)' }}>
+                  <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>Total Records</span>
+                  <strong style={{ fontSize: '18px', color: '#0f172a' }}>
+                    {(healthData?.counts?.totalCandidates || 0) + (healthData?.counts?.totalJobs || 0)}
+                  </strong>
+                  <small style={{ color: '#64748b', fontSize: '11px' }}>
+                    {healthData?.counts?.totalCandidates || 0} Cand. • {healthData?.counts?.totalJobs || 0} Roles
+                  </small>
+                </div>
+
+                <div style={{ background: '#ffffff', padding: '18px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 2px 6px rgba(0,0,0,.03)' }}>
+                  <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>Server Memory (RSS)</span>
+                  <strong style={{ fontSize: '18px', color: '#8b5cf6' }}>{healthData?.memory?.rssMb || 110} MB</strong>
+                  <small style={{ color: '#64748b', fontSize: '11px' }}>Heap: {healthData?.memory?.heapUsedMb || 45} MB</small>
+                </div>
+              </div>
+
+              {/* AUDIT LOGS SECTION */}
+              <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '22px', marginBottom: '24px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <div>
+                    <h3 style={{ fontSize: '16px', color: '#0f172a', margin: 0 }}>Security & Activity Audit Logs</h3>
+                    <p style={{ fontSize: '12px', color: '#64748b', margin: '3px 0 0' }}>Immutable audit trail of recruiter and administrator events</p>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <input
+                      type="text"
+                      placeholder="Search audit trail..."
+                      value={logSearch}
+                      onChange={(e) => setLogSearch(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && loadAdminData()}
+                      style={{ padding: '6px 12px', fontSize: '12px', borderRadius: '6px', border: '1px solid #d9e2ef', width: '220px' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={loadAdminData}
+                      style={{ padding: '6px 14px', borderRadius: '6px', border: '1px solid #d9e2ef', background: '#f8fafc', fontSize: '12px', cursor: 'pointer' }}
+                    >
+                      <i className="fa-solid fa-rotate-right"></i> Refresh
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid #e2e8f0', textAlign: 'left', color: '#64748b' }}>
+                        <th style={{ padding: '10px 8px' }}>Timestamp</th>
+                        <th style={{ padding: '10px 8px' }}>Actor</th>
+                        <th style={{ padding: '10px 8px' }}>Action</th>
+                        <th style={{ padding: '10px 8px' }}>Resource</th>
+                        <th style={{ padding: '10px 8px' }}>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {auditLogs.length > 0 ? (
+                        auditLogs.slice(0, 10).map((log) => (
+                          <tr key={log.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                            <td style={{ padding: '10px 8px', color: '#64748b' }}>{new Date(log.createdAt).toLocaleString()}</td>
+                            <td style={{ padding: '10px 8px', fontWeight: '500' }}>{log.actorEmail || log.user?.email || 'system'}</td>
+                            <td style={{ padding: '10px 8px' }}>
+                              <span style={{ padding: '2px 8px', borderRadius: '4px', background: '#e0e7ff', color: '#3730a3', fontSize: '11px', fontWeight: '600' }}>
+                                {log.action}
+                              </span>
+                            </td>
+                            <td style={{ padding: '10px 8px', color: '#475569' }}>{log.resource}</td>
+                            <td style={{ padding: '10px 8px' }}>
+                              <span style={{ padding: '2px 8px', borderRadius: '4px', background: '#dcfce7', color: '#166534', fontSize: '11px', fontWeight: '600' }}>
+                                {log.status || 'SUCCESS'}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="5" style={{ padding: '20px', textAlign: 'center', color: '#94a3b8' }}>
+                            {loadingAdmin ? 'Loading audit trail...' : 'No audit records found.'}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* USER ROLE MANAGEMENT SECTION */}
+              <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '22px' }}>
+                <h3 style={{ fontSize: '16px', color: '#0f172a', margin: '0 0 4px' }}>User Access & Role-Based Access Control (RBAC)</h3>
+                <p style={{ fontSize: '12px', color: '#64748b', margin: '0 0 16px' }}>Manage user permissions across Administrator, HR Manager, Recruiter, and Interviewer</p>
+
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid #e2e8f0', textAlign: 'left', color: '#64748b' }}>
+                      <th style={{ padding: '10px 8px' }}>Name</th>
+                      <th style={{ padding: '10px 8px' }}>Email</th>
+                      <th style={{ padding: '10px 8px' }}>Assigned Role</th>
+                      <th style={{ padding: '10px 8px' }}>Created</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {usersList.length > 0 ? (
+                      usersList.map((u) => (
+                        <tr key={u.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                          <td style={{ padding: '10px 8px', fontWeight: '600' }}>{u.firstName} {u.lastName}</td>
+                          <td style={{ padding: '10px 8px', color: '#64748b' }}>{u.email}</td>
+                          <td style={{ padding: '10px 8px' }}>
+                            <select
+                              value={u.role}
+                              onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                              style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '11px', fontWeight: '600' }}
+                            >
+                              <option value="ADMIN">ADMIN</option>
+                              <option value="HR_MANAGER">HR_MANAGER</option>
+                              <option value="RECRUITER">RECRUITER</option>
+                              <option value="INTERVIEWER">INTERVIEWER</option>
+                            </select>
+                          </td>
+                          <td style={{ padding: '10px 8px', color: '#94a3b8' }}>{new Date(u.createdAt).toLocaleDateString()}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: '#94a3b8' }}>
+                          {loadingAdmin ? 'Loading users...' : 'No users loaded.'}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       </main>
 

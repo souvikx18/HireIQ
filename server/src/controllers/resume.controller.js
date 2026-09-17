@@ -1,6 +1,7 @@
 import { prisma } from '../config/prisma.js';
 import { resumeParserService } from '../services/resumeParser.service.js';
 import { matchingEngineService } from '../services/matchingEngine.service.js';
+import { auditService } from '../services/audit.service.js';
 import { sendSuccess, sendError } from '../utils/response.js';
 
 export const resumeController = {
@@ -91,7 +92,7 @@ export const resumeController = {
         },
       });
 
-      // 7. Save ResumeAnalysis record
+      // 7. Save ResumeAnalysis record with explainable criteria breakdown
       await prisma.resumeAnalysis.create({
         data: {
           resumeId: resume.id,
@@ -105,11 +106,34 @@ export const resumeController = {
           matchedSkills: JSON.stringify(evaluation.matchedSkills),
           missingSkills: JSON.stringify(evaluation.missingSkills),
           partialSkills: JSON.stringify(evaluation.partialSkills),
+          requiredMatched: JSON.stringify(evaluation.requiredMatched),
+          requiredMissing: JSON.stringify(evaluation.requiredMissing),
+          preferredMatched: JSON.stringify(evaluation.preferredMatched),
+          preferredMissing: JSON.stringify(evaluation.preferredMissing),
+          suggestedQuestions: JSON.stringify(evaluation.suggestedQuestions),
+          concerns: JSON.stringify(evaluation.concerns),
           strengths: JSON.stringify(evaluation.strengths),
           gapRoadmap: JSON.stringify(evaluation.roadmapSteps),
           scoreExplanation: evaluation.scoreExplanation,
           courseRecommendation: evaluation.courseRecommendation,
         },
+      });
+
+      // Log audit event
+      await auditService.log({
+        userId: req.user?.userId || null,
+        actorEmail: req.user?.email || 'recruiter',
+        action: 'RESUME_UPLOAD_EVALUATED',
+        resource: 'Resume',
+        targetEntity: 'Candidate',
+        targetId: candidate.id,
+        details: {
+          candidateName: candidate.name,
+          matchScore: evaluation.matchScore,
+          targetRole: targetJobRole?.title,
+          fileName: originalFileName,
+        },
+        ipAddress: req.ip,
       });
 
       // 8. Associate candidate skills & skill gaps in DB

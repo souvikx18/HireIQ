@@ -10,10 +10,17 @@ export const candidatesApi = {
     return apiClient(`/candidates/${id}`);
   },
 
-  updateStatus: async (id, status) => {
+  updateStatus: async (id, { status, currentStage, notes } = {}) => {
     return apiClient(`/candidates/${id}/status`, {
       method: 'PATCH',
-      body: { status },
+      body: { status, currentStage, notes },
+    });
+  },
+
+  compareCandidates: async (candidateIds = []) => {
+    return apiClient('/candidates/compare', {
+      method: 'POST',
+      body: { candidateIds },
     });
   },
 

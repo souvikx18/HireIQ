@@ -1,10 +1,13 @@
 import { z } from 'zod';
 import { prisma } from '../config/prisma.js';
+import { auditService } from '../services/audit.service.js';
 import { sendSuccess, sendError } from '../utils/response.js';
 
 export const updateCandidateStatusSchema = z.object({
   body: z.object({
-    status: z.enum(['ACTIVE', 'SHORTLISTED', 'UNDER_REVIEW', 'MAYBE', 'REJECTED', 'HIRED']),
+    status: z.string().optional(),
+    currentStage: z.string().optional(),
+    notes: z.string().optional(),
   }),
 });
 
@@ -83,6 +86,8 @@ export const candidateController = {
           reviewClass: latestReview?.reviewClass || 'green-review',
           status: c.status === 'SHORTLISTED' ? 'Shortlisted' : c.status === 'REJECTED' ? 'Rejected' : 'Active',
           statusVal: c.status.toLowerCase(),
+          currentStage: c.currentStage || 'UNDER_REVIEW',
+          notes: c.notes || '',
           matchScore: c.matchScore,
           atsScore: c.atsScore,
           skills: c.skills.map((s) => s.skill.name),
@@ -131,14 +136,111 @@ export const candidateController = {
   async updateStatus(req, res, next) {
     try {
       const { id } = req.params;
-      const { status } = req.body;
+      const { status, currentStage, notes } = req.body;
+
+      const updateData = {};
+      if (status) updateData.status = status.toUpperCase().replace(/\s+/g, '_');
+      if (currentStage) updateData.currentStage = currentStage.toUpperCase().replace(/\s+/g, '_');
+      if (notes !== undefined) updateData.notes = notes;
 
       const updated = await prisma.candidate.update({
         where: { id },
-        data: { status },
+        data: updateData,
       });
 
-      return sendSuccess(res, updated, 'Candidate status updated');
+      // Log status transition audit event
+      await auditService.log({
+        userId: req.user?.userId || null,
+        actorEmail: req.user?.email || 'recruiter',
+        action: 'CANDIDATE_STAGE_UPDATE',
+        resource: 'Candidate',
+        targetEntity: 'Candidate',
+        targetId: id,
+        details: {
+          candidateName: updated.name,
+          newStage: updated.currentStage,
+          newStatus: updated.status,
+          notes,
+        },
+        ipAddress: req.ip,
+      });
+
+      return sendSuccess(res, updated, 'Candidate status updated successfully');
+    } catch (err) {
+      next(err);
+    }
+  },
+
+  async compareCandidates(req, res, next) {
+    try {
+      const candidateIds = req.body.candidateIds || (req.query.ids ? req.query.ids.split(',') : []);
+
+      if (!Array.isArray(candidateIds) || candidateIds.length < 2) {
+        return sendError(res, 'Please provide at least 2 candidate IDs to compare', 400);
+      }
+
+      const candidates = await prisma.candidate.findMany({
+        where: { id: { in: candidateIds } },
+        include: {
+          skills: { include: { skill: true } },
+          skillGaps: { include: { skill: true } },
+          resumes: {
+            include: { analysis: true },
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+          },
+        },
+      });
+
+      if (candidates.length < 2) {
+        return sendError(res, 'Could not find sufficient candidate records for comparison', 404);
+      }
+
+      const comparison = candidates.map((cand) => {
+        const latestResume = cand.resumes[0];
+        const analysis = latestResume?.analysis;
+
+        let parsedMatched = [];
+        let parsedMissing = [];
+        let parsedStrengths = [];
+        let parsedQuestions = [];
+
+        try {
+          if (analysis?.matchedSkills) parsedMatched = JSON.parse(analysis.matchedSkills);
+          if (analysis?.missingSkills) parsedMissing = JSON.parse(analysis.missingSkills);
+          if (analysis?.strengths) parsedStrengths = JSON.parse(analysis.strengths);
+          if (analysis?.suggestedQuestions) parsedQuestions = JSON.parse(analysis.suggestedQuestions);
+        } catch {}
+
+        return {
+          id: cand.id,
+          name: cand.name,
+          email: cand.email,
+          roleApplied: cand.roleApplied,
+          currentStage: cand.currentStage,
+          matchScore: cand.matchScore,
+          atsScore: cand.atsScore,
+          rating: cand.rating,
+          experienceYears: cand.experienceYears || 3,
+          skills: cand.skills.map((s) => s.skill.name),
+          matchedSkills: parsedMatched,
+          missingSkills: parsedMissing,
+          strengths: parsedStrengths,
+          suggestedQuestions: parsedQuestions,
+          explanation: analysis?.scoreExplanation || 'Evaluation generated via criteria match.',
+        };
+      });
+
+      // Calculate comparative highlights
+      const topScore = Math.max(...comparison.map((c) => c.matchScore));
+      const leader = comparison.find((c) => c.matchScore === topScore);
+
+      return sendSuccess(res, {
+        comparison,
+        leaderId: leader?.id,
+        leaderName: leader?.name,
+        recommendation: `${leader?.name} leads the cohort with a ${leader?.matchScore}% criteria alignment score and verified competency in ${leader?.skills.slice(0, 3).join(', ')}.`,
+      });
     } catch (err) {
       next(err);
     }

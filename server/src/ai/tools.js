@@ -283,4 +283,82 @@ export const AI_TOOLS = [
       };
     },
   },
+
+  {
+    name: 'compare_candidates',
+    description: 'Compare two or more candidates side-by-side on match score, skills, experience, and strengths.',
+    parameters: {
+      type: 'object',
+      properties: {
+        candidateNames: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Names of the candidates to compare',
+        },
+      },
+      required: ['candidateNames'],
+    },
+    execute: async ({ candidateNames = [] }) => {
+      try {
+        const candidates = await prisma.candidate.findMany({
+          where: {
+            OR: candidateNames.map((name) => ({ name: { contains: name } })),
+          },
+          include: {
+            skills: { include: { skill: true } },
+          },
+          take: 4,
+        });
+
+        if (candidates.length < 2) {
+          return { error: 'Please specify at least 2 valid candidate names to compare.' };
+        }
+
+        const comparison = candidates.map((c) => ({
+          name: c.name,
+          roleApplied: c.roleApplied,
+          matchScore: `${c.matchScore}%`,
+          atsScore: `${c.atsScore}%`,
+          rating: `${c.rating}/5.0`,
+          status: c.status,
+          currentStage: c.currentStage,
+          skills: c.skills.map((s) => s.skill.name).slice(0, 6),
+        }));
+
+        const leader = candidates.reduce((prev, curr) => (curr.matchScore > prev.matchScore ? curr : prev));
+
+        return {
+          comparedCount: candidates.length,
+          candidates: comparison,
+          recommendation: `${leader.name} has the highest technical alignment (${leader.matchScore}%) for ${leader.roleApplied}.`,
+        };
+      } catch (err) {
+        logger.error('Error executing compare_candidates tool:', err);
+        return { error: 'Failed to compare candidates.' };
+      }
+    },
+  },
+
+  {
+    name: 'get_system_health',
+    description: 'Check operational status of HireIQ backend services, database ping, and system uptime.',
+    parameters: { type: 'object', properties: {} },
+    execute: async () => {
+      try {
+        const start = Date.now();
+        await prisma.$queryRaw`SELECT 1`;
+        const latency = Date.now() - start;
+
+        return {
+          status: 'OPERATIONAL',
+          database: 'PostgreSQL (Supabase Connected)',
+          latencyMs: `${latency}ms`,
+          uptimeSeconds: Math.floor(process.uptime()),
+          memoryRss: `${Math.round(process.memoryUsage().rss / 1024 / 1024)} MB`,
+        };
+      } catch (err) {
+        return { status: 'DEGRADED', error: err.message };
+      }
+    },
+  },
 ];

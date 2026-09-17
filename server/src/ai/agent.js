@@ -144,6 +144,40 @@ export const aiAgent = {
       return { reply, toolExecuted: 'get_hiring_metrics', data: result };
     }
 
+    // Intent: Candidate Comparison
+    if (q.includes('compare') || q.includes('comparison') || q.includes('versus') || q.includes('vs')) {
+      const tool = AI_TOOLS.find((t) => t.name === 'compare_candidates');
+      const candTool = AI_TOOLS.find((t) => t.name === 'search_candidates');
+      const topCands = await candTool.execute({ limit: 2 });
+      const names = topCands.candidates ? topCands.candidates.map((c) => c.name) : [];
+      const result = await tool.execute({ candidateNames: names });
+
+      if (result.error) {
+        return { reply: result.error, toolExecuted: 'compare_candidates' };
+      }
+
+      let reply = `### Candidate Cohort Comparison\n\n`;
+      result.candidates.forEach((c) => {
+        reply += `• **${c.name}** (${c.roleApplied})\n`;
+        reply += `  Match: **${c.matchScore}** | ATS: **${c.atsScore}** | Stage: *${c.currentStage}*\n`;
+        reply += `  Skills: ${c.skills.join(', ')}\n\n`;
+      });
+      reply += `💡 **Recommendation**: ${result.recommendation}`;
+      return { reply, toolExecuted: 'compare_candidates', data: result };
+    }
+
+    // Intent: System Health
+    if (q.includes('health') || q.includes('system status') || q.includes('server status')) {
+      const tool = AI_TOOLS.find((t) => t.name === 'get_system_health');
+      const result = await tool.execute();
+      let reply = `### System Health & Operational Status\n\n`;
+      reply += `• **Overall Status**: **${result.status}**\n`;
+      reply += `• **Database**: ${result.database} (${result.latencyMs})\n`;
+      reply += `• **Server Uptime**: ${result.uptimeSeconds} seconds\n`;
+      reply += `• **Memory Usage**: ${result.memoryRss}\n`;
+      return { reply, toolExecuted: 'get_system_health', data: result };
+    }
+
     // Intent: Interview Questions
     if (q.includes('interview') || q.includes('question') || q.includes('ask')) {
       const tool = AI_TOOLS.find((t) => t.name === 'generate_interview_questions');

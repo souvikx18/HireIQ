@@ -86,6 +86,11 @@ model JobRole {
   title           String
   department      String
   experienceLevel String
+  minExperience   Float       @default(0)
+  educationLevel  String      @default("Bachelor's or equivalent")
+  description     String?
+  responsibilities String?
+  customCriteria  String?     // JSON encoded custom criteria & weights
   openPositions   Int         @default(1)
   status          String      @default("ACTIVE") // JobStatus enum string
   skills          JobSkill[]
@@ -130,6 +135,10 @@ model Candidate {
   reviewsCount    Int              @default(0)
   rating          Float            @default(4.0)
   status          String           @default("ACTIVE") // CandidateStatus
+  currentStage    String           @default("UPLOADED") // UPLOADED, PARSED, UNDER_REVIEW, SHORTLISTED, INTERVIEW, SELECTED, REJECTED
+  experienceYears Float            @default(0)
+  education       String?
+  notes           String?
   matchScore      Int              @default(0)
   atsScore        Int              @default(0)
   skills          CandidateSkill[]
@@ -194,6 +203,12 @@ model ResumeAnalysis {
   matchedSkills       String   // JSON encoded string
   missingSkills       String   // JSON encoded string
   partialSkills       String   // JSON encoded string
+  requiredMatched     String?  // JSON encoded string
+  requiredMissing     String?  // JSON encoded string
+  preferredMatched    String?  // JSON encoded string
+  preferredMissing    String?  // JSON encoded string
+  suggestedQuestions String?  // JSON encoded string of interview focus questions
+  concerns            String?  // JSON encoded string of human review flags
   strengths           String   // JSON encoded string
   gapRoadmap          String   // JSON encoded string
   scoreExplanation    String?
@@ -225,12 +240,16 @@ model AiConversation {
 }
 
 model AuditLog {
-  id        String   @id @default(uuid())
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
-  action    String
-  resource  String
-  details   String?
-  ipAddress String?
-  createdAt DateTime @default(now())
+  id           String   @id @default(uuid())
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  actorEmail   String?
+  action       String
+  resource     String
+  targetEntity String?
+  targetId     String?
+  status       String   @default("SUCCESS")
+  details      String?
+  ipAddress    String?
+  createdAt    DateTime @default(now())
 }

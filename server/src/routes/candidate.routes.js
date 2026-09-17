@@ -13,6 +13,8 @@ const router = Router();
 router.use(authenticate);
 
 router.get('/', candidateController.listCandidates);
+router.post('/compare', candidateController.compareCandidates);
+router.get('/compare', candidateController.compareCandidates);
 router.get('/:id', candidateController.getCandidate);
 
 router.patch(

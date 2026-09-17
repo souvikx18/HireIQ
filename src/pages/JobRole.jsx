@@ -18,6 +18,9 @@ export default function JobRole() {
   const [newDepartment, setNewDepartment] = useState('');
   const [newExperience, setNewExperience] = useState('');
   const [newSkills, setNewSkills] = useState('');
+  const [newPreferredSkills, setNewPreferredSkills] = useState('');
+  const [newEducationLevel, setNewEducationLevel] = useState("Bachelor's or equivalent");
+  const [newMinExperience, setNewMinExperience] = useState('2');
   const [newOpenPositions, setNewOpenPositions] = useState('1');
 
   const [selectedRoleDetails, setSelectedRoleDetails] = useState(null);
@@ -92,12 +95,19 @@ export default function JobRole() {
     }
 
     try {
+      const reqSkills = newSkills.split(',').map((s) => s.trim()).filter(Boolean);
+      const prefSkills = newPreferredSkills.split(',').map((s) => s.trim()).filter(Boolean);
+
       await jobsApi.createJob({
-        title: newRoleName.trim(),
+        title: newRoleName,
         department: newDepartment,
-        experienceLevel: newExperience || '2 - 5 years',
+        experienceLevel: newExperience,
         openPositions: parseInt(newOpenPositions, 10) || 1,
-        skills: newSkills,
+        minExperience: parseFloat(newMinExperience) || 2,
+        educationLevel: newEducationLevel,
+        requiredSkills: reqSkills,
+        preferredSkills: prefSkills,
+        skills: [...reqSkills, ...prefSkills],
       });
 
       setModalOpen(false);
@@ -105,8 +115,11 @@ export default function JobRole() {
       setNewDepartment('');
       setNewExperience('');
       setNewSkills('');
+      setNewPreferredSkills('');
+      setNewEducationLevel("Bachelor's or equivalent");
+      setNewMinExperience('2');
       setNewOpenPositions('1');
-      triggerToast(`${newRoleName} created successfully`);
+      triggerToast(`${newRoleName} created successfully with criteria`);
       loadRoles();
     } catch (err) {
       triggerToast(err.message || 'Failed to create role');
@@ -477,14 +490,52 @@ export default function JobRole() {
               </div>
 
               <div className="form-group">
-                <label>Required Skills</label>
+                <label>Required Skills (Mandatory Criteria)</label>
                 <input
                   type="text"
                   id="jobSkills"
-                  placeholder="JavaScript, React, Node.js"
+                  placeholder="e.g. JavaScript, React, Node.js, SQL"
                   value={newSkills}
                   onChange={(e) => setNewSkills(e.target.value)}
+                  required
                 />
+              </div>
+
+              <div className="form-group">
+                <label>Preferred Skills (Bonus Criteria)</label>
+                <input
+                  type="text"
+                  id="jobPreferredSkills"
+                  placeholder="e.g. Docker, AWS, TypeScript, GraphQL"
+                  value={newPreferredSkills}
+                  onChange={(e) => setNewPreferredSkills(e.target.value)}
+                />
+              </div>
+
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Min Experience (Years)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.5"
+                    value={newMinExperience}
+                    onChange={(e) => setNewMinExperience(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Education Requirement</label>
+                  <select
+                    value={newEducationLevel}
+                    onChange={(e) => setNewEducationLevel(e.target.value)}
+                  >
+                    <option value="Bachelor's or equivalent">Bachelor's or equivalent</option>
+                    <option value="Master's / Advanced Degree">Master's / Advanced Degree</option>
+                    <option value="Associate / Technical Degree">Associate / Technical Degree</option>
+                    <option value="Any / Experience Equivalent">Any / Experience Equivalent</option>
+                  </select>
+                </div>
               </div>
 
               <div className="form-group">

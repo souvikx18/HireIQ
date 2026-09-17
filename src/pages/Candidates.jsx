@@ -12,8 +12,47 @@ export default function Candidates() {
   const [statusFilter, setStatusFilter] = useState('All Status');
   const [selectedCandidateModal, setSelectedCandidateModal] = useState(null);
   const [actionMenu, setActionMenu] = useState(null); // { candidate, top, left }
+  const [selectedForCompare, setSelectedForCompare] = useState([]);
+  const [compareModalData, setCompareModalData] = useState(null);
+  const [isComparing, setIsComparing] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
+
+  const handleToggleCompare = (id) => {
+    setSelectedForCompare((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleStageChange = async (candidateId, newStage) => {
+    try {
+      await candidatesApi.updateStatus(candidateId, { currentStage: newStage });
+      setCandidatesList((prev) =>
+        prev.map((c) => (c.id === candidateId ? { ...c, currentStage: newStage } : c))
+      );
+      triggerToast(`Candidate stage updated to ${newStage.replace('_', ' ')}`);
+    } catch (err) {
+      triggerToast(err.message || 'Failed to update candidate stage');
+    }
+  };
+
+  const handleRunComparison = async () => {
+    if (selectedForCompare.length < 2) {
+      triggerToast('Select at least 2 candidates using the checkboxes to compare');
+      return;
+    }
+    setIsComparing(true);
+    try {
+      const res = await candidatesApi.compareCandidates(selectedForCompare);
+      if (res?.data) {
+        setCompareModalData(res.data);
+      }
+    } catch (err) {
+      triggerToast(err.message || 'Failed to compare candidates');
+    } finally {
+      setIsComparing(false);
+    }
+  };
 
   const triggerToast = (msg) => {
     setToastMessage(msg);
@@ -219,6 +258,30 @@ export default function Candidates() {
                 />
 
                 <button
+                  type="button"
+                  onClick={handleRunComparison}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    height: '36px',
+                    padding: '0 14px',
+                    borderRadius: '7px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    background: selectedForCompare.length >= 2 ? '#1769ff' : '#f1f5f9',
+                    color: selectedForCompare.length >= 2 ? '#ffffff' : '#64748b',
+                    border: '1px solid #d9e2ef',
+                    transition: 'all .2s ease',
+                  }}
+                  title={selectedForCompare.length < 2 ? 'Select at least 2 candidates using the checkboxes' : 'Compare selected candidates side-by-side'}
+                >
+                  <i className="fa-solid fa-code-compare"></i>
+                  {isComparing ? 'Comparing...' : `Compare ${selectedForCompare.length > 0 ? `(${selectedForCompare.length})` : ''}`}
+                </button>
+
+                <button
                   className="export-btn"
                   type="button"
                   onClick={handleExport}
@@ -234,8 +297,23 @@ export default function Candidates() {
               <table>
                 <thead>
                   <tr>
+                    <th style={{ width: '40px', textAlign: 'center' }}>
+                      <input
+                        type="checkbox"
+                        title="Select All"
+                        checked={filteredCandidates.length > 0 && selectedForCompare.length === filteredCandidates.length}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedForCompare(filteredCandidates.map((c) => c.id));
+                          } else {
+                            setSelectedForCompare([]);
+                          }
+                        }}
+                      />
+                    </th>
                     <th>Candidate</th>
                     <th>Role</th>
+                    <th>Pipeline Stage</th>
                     <th>Views</th>
                     <th>Reviews</th>
                     <th>Average Rating</th>
@@ -247,6 +325,15 @@ export default function Candidates() {
                 <tbody>
                   {filteredCandidates.map((c) => (
                     <tr key={c.id}>
+                      <td style={{ textAlign: 'center' }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedForCompare.includes(c.id)}
+                          onChange={() => handleToggleCompare(c.id)}
+                          title={`Select ${c.name} for comparison`}
+                        />
+                      </td>
+
                       <td>
                         <div className="candidate-info">
                           <div className={`candidate-avatar ${c.avatarColor}`}>
@@ -260,6 +347,50 @@ export default function Candidates() {
                       </td>
 
                       <td>{c.role}</td>
+
+                      <td>
+                        <select
+                          value={c.currentStage || 'UNDER_REVIEW'}
+                          onChange={(e) => handleStageChange(c.id, e.target.value)}
+                          style={{
+                            padding: '4px 10px',
+                            fontSize: '11px',
+                            fontWeight: '600',
+                            borderRadius: '20px',
+                            border: '1px solid #d9e2ef',
+                            background:
+                              c.currentStage === 'SHORTLISTED'
+                                ? '#e8f5e9'
+                                : c.currentStage === 'INTERVIEW'
+                                ? '#e3f2fd'
+                                : c.currentStage === 'SELECTED'
+                                ? '#ede7f6'
+                                : c.currentStage === 'REJECTED'
+                                ? '#ffebee'
+                                : '#f8fafc',
+                            color:
+                              c.currentStage === 'SHORTLISTED'
+                                ? '#2e7d32'
+                                : c.currentStage === 'INTERVIEW'
+                                ? '#1565c0'
+                                : c.currentStage === 'SELECTED'
+                                ? '#6a1b9a'
+                                : c.currentStage === 'REJECTED'
+                                ? '#c62828'
+                                : '#475569',
+                            cursor: 'pointer',
+                            outline: 'none',
+                          }}
+                        >
+                          <option value="UPLOADED">Uploaded</option>
+                          <option value="PARSED">Parsed</option>
+                          <option value="UNDER_REVIEW">Under Review</option>
+                          <option value="SHORTLISTED">Shortlisted</option>
+                          <option value="INTERVIEW">Interview</option>
+                          <option value="SELECTED">Selected</option>
+                          <option value="REJECTED">Rejected</option>
+                        </select>
+                      </td>
 
                       <td>
                         <strong className="views">{c.views}</strong>
@@ -699,6 +830,286 @@ export default function Candidates() {
                 onClick={() => triggerToast('Opening candidate reviews...')}
               >
                 <i className="fa-regular fa-star"></i> View Reviews
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CANDIDATE COMPARISON MODAL */}
+      {compareModalData && (
+        <div
+          className="candidate-modal-overlay"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(3, 14, 28, .75)',
+            backdropFilter: 'blur(3px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px',
+            zIndex: 100000,
+          }}
+          onClick={() => setCompareModalData(null)}
+        >
+          <div
+            className="candidate-modal"
+            style={{
+              position: 'relative',
+              width: '950px',
+              maxWidth: '96vw',
+              maxHeight: '88vh',
+              overflowY: 'auto',
+              padding: '26px',
+              background: '#ffffff',
+              borderRadius: '14px',
+              boxShadow: '0 20px 60px rgba(0,0,0,.3)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="modal-close"
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                width: '34px',
+                height: '34px',
+                border: '1px solid #d9e2ef',
+                borderRadius: '7px',
+                background: '#ffffff',
+                color: '#647084',
+                cursor: 'pointer',
+              }}
+              onClick={() => setCompareModalData(null)}
+            >
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+
+            <div style={{ marginBottom: '20px' }}>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '4px 10px',
+                  borderRadius: '20px',
+                  background: '#eef2ff',
+                  color: '#4338ca',
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  marginBottom: '6px',
+                }}
+              >
+                <i className="fa-solid fa-code-compare"></i> Side-by-Side Comparison
+              </span>
+              <h2 style={{ fontSize: '20px', color: '#0f172a', margin: '4px 0' }}>
+                Candidate Cohort Evaluation
+              </h2>
+              <p style={{ fontSize: '13px', color: '#64748b' }}>
+                Comparing {compareModalData.comparison.length} candidates against role criteria, verified skills, and experience tenure.
+              </p>
+            </div>
+
+            {/* Recommendation Highlight Banner */}
+            {compareModalData.recommendation && (
+              <div
+                style={{
+                  padding: '14px 18px',
+                  background: '#f0fdf4',
+                  border: '1px solid #bbf7d0',
+                  borderRadius: '10px',
+                  marginBottom: '22px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                }}
+              >
+                <div
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    background: '#16a34a',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <i className="fa-solid fa-trophy"></i>
+                </div>
+                <div>
+                  <strong style={{ display: 'block', fontSize: '13px', color: '#14532d' }}>
+                    Top Recommendation
+                  </strong>
+                  <span style={{ fontSize: '12px', color: '#166534' }}>
+                    {compareModalData.recommendation}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Comparison Grid */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: `repeat(${Math.min(compareModalData.comparison.length, 3)}, 1fr)`,
+                gap: '16px',
+              }}
+            >
+              {compareModalData.comparison.map((c) => (
+                <div
+                  key={c.id}
+                  style={{
+                    border: c.id === compareModalData.leaderId ? '2px solid #1769ff' : '1px solid #e2e8f0',
+                    borderRadius: '12px',
+                    padding: '18px',
+                    background: c.id === compareModalData.leaderId ? '#f8faff' : '#ffffff',
+                    position: 'relative',
+                  }}
+                >
+                  {c.id === compareModalData.leaderId && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '-10px',
+                        right: '16px',
+                        background: '#1769ff',
+                        color: '#ffffff',
+                        fontSize: '10px',
+                        fontWeight: '700',
+                        padding: '2px 8px',
+                        borderRadius: '10px',
+                      }}
+                    >
+                      ★ LEADER
+                    </span>
+                  )}
+
+                  <h3 style={{ fontSize: '16px', color: '#0f172a', margin: '0 0 2px' }}>{c.name}</h3>
+                  <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '12px' }}>
+                    {c.roleApplied}
+                  </span>
+
+                  {/* Metrics Bar */}
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(2, 1fr)',
+                      gap: '8px',
+                      marginBottom: '14px',
+                    }}
+                  >
+                    <div style={{ padding: '8px', background: '#f1f5f9', borderRadius: '6px', textAlign: 'center' }}>
+                      <span style={{ fontSize: '10px', color: '#64748b', display: 'block' }}>Match Score</span>
+                      <strong style={{ fontSize: '16px', color: '#1769ff' }}>{c.matchScore}%</strong>
+                    </div>
+                    <div style={{ padding: '8px', background: '#f1f5f9', borderRadius: '6px', textAlign: 'center' }}>
+                      <span style={{ fontSize: '10px', color: '#64748b', display: 'block' }}>ATS Score</span>
+                      <strong style={{ fontSize: '16px', color: '#059669' }}>{c.atsScore}%</strong>
+                    </div>
+                  </div>
+
+                  {/* Experience & Stage */}
+                  <div style={{ fontSize: '11px', color: '#475569', marginBottom: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                      <span>Experience:</span>
+                      <strong>{c.experienceYears} Years</strong>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Current Stage:</span>
+                      <span
+                        style={{
+                          fontSize: '10px',
+                          fontWeight: '600',
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          background: '#e0e7ff',
+                          color: '#3730a3',
+                        }}
+                      >
+                        {c.currentStage}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Matched Skills */}
+                  <div style={{ marginBottom: '12px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: '600', color: '#334155', display: 'block', marginBottom: '6px' }}>
+                      Verified Competencies:
+                    </span>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                      {c.skills.slice(0, 6).map((skill, idx) => (
+                        <span
+                          key={idx}
+                          style={{
+                            fontSize: '10px',
+                            padding: '3px 7px',
+                            borderRadius: '4px',
+                            background: '#ecfdf5',
+                            color: '#065f46',
+                            border: '1px solid #a7f3d0',
+                          }}
+                        >
+                          ✓ {skill}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Missing Criteria */}
+                  {c.missingSkills && c.missingSkills.length > 0 && (
+                    <div style={{ marginBottom: '12px' }}>
+                      <span style={{ fontSize: '11px', fontWeight: '600', color: '#b91c1c', display: 'block', marginBottom: '6px' }}>
+                        Missing Criteria:
+                      </span>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                        {c.missingSkills.slice(0, 3).map((gap, idx) => (
+                          <span
+                            key={idx}
+                            style={{
+                              fontSize: '10px',
+                              padding: '3px 7px',
+                              borderRadius: '4px',
+                              background: '#fef2f2',
+                              color: '#991b1b',
+                              border: '1px solid #fecaca',
+                            }}
+                          >
+                            ! {gap}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Key Strengths */}
+                  {c.strengths && c.strengths.length > 0 && (
+                    <div>
+                      <span style={{ fontSize: '11px', fontWeight: '600', color: '#334155', display: 'block', marginBottom: '4px' }}>
+                        Key Strength:
+                      </span>
+                      <p style={{ fontSize: '11px', color: '#64748b', margin: 0, lineHeight: '1.4' }}>
+                        {c.strengths[0]}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div style={{ marginTop: '24px', textAlign: 'right' }}>
+              <button
+                type="button"
+                className="cancel-btn"
+                style={{ padding: '8px 20px', borderRadius: '7px', cursor: 'pointer' }}
+                onClick={() => setCompareModalData(null)}
+              >
+                Close Comparison
               </button>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { prisma } from '../config/prisma.js';
+import { auditService } from '../services/audit.service.js';
 import { sendSuccess, sendError } from '../utils/response.js';
 
 export const createJobSchema = z.object({
@@ -8,7 +9,13 @@ export const createJobSchema = z.object({
     department: z.string().min(1, 'Department is required'),
     experienceLevel: z.string().min(1, 'Experience level is required'),
     openPositions: z.number().or(z.string()).transform((v) => parseInt(String(v), 10) || 1),
+    minExperience: z.number().or(z.string()).transform((v) => parseFloat(String(v)) || 0).optional(),
+    educationLevel: z.string().optional(),
+    description: z.string().optional(),
+    responsibilities: z.string().optional(),
     skills: z.array(z.string()).or(z.string().transform((v) => v.split(',').map((s) => s.trim()).filter(Boolean))).optional(),
+    requiredSkills: z.array(z.string()).optional(),
+    preferredSkills: z.array(z.string()).optional(),
   }),
 });
 
@@ -92,7 +99,19 @@ export const jobController = {
 
   async createJob(req, res, next) {
     try {
-      const { title, department, experienceLevel, openPositions, skills = [] } = req.body;
+      const {
+        title,
+        department,
+        experienceLevel,
+        openPositions,
+        minExperience = 0,
+        educationLevel = "Bachelor's or equivalent",
+        description,
+        responsibilities,
+        skills = [],
+        requiredSkills = [],
+        preferredSkills = [],
+      } = req.body;
 
       // Generate code prefix (e.g. "Full Stack Developer" -> "FS-008")
       const words = title.replace(/[^a-zA-Z0-9 ]/g, '').split(' ').filter(Boolean);
@@ -112,14 +131,21 @@ export const jobController = {
           department: department.trim(),
           experienceLevel: experienceLevel.trim(),
           openPositions,
+          minExperience: parseFloat(String(minExperience)) || 0,
+          educationLevel: educationLevel.trim(),
+          description: description?.trim() || null,
+          responsibilities: responsibilities?.trim() || null,
           status: 'ACTIVE',
         },
       });
 
-      // Link skills
-      const skillList = Array.isArray(skills) ? skills : [];
-      for (const skillName of skillList) {
-        const trimmed = skillName.trim();
+      // Assemble criteria lists
+      const reqList = Array.isArray(requiredSkills) && requiredSkills.length > 0 ? requiredSkills : skills;
+      const prefList = Array.isArray(preferredSkills) ? preferredSkills : [];
+
+      // Link required skills
+      for (const skillName of reqList) {
+        const trimmed = String(skillName).trim();
         if (!trimmed) continue;
         const skill = await prisma.skill.upsert({
           where: { name: trimmed },
@@ -127,13 +153,49 @@ export const jobController = {
           create: { name: trimmed },
         });
 
-        await prisma.jobSkill.create({
-          data: {
+        await prisma.jobSkill.upsert({
+          where: { jobRoleId_skillId: { jobRoleId: jobRole.id, skillId: skill.id } },
+          update: { required: true },
+          create: {
             jobRoleId: jobRole.id,
             skillId: skill.id,
+            required: true,
           },
         });
       }
+
+      // Link preferred skills
+      for (const skillName of prefList) {
+        const trimmed = String(skillName).trim();
+        if (!trimmed) continue;
+        const skill = await prisma.skill.upsert({
+          where: { name: trimmed },
+          update: {},
+          create: { name: trimmed },
+        });
+
+        await prisma.jobSkill.upsert({
+          where: { jobRoleId_skillId: { jobRoleId: jobRole.id, skillId: skill.id } },
+          update: { required: false },
+          create: {
+            jobRoleId: jobRole.id,
+            skillId: skill.id,
+            required: false,
+          },
+        });
+      }
+
+      // Log audit
+      await auditService.log({
+        userId: req.user?.userId || null,
+        actorEmail: req.user?.email || 'recruiter',
+        action: 'JOB_ROLE_CREATED',
+        resource: 'JobRole',
+        targetEntity: 'JobRole',
+        targetId: jobRole.id,
+        details: { title: jobRole.title, code: jobRole.code, department: jobRole.department },
+        ipAddress: req.ip,
+      });
 
       return sendSuccess(res, jobRole, 'Job role created successfully', 201);
     } catch (err) {
