@@ -1,0 +1,236 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  ADMIN
+  HR_MANAGER
+  RECRUITER
+  INTERVIEWER
+}
+
+enum JobStatus {
+  ACTIVE
+  INACTIVE
+  DRAFT
+}
+
+enum CandidateStatus {
+  ACTIVE
+  SHORTLISTED
+  UNDER_REVIEW
+  MAYBE
+  REJECTED
+  HIRED
+}
+
+enum ParsingStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum SkillCategory {
+  TECHNICAL
+  TOOLS
+  SOFT
+  DOMAIN
+}
+
+enum GapPriority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+}
+
+model User {
+  id                   String            @id @default(uuid())
+  email                String            @unique
+  passwordHash         String
+  firstName            String
+  lastName             String
+  role                 String            @default("ADMIN") // Role enum string
+  avatarUrl            String?
+  emailNotifications   Boolean           @default(true)
+  hiringUpdates        Boolean           @default(true)
+  candidateUpdates     Boolean           @default(true)
+  interviewReminders   Boolean           @default(true)
+  refreshTokens        RefreshToken[]
+  candidateReviews     CandidateReview[]
+  aiConversations      AiConversation[]
+  auditLogs            AuditLog[]
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  revoked   Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model JobRole {
+  id              String      @id @default(uuid())
+  code            String      @unique
+  title           String
+  department      String
+  experienceLevel String
+  openPositions   Int         @default(1)
+  status          String      @default("ACTIVE") // JobStatus enum string
+  skills          JobSkill[]
+  candidates      Candidate[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model Skill {
+  id                  String           @id @default(uuid())
+  name                String           @unique
+  category            String           @default("TECHNICAL") // SkillCategory
+  marketDemandPercent Int              @default(50)
+  jobSkills           JobSkill[]
+  candidateSkills     CandidateSkill[]
+  skillGaps           SkillGap[]
+  createdAt           DateTime         @default(now())
+}
+
+model JobSkill {
+  id        String   @id @default(uuid())
+  jobRoleId String
+  jobRole   JobRole  @relation(fields: [jobRoleId], references: [id], onDelete: Cascade)
+  skillId   String
+  skill     Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  required  Boolean  @default(true)
+
+  @@unique([jobRoleId, skillId])
+}
+
+model Candidate {
+  id              String           @id @default(uuid())
+  name            String
+  email           String           @unique
+  phone           String?
+  location        String?
+  roleApplied     String
+  jobRoleId       String?
+  jobRole         JobRole?         @relation(fields: [jobRoleId], references: [id], onDelete: SetNull)
+  views           Int              @default(0)
+  viewsThisWeek   String           @default("0 this week")
+  reviewsCount    Int              @default(0)
+  rating          Float            @default(4.0)
+  status          String           @default("ACTIVE") // CandidateStatus
+  matchScore      Int              @default(0)
+  atsScore        Int              @default(0)
+  skills          CandidateSkill[]
+  skillGaps       SkillGap[]
+  resumes         Resume[]
+  reviews         CandidateReview[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model CandidateSkill {
+  id          String    @id @default(uuid())
+  candidateId String
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  skillId     String
+  skill       Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  proficiency String    @default("Proficient")
+
+  @@unique([candidateId, skillId])
+}
+
+model SkillGap {
+  id             String    @id @default(uuid())
+  candidateId    String
+  candidate      Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  skillId        String
+  skill          Skill     @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  requiredLevel  Int       @default(80)
+  candidateLevel Int       @default(30)
+  gapPercentage  Int       @default(50)
+  priority       String    @default("HIGH") // GapPriority
+  learningPlan   String?
+  createdAt      DateTime  @default(now())
+}
+
+model Resume {
+  id               String          @id @default(uuid())
+  candidateId      String?
+  candidate        Candidate?      @relation(fields: [candidateId], references: [id], onDelete: SetNull)
+  originalFileName String
+  storedFileName   String
+  filePath         String
+  fileType         String
+  fileSize         Int
+  parsingStatus    String          @default("PENDING") // ParsingStatus
+  rawText          String?
+  analysis         ResumeAnalysis?
+  createdAt        DateTime        @default(now())
+}
+
+model ResumeAnalysis {
+  id                  String   @id @default(uuid())
+  resumeId            String   @unique
+  resume              Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  overallScore        Int      @default(0)
+  atsScore            Int      @default(0)
+  skillCoverage       Int      @default(0)
+  experienceMatch     String?
+  jdMatch             String?
+  aiConfidence        String?  @default("95%")
+  aiRecommendation    String?  @default("REVIEW REQUIRED")
+  matchedSkills       String   // JSON encoded string
+  missingSkills       String   // JSON encoded string
+  partialSkills       String   // JSON encoded string
+  strengths           String   // JSON encoded string
+  gapRoadmap          String   // JSON encoded string
+  scoreExplanation    String?
+  courseRecommendation String?
+  createdAt           DateTime @default(now())
+}
+
+model CandidateReview {
+  id           String    @id @default(uuid())
+  candidateId  String
+  candidate    Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  authorId     String?
+  author       User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  reviewerName String
+  reviewDate   String
+  reviewText   String
+  rating       Float     @default(5.0)
+  reviewClass  String    @default("green-review")
+  createdAt    DateTime  @default(now())
+}
+
+model AiConversation {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  messages  String   // JSON encoded string
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String
+  resource  String
+  details   String?
+  ipAddress String?
+  createdAt DateTime @default(now())
+}

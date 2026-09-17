@@ -1,109 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
+import { candidatesApi } from '../api/candidates';
 import '../css/candidates.css';
 
 export default function Candidates() {
-  const navigate = useNavigate();
-
-  const [candidatesList, setCandidatesList] = useState([
-    {
-      id: 1,
-      name: 'Sarah Jenkins',
-      email: 'sarah.jenkins@email.com',
-      avatar: 'SJ',
-      avatarColor: 'purple',
-      role: 'Frontend Engineer',
-      views: '32',
-      viewsThisWeek: '5 this week',
-      reviews: '18',
-      rating: '4.6',
-      stars: '★ ★ ★ ★',
-      starEmpty: '★',
-      reviewerName: 'John Doe',
-      reviewDate: 'May 24, 2025',
-      reviewText: 'Excellent problem solving skills and communication.',
-      reviewClass: 'green-review',
-      status: 'Active',
-    },
-    {
-      id: 2,
-      name: 'Rohan Mehta',
-      email: 'rohan.mehta@email.com',
-      avatar: 'RM',
-      avatarColor: 'blue',
-      role: 'Full Stack Developer',
-      views: '28',
-      viewsThisWeek: '4 this week',
-      reviews: '15',
-      rating: '4.2',
-      stars: '★ ★ ★ ★',
-      starEmpty: '★',
-      reviewerName: 'Emily Johnson',
-      reviewDate: 'May 23, 2025',
-      reviewText: 'Good technical knowledge, can improve in system design.',
-      reviewClass: 'blue-review',
-      status: 'Active',
-    },
-    {
-      id: 3,
-      name: 'Ananya Patel',
-      email: 'ananya.patel@email.com',
-      avatar: 'AP',
-      avatarColor: 'green',
-      role: 'Backend Developer',
-      views: '25',
-      viewsThisWeek: '3 this week',
-      reviews: '12',
-      rating: '4.0',
-      stars: '★ ★ ★ ★',
-      starEmpty: '★',
-      reviewerName: 'Michael Smith',
-      reviewDate: 'May 22, 2025',
-      reviewText: 'Strong backend concepts and coding skills.',
-      reviewClass: 'yellow-review',
-      status: 'Active',
-    },
-    {
-      id: 4,
-      name: 'Vikram Kumar',
-      email: 'vikram.kumar@email.com',
-      avatar: 'VK',
-      avatarColor: 'pink',
-      role: 'Frontend Engineer',
-      views: '20',
-      viewsThisWeek: '2 this week',
-      reviews: '9',
-      rating: '3.8',
-      stars: '★ ★ ★',
-      starEmpty: '★ ★',
-      reviewerName: 'John Doe',
-      reviewDate: 'May 21, 2025',
-      reviewText: 'Needs improvement in JavaScript frameworks.',
-      reviewClass: 'red-review',
-      status: 'Active',
-    },
-    {
-      id: 5,
-      name: 'Neha Tiwari',
-      email: 'neha.tiwari@email.com',
-      avatar: 'NT',
-      avatarColor: 'purple',
-      role: 'UI/UX Designer',
-      views: '18',
-      viewsThisWeek: '2 this week',
-      reviews: '8',
-      rating: '4.4',
-      stars: '★ ★ ★ ★',
-      starEmpty: '★',
-      reviewerName: 'Emily Johnson',
-      reviewDate: 'May 21, 2025',
-      reviewText: 'Creative designs and good understanding of UI/UX.',
-      reviewClass: 'green-review',
-      status: 'Active',
-    },
-  ]);
+  const [candidatesList, setCandidatesList] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [roleFilter, setRoleFilter] = useState('All Roles');
   const [statusFilter, setStatusFilter] = useState('All Status');
@@ -119,6 +22,24 @@ export default function Candidates() {
       setShowToast(false);
     }, 2500);
   };
+
+  const loadCandidates = async () => {
+    setLoading(true);
+    try {
+      const res = await candidatesApi.getCandidates();
+      if (res?.data) {
+        setCandidatesList(res.data);
+      }
+    } catch (err) {
+      triggerToast(err.message || 'Failed to load candidates');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCandidates();
+  }, []);
 
   const filteredCandidates = candidatesList.filter((c) => {
     const matchesRole =
@@ -172,13 +93,18 @@ export default function Candidates() {
     return () => document.removeEventListener('click', handleDocumentClick);
   }, []);
 
-  const handleDeleteCandidate = (candidate) => {
+  const handleDeleteCandidate = async (candidate) => {
     const confirmDelete = window.confirm(
       `Remove ${candidate.name} from candidates?`
     );
     if (confirmDelete) {
-      setCandidatesList((prev) => prev.filter((c) => c.id !== candidate.id));
-      triggerToast(`${candidate.name} removed successfully`);
+      try {
+        await candidatesApi.deleteCandidate(candidate.id);
+        setCandidatesList((prev) => prev.filter((c) => c.id !== candidate.id));
+        triggerToast(`${candidate.name} removed successfully`);
+      } catch (err) {
+        triggerToast(err.message || 'Failed to remove candidate');
+      }
     }
   };
 

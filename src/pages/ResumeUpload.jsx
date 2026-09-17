@@ -1,6 +1,8 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
+import { resumesApi } from '../api/resumes';
+import { candidatesApi } from '../api/candidates';
 import '../css/resumeupload.css';
 
 const CANDIDATE_PRESETS = [
@@ -486,7 +488,21 @@ export default function ResumeUpload() {
     triggerToast('Resume uploaded: ' + file.name);
   };
 
-  const handleStartAnalysis = (e) => {
+  useEffect(() => {
+    const loadHistory = async () => {
+      try {
+        const res = await resumesApi.getHistory();
+        if (res?.data?.length) {
+          setHistoryItems(res.data);
+        }
+      } catch {
+        // keep initial history
+      }
+    };
+    loadHistory();
+  }, []);
+
+  const handleStartAnalysis = async (e) => {
     if (e) e.stopPropagation();
     if (!uploadedFile) return;
 
@@ -501,48 +517,11 @@ export default function ResumeUpload() {
       )
     );
 
-    // Simulate AI parsing and evaluation delay
-    setTimeout(() => {
-      // Find matching preset candidate or generate parsed profile from file name
-      const lowerName = uploadedFile.name.toLowerCase();
-      let matchedCandidate = CANDIDATE_PRESETS.find(
-        (c) =>
-          lowerName.includes(c.name.toLowerCase().split(' ')[0]) ||
-          lowerName.includes(c.name.toLowerCase().split(' ')[1]) ||
-          lowerName === c.fileName.toLowerCase()
-      );
+    try {
+      const res = await resumesApi.uploadResume(uploadedFile.rawFile);
+      const parsedData = res.data;
 
-      if (!matchedCandidate) {
-        // Generate parsed candidate data dynamically from custom file name
-        const cleanName = uploadedFile.name
-          .replace(/\.[^/.]+$/, '')
-          .replace(/[_-]/g, ' ')
-          .replace(/\b\w/g, (c) => c.toUpperCase());
-
-        matchedCandidate = {
-          id: Date.now(),
-          name: cleanName || 'Uploaded Candidate',
-          matchRole: 'Candidate Match: Evaluated Profile',
-          avatar: cleanName.slice(0, 2).toUpperCase() || 'CV',
-          matchScore: 91,
-          matchTitle: 'Strong Technical Match',
-          matchDesc: `${cleanName} matches 10 out of 12 required core skills.`,
-          skills: [
-            { name: 'Core Skillset Identified', purple: false },
-            { name: 'Domain Experience', purple: false },
-            { name: 'Technical Competencies', purple: true },
-            { name: 'Problem Solving', purple: true },
-            { name: 'Communication', purple: true },
-          ],
-          gaps: ['Advanced Domain Frameworks'],
-          courseTitle: 'Actionable Course Pathway',
-          courseDesc:
-            'Recommended Industry Specialization Pathway on Coursera (20h estimate).',
-          fileName: uploadedFile.name,
-        };
-      }
-
-      setSelectedCandidate(matchedCandidate);
+      setSelectedCandidate(parsedData);
       setAnalysisStatus('analyzed');
 
       // Update history status to Analyzed
@@ -554,8 +533,11 @@ export default function ResumeUpload() {
         )
       );
 
-      triggerToast(`Analysis complete: ${matchedCandidate.name}`);
-    }, 1300);
+      triggerToast(`Analysis complete: ${parsedData.name}`);
+    } catch (err) {
+      setAnalysisStatus('uploaded');
+      triggerToast(`Analysis error: ${err.message || 'Failed to parse resume'}`);
+    }
   };
 
   const handleFileInputChange = (e) => {
@@ -589,13 +571,27 @@ export default function ResumeUpload() {
     }
   };
 
-  const handleShortlist = () => {
+  const handleShortlist = async () => {
     setShortlisted(true);
+    if (activeCandidate?.id) {
+      try {
+        await candidatesApi.updateStatus(activeCandidate.id, 'SHORTLISTED');
+      } catch {
+        // ignore
+      }
+    }
     triggerToast('Candidate shortlisted successfully.');
   };
 
-  const handlePass = () => {
+  const handlePass = async () => {
     setPassed(true);
+    if (activeCandidate?.id) {
+      try {
+        await candidatesApi.updateStatus(activeCandidate.id, 'REJECTED');
+      } catch {
+        // ignore
+      }
+    }
     triggerToast('Candidate marked as passed.');
   };
 

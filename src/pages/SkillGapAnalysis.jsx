@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
+import { analyticsApi } from '../api/analytics';
 import '../css/skillgapanalysis.css';
 
 export default function SkillGapAnalysis() {
@@ -8,74 +9,8 @@ export default function SkillGapAnalysis() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
-
-  const initialGaps = [
-    {
-      id: 'aws',
-      skill: 'AWS',
-      category: 'tools',
-      categoryLabel: 'Tools & Frameworks',
-      required: '80%',
-      candidateAvg: '35%',
-      severityClass: 'high',
-      severityLabel: 'High gap',
-      severityPercent: '45%',
-      iconClass: 'table-icon cloud',
-      iconFa: 'fa-brands fa-aws',
-    },
-    {
-      id: 'docker',
-      skill: 'Docker',
-      category: 'tools',
-      categoryLabel: 'Tools & Frameworks',
-      required: '70%',
-      candidateAvg: '30%',
-      severityClass: 'high',
-      severityLabel: 'High gap',
-      severityPercent: '40%',
-      iconClass: 'table-icon docker',
-      iconFa: 'fa-brands fa-docker',
-    },
-    {
-      id: 'kubernetes',
-      skill: 'Kubernetes',
-      category: 'technical',
-      categoryLabel: 'Technical Skills',
-      required: '70%',
-      candidateAvg: '25%',
-      severityClass: 'high',
-      severityLabel: 'High gap',
-      severityPercent: '45%',
-      iconClass: 'table-icon kubernetes',
-      iconFa: 'fa-solid fa-cubes',
-    },
-    {
-      id: 'system-design',
-      skill: 'System Design',
-      category: 'technical',
-      categoryLabel: 'Technical Skills',
-      required: '60%',
-      candidateAvg: '20%',
-      severityClass: 'medium',
-      severityLabel: 'Medium gap',
-      severityPercent: '40%',
-      iconClass: 'table-icon design',
-      iconFa: 'fa-solid fa-diagram-project',
-    },
-    {
-      id: 'industry-knowledge',
-      skill: 'Industry Knowledge',
-      category: 'domain',
-      categoryLabel: 'Domain Knowledge',
-      required: '65%',
-      candidateAvg: '42%',
-      severityClass: 'medium',
-      severityLabel: 'Medium gap',
-      severityPercent: '23%',
-      iconClass: 'table-icon domain',
-      iconFa: 'fa-solid fa-briefcase',
-    },
-  ];
+  const [gapsList, setGapsList] = useState([]);
+  const [readinessScore, setReadinessScore] = useState(72);
 
   const triggerToast = (msg) => {
     setToastMessage(msg);
@@ -85,7 +20,23 @@ export default function SkillGapAnalysis() {
     }, 2500);
   };
 
-  const filteredGaps = initialGaps.filter((item) => {
+  const loadGaps = async () => {
+    try {
+      const res = await analyticsApi.getSkillGaps({ search: searchTerm, category: categoryFilter });
+      if (res?.data) {
+        if (res.data.gaps) setGapsList(res.data.gaps);
+        if (res.data.readinessScore) setReadinessScore(res.data.readinessScore);
+      }
+    } catch {
+      // keep fallback
+    }
+  };
+
+  useEffect(() => {
+    loadGaps();
+  }, [categoryFilter]);
+
+  const filteredGaps = gapsList.filter((item) => {
     const matchesSearch =
       item.skill.toLowerCase().includes(searchTerm.toLowerCase().trim()) ||
       item.categoryLabel.toLowerCase().includes(searchTerm.toLowerCase().trim());
@@ -147,7 +98,7 @@ export default function SkillGapAnalysis() {
             <div className="section-label">Overall workforce readiness</div>
             <div className="readiness-main">
               <div className="score-ring">
-                <strong>72</strong>
+                <strong>{readinessScore}</strong>
                 <span>/100</span>
               </div>
               <div>

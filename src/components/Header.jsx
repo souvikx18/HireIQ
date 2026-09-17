@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import "../css/header-common.css";
 
 export default function Header({
@@ -19,102 +19,51 @@ export default function Header({
   className = "",
 }) {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const { user, logout } = useAuth();
 
   const [theme, setTheme] = useState(
-    () => localStorage.getItem("theme") || "light",
+    () => localStorage.getItem("theme") || "light"
   );
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
 
-  const [loginOpen, setLoginOpen] = useState(
-    () => searchParams.get('openLogin') === '1'
-  );
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-
-  const [profileName, setProfileName] = useState('HR Manager');
-  const [profileRole, setProfileRole] = useState('Administrator');
-  const [avatarText, setAvatarText] = useState('HR');
+  const profileName = user ? `${user.firstName} ${user.lastName}`.trim() : "HR Manager";
+  const profileRole = user ? (user.role === 'ADMIN' ? 'Administrator' : user.role === 'HR_MANAGER' ? 'HR Manager' : user.role) : "Administrator";
+  const avatarText = user
+    ? `${user.firstName?.[0] || 'H'}${user.lastName?.[0] || 'R'}`.toUpperCase()
+    : "HR";
 
   useEffect(() => {
-    const isDark = theme === 'dark';
-    document.body.classList.toggle('dark-mode', isDark);
-    localStorage.setItem('theme', theme);
+    const isDark = theme === "dark";
+    document.body.classList.toggle("dark-mode", isDark);
+    localStorage.setItem("theme", theme);
   }, [theme]);
 
   useEffect(() => {
-    const loadProfile = () => {
-      try {
-        const saved = JSON.parse(localStorage.getItem('profile') || 'null');
-        if (saved && saved.name) {
-          setProfileName(saved.name);
-          const initials = saved.name
-            .split(' ')
-            .map((n) => n[0])
-            .join('')
-            .toUpperCase()
-            .slice(0, 2);
-          setAvatarText(initials || 'HR');
-        }
-        if (saved && saved.role) {
-          setProfileRole(saved.role);
-        }
-      } catch {
-        // ignore
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
       }
     };
-    loadProfile();
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
   }, []);
-
-  useEffect(() => {
-    if (loginOpen) {
-      document.body.classList.add('login-open');
-      document.body.classList.remove('dark-mode');
-    } else {
-      document.body.classList.remove('login-open');
-      const savedTheme = localStorage.getItem('theme') || 'light';
-      if (savedTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-      }
-    }
-  }, [loginOpen]);
-
-  useEffect(() => {
-    if (searchParams.get('openLogin') === '1') {
-      setLoginOpen(true);
-    }
-  }, [searchParams]);
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   };
 
-  const handleOpenLogin = (e) => {
+  const handleProfileClick = (e) => {
     if (onProfileClick) {
       onProfileClick(e);
     } else {
-      navigate('/setting');
+      setMenuOpen(!menuOpen);
     }
   };
 
-  const handleCloseLogin = () => {
-    setLoginOpen(false);
-    document.body.classList.remove("login-open");
-  };
-
-  const handleLoginSubmit = (e) => {
-    e.preventDefault();
-    handleCloseLogin();
-  };
-
-  const handleCreateAccountClick = (e) => {
-    e.preventDefault();
-    document.body.classList.add("page-leaving");
-    setTimeout(() => {
-      document.body.classList.remove("page-leaving");
-      handleCloseLogin();
-      navigate("/signup");
-    }, 350);
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
   };
 
   const handleNotification = (e) => {
@@ -197,120 +146,92 @@ export default function Header({
             </button>
           )}
 
-          {/* Profile / Login Area */}
+          {/* Profile / Menu Area */}
           {showProfile && (
-            <button
-              className="profile"
-              id="profileBtn"
-              type="button"
-              aria-label="Open login"
-              onClick={handleOpenLogin}
-            >
-              <div className="avatar">{avatarText}</div>
+            <div style={{ position: "relative" }} ref={menuRef}>
+              <button
+                className="profile"
+                id="profileBtn"
+                type="button"
+                aria-label="Open profile menu"
+                onClick={handleProfileClick}
+              >
+                <div className="avatar">{avatarText}</div>
 
-              <div>
-                <strong>{profileName}</strong>
-                <small>{profileRole}</small>
-              </div>
+                <div>
+                  <strong>{profileName}</strong>
+                  <small>{profileRole}</small>
+                </div>
 
-              <i className="fa-solid fa-chevron-down"></i>
-            </button>
+                <i className="fa-solid fa-chevron-down"></i>
+              </button>
+
+              {menuOpen && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "calc(100% + 8px)",
+                    right: 0,
+                    width: "190px",
+                    background: "#0d1b2e",
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    borderRadius: "10px",
+                    boxShadow: "0 10px 30px rgba(0,0,0,0.5)",
+                    padding: "8px",
+                    zIndex: 9999,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "4px",
+                  }}
+                >
+                  <button
+                    type="button"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      padding: "10px 12px",
+                      border: "none",
+                      background: "transparent",
+                      color: "#e2e8f0",
+                      borderRadius: "6px",
+                      fontSize: "13px",
+                      cursor: "pointer",
+                      textAlign: "left",
+                    }}
+                    onClick={() => {
+                      setMenuOpen(false);
+                      navigate("/setting");
+                    }}
+                  >
+                    <i className="fa-solid fa-gear"></i> Account Settings
+                  </button>
+
+                  <button
+                    type="button"
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      padding: "10px 12px",
+                      border: "none",
+                      background: "transparent",
+                      color: "#f87171",
+                      borderRadius: "6px",
+                      fontSize: "13px",
+                      cursor: "pointer",
+                      textAlign: "left",
+                    }}
+                    onClick={handleLogout}
+                  >
+                    <i className="fa-solid fa-arrow-right-from-bracket"></i> Log Out
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </header>
-
-      {/* Built-in Login Overlay mounted to document.body */}
-      {typeof document !== "undefined" &&
-        createPortal(
-          <div
-            className={`login-overlay ${loginOpen ? "show" : ""}`}
-            id="loginOverlay"
-            aria-hidden={!loginOpen}
-            onClick={(e) => {
-              if (e.target.id === "loginOverlay") handleCloseLogin();
-            }}
-          >
-            <section className="login-visual">
-              <div className="login-orbit" aria-hidden="true">
-                <span className="orbit orbit-one"></span>
-                <span className="orbit orbit-two"></span>
-                <span className="orbit-line orbit-line-one"></span>
-                <span className="orbit-line orbit-line-two"></span>
-                <span className="orbit-core"></span>
-              </div>
-              <div className="orbit-label">HireIQ</div>
-              <div className="login-message">
-                <span className="login-kicker">HireIQ Talent Console</span>
-                <h2>Identify Gaps. Match Potential. Accelerate Growth.</h2>
-                <p>
-                  Leverage Enterprise LLM context parsing to align your
-                  engineers with next-gen project requirements.
-                </p>
-              </div>
-            </section>
-
-            <section className="login-panel" aria-label="Login form">
-              <button
-                className="login-close"
-                id="loginClose"
-                type="button"
-                aria-label="Close login"
-                onClick={handleCloseLogin}
-              >
-                <i className="fa-solid fa-xmark"></i>
-              </button>
-              <div className="login-form-wrap">
-                <h1>Welcome Back</h1>
-                <p className="login-subtitle">Login to your talent console</p>
-                <form id="loginForm" onSubmit={handleLoginSubmit}>
-                  <label htmlFor="loginEmail">Email</label>
-                  <input
-                    id="loginEmail"
-                    type="email"
-                    required
-                    value={loginEmail}
-                    onChange={(e) => setLoginEmail(e.target.value)}
-                  />
-                  <div className="password-label">
-                    <label htmlFor="loginPassword">Password</label>
-                    <a href="#">Forgot password?</a>
-                  </div>
-                  <div className="password-field">
-                    <input
-                      id="loginPassword"
-                      type={showPassword ? "text" : "password"}
-                      required
-                      value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)}
-                    />
-                    <button
-                      id="togglePassword"
-                      type="button"
-                      aria-label={
-                        showPassword ? "Hide password" : "Show password"
-                      }
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      <i
-                        className={`fa-regular fa-eye${showPassword ? "-slash" : ""}`}
-                      ></i>
-                    </button>
-                  </div>
-                  <button className="sign-in-btn" type="submit">
-                    Login
-                  </button>
-                </form>
-                <p className="create-account">
-                  New to TalentAI?{" "}
-                  <a href="signup.html" onClick={handleCreateAccountClick}>
-                    Create an account
-                  </a>
-                </p>
-              </div>
-            </section>
-          </div>,
-          document.body,
-        )}
     </>
   );
 }

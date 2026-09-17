@@ -1,130 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
+import { jobsApi } from '../api/jobs';
 import '../css/jobrole.css';
 
 export default function JobRole() {
-  const [roles, setRoles] = useState([
-    {
-      id: 'FS-001',
-      name: 'Full Stack Developer',
-      code: 'FS-001',
-      department: 'Engineering',
-      departmentVal: 'engineering',
-      experience: '2 - 5 years',
-      experienceVal: '2-5',
-      skills: ['JavaScript', 'React', 'Node.js'],
-      extraSkillsCount: 3,
-      candidates: '36',
-      status: 'Active',
-      statusVal: 'active',
-      createdDate: '25 May, 2024',
-      iconClass: 'blue-role',
-      iconFa: 'fa-solid fa-code',
-    },
-    {
-      id: 'DA-002',
-      name: 'Data Analyst',
-      code: 'DA-002',
-      department: 'Data Science',
-      departmentVal: 'data-science',
-      experience: '1 - 3 years',
-      experienceVal: '1-3',
-      skills: ['SQL', 'Excel', 'Python'],
-      extraSkillsCount: 2,
-      candidates: '28',
-      status: 'Active',
-      statusVal: 'active',
-      createdDate: '22 May, 2024',
-      iconClass: 'green-role',
-      iconFa: 'fa-solid fa-chart-column',
-    },
-    {
-      id: 'UX-003',
-      name: 'UI/UX Designer',
-      code: 'UX-003',
-      department: 'Design',
-      departmentVal: 'design',
-      experience: '2 - 5 years',
-      experienceVal: '2-5',
-      skills: ['Figma', 'Wireframing', 'Prototyping'],
-      extraSkillsCount: 2,
-      candidates: '19',
-      status: 'Active',
-      statusVal: 'active',
-      createdDate: '20 May, 2024',
-      iconClass: 'orange-role',
-      iconFa: 'fa-solid fa-mobile-screen-button',
-    },
-    {
-      id: 'DO-004',
-      name: 'DevOps Engineer',
-      code: 'DO-004',
-      department: 'Engineering',
-      departmentVal: 'engineering',
-      experience: '3 - 6 years',
-      experienceVal: '3-6',
-      skills: ['AWS', 'Docker', 'Kubernetes'],
-      extraSkillsCount: 3,
-      candidates: '14',
-      status: 'Active',
-      statusVal: 'active',
-      createdDate: '18 May, 2024',
-      iconClass: 'purple-role',
-      iconFa: 'fa-solid fa-gear',
-    },
-    {
-      id: 'CS-005',
-      name: 'Cyber Security Analyst',
-      code: 'CS-005',
-      department: 'Security',
-      departmentVal: 'security',
-      experience: '2 - 5 years',
-      experienceVal: '2-5',
-      skills: ['Network Security', 'SIEM', 'Firewalls'],
-      extraSkillsCount: 2,
-      candidates: '8',
-      status: 'Active',
-      statusVal: 'active',
-      createdDate: '15 May, 2024',
-      iconClass: 'red-role',
-      iconFa: 'fa-solid fa-shield-halved',
-    },
-    {
-      id: 'DM-006',
-      name: 'Digital Marketing Specialist',
-      code: 'DM-006',
-      department: 'Marketing',
-      departmentVal: 'marketing',
-      experience: '1 - 3 years',
-      experienceVal: '1-3',
-      skills: ['SEO', 'Google Ads', 'Content Strategy'],
-      extraSkillsCount: 2,
-      candidates: '22',
-      status: 'Active',
-      statusVal: 'active',
-      createdDate: '12 May, 2024',
-      iconClass: 'orange-role',
-      iconFa: 'fa-solid fa-bullhorn',
-    },
-    {
-      id: 'PM-007',
-      name: 'Product Manager',
-      code: 'PM-007',
-      department: 'Product',
-      departmentVal: 'product',
-      experience: '4 - 7 years',
-      experienceVal: '4-7',
-      skills: ['Product Strategy', 'Agile', 'JIRA'],
-      extraSkillsCount: 2,
-      candidates: '12',
-      status: 'Active',
-      statusVal: 'active',
-      createdDate: '10 May, 2024',
-      iconClass: 'cyan-role',
-      iconFa: 'fa-solid fa-briefcase',
-    },
-  ]);
+  const [roles, setRoles] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('all');
@@ -149,6 +31,24 @@ export default function JobRole() {
       setShowToast(false);
     }, 2500);
   };
+
+  const loadRoles = async () => {
+    setLoading(true);
+    try {
+      const res = await jobsApi.getJobs();
+      if (res?.data) {
+        setRoles(res.data);
+      }
+    } catch (err) {
+      triggerToast(err.message || 'Failed to load roles');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadRoles();
+  }, []);
 
   const handleResetFilters = () => {
     setSearch('');
@@ -184,84 +84,48 @@ export default function JobRole() {
     return 'fa-solid fa-code';
   };
 
-  const createRoleCode = (name) => {
-    const words = name
-      .replace(/[^a-zA-Z0-9 ]/g, '')
-      .split(' ')
-      .filter(Boolean);
-    let prefix = '';
-    if (words.length >= 2) {
-      prefix = words
-        .slice(0, 2)
-        .map((w) => w.charAt(0))
-        .join('')
-        .toUpperCase();
-    } else {
-      prefix = words[0]?.substring(0, 2).toUpperCase() || 'JR';
-    }
-    const number = String(roles.length + 1).padStart(3, '0');
-    return `${prefix}-${number}`;
-  };
-
-  const handleCreateRoleSubmit = (e) => {
+  const handleCreateRoleSubmit = async (e) => {
     e.preventDefault();
     if (!newRoleName.trim() || !newDepartment) {
       triggerToast('Please enter the required information');
       return;
     }
 
-    const roleCode = createRoleCode(newRoleName);
-    const departmentValue = newDepartment.toLowerCase().replace(/\s+/g, '-');
-    const experienceValue = newExperience.toLowerCase().replace(/\s+/g, '');
-    const skillsArr = newSkills
-      ? newSkills
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean)
-      : [];
+    try {
+      await jobsApi.createJob({
+        title: newRoleName.trim(),
+        department: newDepartment,
+        experienceLevel: newExperience || '2 - 5 years',
+        openPositions: parseInt(newOpenPositions, 10) || 1,
+        skills: newSkills,
+      });
 
-    const today = new Date();
-    const createdDate = today.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
-
-    const newRoleObj = {
-      id: roleCode,
-      name: newRoleName.trim(),
-      code: roleCode,
-      department: newDepartment,
-      departmentVal: departmentValue,
-      experience: newExperience,
-      experienceVal: experienceValue,
-      skills: skillsArr.slice(0, 3),
-      extraSkillsCount: Math.max(0, skillsArr.length - 3),
-      candidates: '0',
-      status: 'Active',
-      statusVal: 'active',
-      createdDate,
-      iconClass: getRoleIconClass(newRoleName),
-      iconFa: getRoleIcon(newRoleName),
-    };
-
-    setRoles([newRoleObj, ...roles]);
-    setModalOpen(false);
-    setNewRoleName('');
-    setNewDepartment('');
-    setNewExperience('');
-    setNewSkills('');
-    setNewOpenPositions('1');
-    triggerToast(`${newRoleName} created successfully`);
+      setModalOpen(false);
+      setNewRoleName('');
+      setNewDepartment('');
+      setNewExperience('');
+      setNewSkills('');
+      setNewOpenPositions('1');
+      triggerToast(`${newRoleName} created successfully`);
+      loadRoles();
+    } catch (err) {
+      triggerToast(err.message || 'Failed to create role');
+    }
   };
 
-  const handleDeleteRole = (role) => {
+  const handleDeleteRole = async (role) => {
     const confirmed = window.confirm(
       `Are you sure you want to delete "${role.name}"?`
     );
     if (!confirmed) return;
-    setRoles(roles.filter((r) => r.id !== role.id));
-    triggerToast(`${role.name} deleted successfully`);
+
+    try {
+      await jobsApi.deleteJob(role.id);
+      setRoles(roles.filter((r) => r.id !== role.id));
+      triggerToast(`${role.name} deleted successfully`);
+    } catch (err) {
+      triggerToast(err.message || 'Failed to delete role');
+    }
   };
 
   const filteredRoles = roles.filter((r) => {

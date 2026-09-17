@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
+import { analyticsApi } from '../api/analytics';
+import { resumesApi } from '../api/resumes';
 import '../css/style.css';
 
 export default function Index() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
 
   const [periodOpen, setPeriodOpen] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('This Month');
@@ -14,13 +15,52 @@ export default function Index() {
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [allSkillsModalOpen, setAllSkillsModalOpen] = useState(false);
   const [selectedFileName, setSelectedFileName] = useState('Choose Resume');
+  const [selectedFileObj, setSelectedFileObj] = useState(null);
   const [analyzing, setAnalyzing] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
+
+  // Live analytics state
+  const [stats, setStats] = useState({
+    totalCandidates: 5,
+    resumesUploaded: 5,
+    shortlisted: 2,
+    skillGapsFound: 5,
+    shortlistRate: '40%',
+    interviewRate: '18.2%',
+    avgApplicationsPerDay: '8.5',
+  });
+  const [topCandidate, setTopCandidate] = useState({
+    name: 'Sarah Jenkins',
+    role: 'Frontend Engineer',
+    location: 'Bangalore, India',
+    experience: '5 Years Exp.',
+    available: 'Available',
+    matchScore: 92,
+    skills: ['React', 'JavaScript', 'SQL', 'Docker'],
+  });
+  const [recentCandidates, setRecentCandidates] = useState([]);
 
   const periodPickerRef = useRef(null);
   const periodDateRef = useRef(null);
   const modalFileRef = useRef(null);
   const headerResumeInputRef = useRef(null);
+
+  const fetchOverview = async () => {
+    try {
+      const res = await analyticsApi.getOverview();
+      if (res?.data) {
+        if (res.data.stats) setStats(res.data.stats);
+        if (res.data.topCandidate) setTopCandidate(res.data.topCandidate);
+        if (res.data.recentCandidates?.length) setRecentCandidates(res.data.recentCandidates);
+      }
+    } catch {
+      // Keep initial fallback
+    }
+  };
+
+  useEffect(() => {
+    fetchOverview();
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -66,33 +106,43 @@ export default function Index() {
 
   const handleModalFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
-      setSelectedFileName(e.target.files[0].name);
+      const file = e.target.files[0];
+      setSelectedFileName(file.name);
+      setSelectedFileObj(file);
     }
   };
 
-  const handleAnalyzeResume = () => {
-    if (!modalFileRef.current || !modalFileRef.current.files.length) {
-      window.alert('Please select a resume first.');
+  const handleAnalyzeResume = async () => {
+    if (!selectedFileObj) {
+      window.alert('Please select a resume file first.');
       return;
     }
 
     setAnalyzing(true);
-    setTimeout(() => {
+    try {
+      const res = await resumesApi.uploadResume(selectedFileObj);
       setAnalyzing(false);
       setAnalysisComplete(true);
 
       setTimeout(() => {
+        const candidateData = res.data;
         window.alert(
-          'Resume analyzed successfully!\n\n' +
-            'Match Score: 92%\n' +
-            'Skill Gaps Found: 8\n' +
-            'Recommendation: Shortlist Candidate'
+          `Resume analyzed successfully!\n\n` +
+            `Candidate: ${candidateData.name}\n` +
+            `Match Score: ${candidateData.matchScore}%\n` +
+            `ATS Score: ${candidateData.atsScore} / 100\n` +
+            `Recommendation: ${candidateData.aiRecommendation}`
         );
         setUploadModalOpen(false);
         setAnalysisComplete(false);
         setSelectedFileName('Choose Resume');
-      }, 700);
-    }, 1800);
+        setSelectedFileObj(null);
+        fetchOverview();
+      }, 500);
+    } catch (err) {
+      setAnalyzing(false);
+      window.alert(`Upload error: ${err.message || 'Failed to analyze resume'}`);
+    }
   };
 
   const handleHeaderResumeChange = (e) => {
@@ -443,7 +493,7 @@ export default function Index() {
             </div>
             <div>
               <p>Total Candidates</p>
-              <h2>0</h2>
+              <h2>{stats.totalCandidates}</h2>
               <span className="positive">
                 ↑ 12% <small>this month</small>
               </span>
@@ -456,7 +506,7 @@ export default function Index() {
             </div>
             <div>
               <p>Resumes Uploaded</p>
-              <h2>0</h2>
+              <h2>{stats.resumesUploaded}</h2>
               <span className="positive">
                 ↑ 8% <small>this month</small>
               </span>
@@ -469,7 +519,7 @@ export default function Index() {
             </div>
             <div>
               <p>Shortlisted</p>
-              <h2>0</h2>
+              <h2>{stats.shortlisted}</h2>
               <span className="positive">
                 ↑ 15% <small>this month</small>
               </span>
@@ -482,7 +532,7 @@ export default function Index() {
             </div>
             <div>
               <p>Skill Gaps Found</p>
-              <h2>0</h2>
+              <h2>{stats.skillGapsFound}</h2>
               <span className="negative">
                 ↑ 10% <small>this month</small>
               </span>
@@ -502,31 +552,29 @@ export default function Index() {
             <div className="candidate-content">
               <div className="score-circle">
                 <div>
-                  <strong>92%</strong>
+                  <strong>{topCandidate.matchScore}%</strong>
                   <span>Match Score</span>
                 </div>
               </div>
 
               <div className="candidate-info">
-                <h2>Arjun Mehta</h2>
-                <p>Full Stack Developer</p>
+                <h2>{topCandidate.name}</h2>
+                <p>{topCandidate.role}</p>
                 <span className="location">
                   <i className="fa-solid fa-location-dot"></i>
-                  Bangalore, India
+                  {topCandidate.location}
                 </span>
 
                 <div className="badges">
-                  <span>5 Years Exp.</span>
-                  <span className="available">Available</span>
+                  <span>{topCandidate.experience}</span>
+                  <span className="available">{topCandidate.available}</span>
                 </div>
 
                 <h4>Top Skills</h4>
                 <div className="skills">
-                  <span>React</span>
-                  <span>Node.js</span>
-                  <span>JavaScript</span>
-                  <span>MongoDB</span>
-                  <span>AWS</span>
+                  {topCandidate.skills.map((sk, idx) => (
+                    <span key={idx}>{sk}</span>
+                  ))}
                 </div>
               </div>
             </div>

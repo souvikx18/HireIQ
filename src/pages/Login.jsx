@@ -6,9 +6,11 @@ import '../css/signup.css';
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [loginEmail, setLoginEmail] = useState('');
-  const [loginPassword, setLoginPassword] = useState('');
+  const [loginEmail, setLoginEmail] = useState('admin@hireiq.com');
+  const [loginPassword, setLoginPassword] = useState('Admin@123456');
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Disconnect from Dashboard dark/light mode: Always use fixed appearance
   useEffect(() => {
@@ -32,10 +34,27 @@ export default function Login() {
     }, 350);
   };
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    login();
-    handleNavWithTransition('/dashboard')();
+    setErrorMessage('');
+    setIsSubmitting(true);
+
+    try {
+      await login({
+        email: loginEmail,
+        password: loginPassword,
+      });
+
+      document.body.classList.add('page-leaving');
+      setTimeout(() => {
+        document.body.classList.remove('page-leaving');
+        navigate('/dashboard');
+      }, 350);
+    } catch (err) {
+      setErrorMessage(err.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -63,6 +82,23 @@ export default function Login() {
         <form className="signup-form" id="loginForm" onSubmit={handleLoginSubmit}>
           <h2>Welcome Back</h2>
           <p className="login-subtitle">Login with email</p>
+
+          {errorMessage && (
+            <div
+              style={{
+                background: 'rgba(239, 68, 68, 0.15)',
+                border: '1px solid #ef4444',
+                color: '#f87171',
+                padding: '10px 14px',
+                borderRadius: '8px',
+                fontSize: '13px',
+                marginBottom: '15px',
+              }}
+            >
+              <i className="fa-solid fa-circle-exclamation" style={{ marginRight: '6px' }}></i>
+              {errorMessage}
+            </div>
+          )}
 
           <div className="signup-field">
             <input
@@ -112,8 +148,15 @@ export default function Login() {
             </a>
           </div>
 
-          <button className="create-button" type="submit">
-            Login
+          <button className="create-button" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px' }}></i>
+                Logging in...
+              </>
+            ) : (
+              'Login'
+            )}
           </button>
 
           <p className="existing-account">

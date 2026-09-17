@@ -1,0 +1,45 @@
+name: HireIQ CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  lint-and-test:
+    name: Lint, Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Root Dependencies
+        run: npm ci
+
+      - name: Lint Frontend & Backend
+        run: npm run lint
+
+      - name: Build Frontend
+        run: npm run build
+
+      - name: Install Server Dependencies
+        run: cd server && npm ci
+
+      - name: Initialize Test Database & Generate Prisma Client
+        run: |
+          cd server
+          npx prisma db push
+          node prisma/seed.js
+
+      - name: Run Backend Tests
+        run: |
+          cd server
+          npm test

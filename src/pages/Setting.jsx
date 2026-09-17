@@ -2,15 +2,24 @@ import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import '../css/setting.css';
+import { useAuth } from '../context/AuthContext.jsx';
+import { authApi } from '../api/auth.js';
 
 export default function Setting() {
+  const { user, updateUser } = useAuth();
+
   const [theme, setTheme] = useState(
     () => localStorage.getItem('theme') || 'light'
   );
-  const [fullName, setFullName] = useState('HR Manager');
-  const [email, setEmail] = useState('hrmanager@hireiq.com');
-  const [role, setRole] = useState('Administrator');
-  const [photo, setPhoto] = useState('');
+  const [fullName, setFullName] = useState(() => {
+    if (user?.firstName) {
+      return `${user.firstName} ${user.lastName || ''}`.trim();
+    }
+    return 'HR Manager';
+  });
+  const [email, setEmail] = useState(() => user?.email || 'hrmanager@hireiq.com');
+  const [role, setRole] = useState(() => user?.role || 'Administrator');
+  const [photo, setPhoto] = useState(() => user?.avatarUrl || '');
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -20,13 +29,22 @@ export default function Setting() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [hiringUpdates, setHiringUpdates] = useState(true);
-  const [candidateUpdates, setCandidateUpdates] = useState(true);
-  const [interviewReminders, setInterviewReminders] = useState(true);
+  const [emailNotifications, setEmailNotifications] = useState(
+    () => user?.emailNotifications ?? true
+  );
+  const [hiringUpdates, setHiringUpdates] = useState(
+    () => user?.hiringUpdates ?? true
+  );
+  const [candidateUpdates, setCandidateUpdates] = useState(
+    () => user?.candidateUpdates ?? true
+  );
+  const [interviewReminders, setInterviewReminders] = useState(
+    () => user?.interviewReminders ?? true
+  );
 
   const [toastMessage, setToastMessage] = useState('Changes saved successfully.');
   const [showToast, setShowToast] = useState(false);
+  const [saving, setSaving] = useState(false);
   const photoInputRef = useRef(null);
 
   useEffect(() => {
@@ -36,33 +54,17 @@ export default function Setting() {
   }, [theme]);
 
   useEffect(() => {
-    const savedProfile = JSON.parse(localStorage.getItem('profile') || 'null');
-    const savedNotifications = JSON.parse(
-      localStorage.getItem('notifications') || 'null'
-    );
-
-    if (savedProfile) {
-      if (savedProfile.name) setFullName(savedProfile.name);
-      if (savedProfile.email) setEmail(savedProfile.email);
-      if (savedProfile.role) setRole(savedProfile.role);
-      if (savedProfile.photo) setPhoto(savedProfile.photo);
+    if (user) {
+      setFullName(`${user.firstName || ''} ${user.lastName || ''}`.trim() || 'HR Manager');
+      setEmail(user.email || 'hrmanager@hireiq.com');
+      setRole(user.role || 'Administrator');
+      if (user.avatarUrl) setPhoto(user.avatarUrl);
+      if (typeof user.emailNotifications === 'boolean') setEmailNotifications(user.emailNotifications);
+      if (typeof user.hiringUpdates === 'boolean') setHiringUpdates(user.hiringUpdates);
+      if (typeof user.candidateUpdates === 'boolean') setCandidateUpdates(user.candidateUpdates);
+      if (typeof user.interviewReminders === 'boolean') setInterviewReminders(user.interviewReminders);
     }
-
-    if (savedNotifications) {
-      if (typeof savedNotifications.emailNotifications === 'boolean') {
-        setEmailNotifications(savedNotifications.emailNotifications);
-      }
-      if (typeof savedNotifications.hiringUpdates === 'boolean') {
-        setHiringUpdates(savedNotifications.hiringUpdates);
-      }
-      if (typeof savedNotifications.candidateUpdates === 'boolean') {
-        setCandidateUpdates(savedNotifications.candidateUpdates);
-      }
-      if (typeof savedNotifications.interviewReminders === 'boolean') {
-        setInterviewReminders(savedNotifications.interviewReminders);
-      }
-    }
-  }, []);
+  }, [user]);
 
   const triggerToast = (msg) => {
     setToastMessage(msg);
@@ -87,71 +89,69 @@ export default function Setting() {
     reader.readAsDataURL(file);
   };
 
-  const handleSave = () => {
-    if (newPassword || confirmPassword) {
-      if (newPassword.length < 8) {
-        triggerToast('New password must be at least 8 characters.');
-        return;
-      }
-      if (newPassword !== confirmPassword) {
-        triggerToast('New passwords do not match.');
-        return;
-      }
-    }
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      if (newPassword || confirmPassword) {
+        if (!currentPassword) {
+          triggerToast('Please enter your current password.');
+          setSaving(false);
+          return;
+        }
+        if (newPassword.length < 8) {
+          triggerToast('New password must be at least 8 characters.');
+          setSaving(false);
+          return;
+        }
+        if (newPassword !== confirmPassword) {
+          triggerToast('New passwords do not match.');
+          setSaving(false);
+          return;
+        }
 
-    localStorage.setItem(
-      'profile',
-      JSON.stringify({
-        name: fullName,
-        email: email,
-        role: role,
-        photo: photo,
-      })
-    );
+        await authApi.changePassword({ currentPassword, newPassword });
+      }
 
-    localStorage.setItem(
-      'notifications',
-      JSON.stringify({
+      const parts = fullName.trim().split(/\s+/);
+      const firstName = parts[0] || 'User';
+      const lastName = parts.slice(1).join(' ') || '';
+
+      const res = await authApi.updateProfile({
+        firstName,
+        lastName,
+        role,
+        avatarUrl: photo,
         emailNotifications,
         hiringUpdates,
         candidateUpdates,
         interviewReminders,
-      })
-    );
+      });
 
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-    triggerToast('Changes saved successfully.');
+      if (res?.data) {
+        updateUser(res.data);
+      }
+
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      triggerToast('Changes saved successfully.');
+    } catch (err) {
+      triggerToast(err.message || 'Failed to save changes.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCancel = () => {
-    const savedProfile = JSON.parse(localStorage.getItem('profile') || 'null');
-    if (savedProfile) {
-      setFullName(savedProfile.name || 'HR Manager');
-      setEmail(savedProfile.email || 'hrmanager@hireiq.com');
-      setRole(savedProfile.role || 'Administrator');
-      setPhoto(savedProfile.photo || '');
-    } else {
-      setFullName('HR Manager');
-      setEmail('hrmanager@hireiq.com');
-      setRole('Administrator');
-      setPhoto('');
-    }
-
-    const savedNotifications = JSON.parse(
-      localStorage.getItem('notifications') || 'null'
-    );
-    if (savedNotifications) {
-      setEmailNotifications(savedNotifications.emailNotifications ?? true);
-      setHiringUpdates(savedNotifications.hiringUpdates ?? true);
-      setCandidateUpdates(savedNotifications.candidateUpdates ?? true);
-      setInterviewReminders(savedNotifications.interviewReminders ?? true);
-    } else {
-      setEmailNotifications(true);
-      setHiringUpdates(true);
-      setCandidateUpdates(true);
-      setInterviewReminders(true);
+    if (user) {
+      setFullName(`${user.firstName || ''} ${user.lastName || ''}`.trim() || 'HR Manager');
+      setEmail(user.email || 'hrmanager@hireiq.com');
+      setRole(user.role || 'Administrator');
+      setPhoto(user.avatarUrl || '');
+      setEmailNotifications(user.emailNotifications ?? true);
+      setHiringUpdates(user.hiringUpdates ?? true);
+      setCandidateUpdates(user.candidateUpdates ?? true);
+      setInterviewReminders(user.interviewReminders ?? true);
     }
 
     setCurrentPassword('');

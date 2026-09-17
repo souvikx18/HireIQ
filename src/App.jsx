@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Index from './pages/Index';
 import LandingPage from './pages/LandingPage';
 import ResumeUpload from './pages/ResumeUpload';
@@ -29,38 +30,178 @@ function AppRoutes() {
   return (
     <>
       <Routes>
-        {/* When project starts/opens, first enters Landing Page */}
+        {/* Landing Page */}
         <Route path="/" element={<LandingPage />} />
 
-        {/* Dashboard Routes */}
-        <Route path="/dashboard" element={<Index />} />
-        <Route path="/dashboard.html" element={<Index />} />
-        <Route path="/index.html" element={<Index />} />
+        {/* Dashboard Routes (Protected) */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Index />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard.html"
+          element={
+            <ProtectedRoute>
+              <Index />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/index.html"
+          element={
+            <ProtectedRoute>
+              <Index />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Authenticated Internal Navigation Routes */}
-        <Route path="/resumeupload" element={<ResumeUpload />} />
-        <Route path="/resumeupload.html" element={<ResumeUpload />} />
+        <Route
+          path="/resumeupload"
+          element={
+            <ProtectedRoute>
+              <ResumeUpload />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/resumeupload.html"
+          element={
+            <ProtectedRoute>
+              <ResumeUpload />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/candidates" element={<Candidates />} />
-        <Route path="/Candidates.html" element={<Candidates />} />
-        <Route path="/candidates.html" element={<Candidates />} />
+        <Route
+          path="/candidates"
+          element={
+            <ProtectedRoute>
+              <Candidates />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/Candidates.html"
+          element={
+            <ProtectedRoute>
+              <Candidates />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/candidates.html"
+          element={
+            <ProtectedRoute>
+              <Candidates />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/skillgapanalysis" element={<SkillGapAnalysis />} />
-        <Route path="/skillgapanalysis.html" element={<SkillGapAnalysis />} />
+        <Route
+          path="/skillgapanalysis"
+          element={
+            <ProtectedRoute>
+              <SkillGapAnalysis />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/skillgapanalysis.html"
+          element={
+            <ProtectedRoute>
+              <SkillGapAnalysis />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/jobrole" element={<JobRole />} />
-        <Route path="/jobrole.html" element={<JobRole />} />
+        <Route
+          path="/jobrole"
+          element={
+            <ProtectedRoute>
+              <JobRole />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/jobrole.html"
+          element={
+            <ProtectedRoute>
+              <JobRole />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/report" element={<Report />} />
-        <Route path="/report.html" element={<Report />} />
+        <Route
+          path="/report"
+          element={
+            <ProtectedRoute>
+              <Report />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/report.html"
+          element={
+            <ProtectedRoute>
+              <Report />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/setting" element={<Setting />} />
-        <Route path="/setting.html" element={<Setting />} />
-        <Route path="/settings" element={<Setting />} />
-        <Route path="/settings.html" element={<Setting />} />
+        <Route
+          path="/setting"
+          element={
+            <ProtectedRoute>
+              <Setting />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/setting.html"
+          element={
+            <ProtectedRoute>
+              <Setting />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Setting />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings.html"
+          element={
+            <ProtectedRoute>
+              <Setting />
+            </ProtectedRoute>
+          }
+        />
 
-        <Route path="/upgrade" element={<Upgrade />} />
-        <Route path="/upgrade.html" element={<Upgrade />} />
+        <Route
+          path="/upgrade"
+          element={
+            <ProtectedRoute>
+              <Upgrade />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/upgrade.html"
+          element={
+            <ProtectedRoute>
+              <Upgrade />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Auth Routes */}
         <Route path="/signup" element={<Signup />} />
@@ -93,4 +234,3 @@ export default function App() {
     </AuthProvider>
   );
 }
-

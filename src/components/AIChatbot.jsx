@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import logo from '../assets/img/hireiq-logo.png';
 import '../css/chatbot.css';
+import { aiApi } from '../api/ai.js';
 
 const INITIAL_GREETING =
   "Hello! 👋 I'm your HireIQ AI Assistant. How can I help you today with resume screening, candidate ranking, or skill gap analysis?";
@@ -187,7 +188,7 @@ export default function AIChatbot() {
     return "Thanks for asking! I can help you with **Resume Upload**, **Candidate Screening**, **Skill Gap Analysis**, **Job Roles**, **Reports**, or **Account Settings**. Please ask any question about the platform.";
   };
 
-  const handleSendMessage = (textToSend) => {
+  const handleSendMessage = async (textToSend) => {
     const query = (textToSend || input).trim();
     if (!query) return;
 
@@ -208,8 +209,20 @@ export default function AIChatbot() {
     setInput('');
     setIsTyping(true);
 
-    // Simulate AI response delay
-    setTimeout(() => {
+    try {
+      const res = await aiApi.chat(query);
+      const replyText = res?.data?.reply || generateBotReply(query);
+      const botMsg = {
+        id: Date.now() + 1,
+        sender: 'bot',
+        text: replyText,
+        time: new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      };
+      setMessages((prev) => [...prev, botMsg]);
+    } catch {
       const replyText = generateBotReply(query);
       const botMsg = {
         id: Date.now() + 1,
@@ -221,8 +234,9 @@ export default function AIChatbot() {
         }),
       };
       setMessages((prev) => [...prev, botMsg]);
+    } finally {
       setIsTyping(false);
-    }, 550);
+    }
   };
 
   const handleSubmit = (e) => {
