@@ -33,15 +33,23 @@ app.use(
   })
 );
 
-// 2. Strict CORS
+// 2. Flexible Production & Development CORS
+const allowedOrigins = (config.clientUrl || '').split(',').map((s) => s.trim());
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. mobile apps, curl) or matching client url
-      if (!origin || origin === config.clientUrl || origin.startsWith('http://localhost')) {
+      if (
+        !origin ||
+        config.clientUrl === '*' ||
+        allowedOrigins.includes(origin) ||
+        origin.startsWith('http://localhost') ||
+        origin.endsWith('.vercel.app') ||
+        origin.endsWith('.netlify.app')
+      ) {
         callback(null, true);
       } else {
-        callback(new Error('Blocked by CORS policy'));
+        callback(new Error(`Blocked by CORS policy: origin ${origin} is not allowed`));
       }
     },
     credentials: true,

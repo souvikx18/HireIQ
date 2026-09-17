@@ -1,4 +1,4 @@
-const BASE_URL = '/api';
+const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 export async function apiClient(endpoint, { body, headers = {}, method = 'GET', isFormData = false, ...customConfig } = {}) {
   const token = localStorage.getItem('hireiq_token');
