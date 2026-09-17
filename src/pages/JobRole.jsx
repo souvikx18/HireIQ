@@ -196,16 +196,29 @@ export default function JobRole() {
   const handleOpenRoleDetails = async (role) => {
     setSelectedRoleDetails(role);
     setLoadingAssigned(true);
+    setAssignedCandidates([]);
     setSelectedCandidateToAssign('');
     try {
       const [candRes, allRes] = await Promise.all([
         jobsApi.getJobCandidates(role.id),
         candidatesApi.getCandidates(),
       ]);
-      if (candRes?.data) setAssignedCandidates(candRes.data);
-      if (allRes?.data) setAllAvailableCandidates(allRes.data);
+      const roleCandidates = Array.isArray(candRes?.data?.candidates)
+        ? candRes.data.candidates
+        : Array.isArray(candRes?.data)
+        ? candRes.data
+        : [];
+      setAssignedCandidates(roleCandidates);
+
+      const allCands = Array.isArray(allRes?.data?.candidates)
+        ? allRes.data.candidates
+        : Array.isArray(allRes?.data)
+        ? allRes.data
+        : [];
+      setAllAvailableCandidates(allCands);
     } catch (err) {
       console.error('Failed to load role candidates:', err);
+      setAssignedCandidates([]);
     } finally {
       setLoadingAssigned(false);
     }
@@ -219,13 +232,24 @@ export default function JobRole() {
     setIsAssigning(true);
     try {
       await candidatesApi.assignJobRole(selectedCandidateToAssign, selectedRoleDetails.id);
-      triggerToast(`Candidate assigned to ${selectedRoleDetails.name}`);
+      triggerToast(`Candidate assigned to ${selectedRoleDetails?.name || selectedRoleDetails?.title || 'role'}`);
       const [candRes, allRes] = await Promise.all([
         jobsApi.getJobCandidates(selectedRoleDetails.id),
         candidatesApi.getCandidates(),
       ]);
-      if (candRes?.data) setAssignedCandidates(candRes.data);
-      if (allRes?.data) setAllAvailableCandidates(allRes.data);
+      const roleCandidates = Array.isArray(candRes?.data?.candidates)
+        ? candRes.data.candidates
+        : Array.isArray(candRes?.data)
+        ? candRes.data
+        : [];
+      setAssignedCandidates(roleCandidates);
+
+      const allCands = Array.isArray(allRes?.data?.candidates)
+        ? allRes.data.candidates
+        : Array.isArray(allRes?.data)
+        ? allRes.data
+        : [];
+      setAllAvailableCandidates(allCands);
       setSelectedCandidateToAssign('');
       loadRoles();
     } catch (err) {
@@ -243,8 +267,19 @@ export default function JobRole() {
         jobsApi.getJobCandidates(selectedRoleDetails.id),
         candidatesApi.getCandidates(),
       ]);
-      if (candRes?.data) setAssignedCandidates(candRes.data);
-      if (allRes?.data) setAllAvailableCandidates(allRes.data);
+      const roleCandidates = Array.isArray(candRes?.data?.candidates)
+        ? candRes.data.candidates
+        : Array.isArray(candRes?.data)
+        ? candRes.data
+        : [];
+      setAssignedCandidates(roleCandidates);
+
+      const allCands = Array.isArray(allRes?.data?.candidates)
+        ? allRes.data.candidates
+        : Array.isArray(allRes?.data)
+        ? allRes.data
+        : [];
+      setAllAvailableCandidates(allCands);
       loadRoles();
     } catch (err) {
       triggerToast(err.message || 'Failed to unassign candidate');
@@ -909,7 +944,7 @@ export default function JobRole() {
             <div className="modal-header" style={{ marginBottom: '18px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <h2 style={{ fontSize: '22px', fontWeight: '700', color: '#0f172a' }}>
-                  {selectedRoleDetails.name}
+                  {selectedRoleDetails?.name || selectedRoleDetails?.title || 'Job Role'}
                 </h2>
                 <span
                   style={{
@@ -921,13 +956,13 @@ export default function JobRole() {
                     color: '#0369a1',
                   }}
                 >
-                  {selectedRoleDetails.code}
+                  {selectedRoleDetails?.code || 'ROLE'}
                 </span>
                 <span
-                  className={`status ${selectedRoleDetails.statusVal}`}
+                  className={`status ${selectedRoleDetails?.statusVal || 'active'}`}
                   style={{ fontSize: '11px', padding: '3px 9px', borderRadius: '12px' }}
                 >
-                  {selectedRoleDetails.status}
+                  {selectedRoleDetails?.status || 'Active'}
                 </span>
               </div>
               <p style={{ color: '#64748b', fontSize: '13px', marginTop: '3px' }}>
@@ -947,23 +982,23 @@ export default function JobRole() {
             >
               <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                 <span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '3px' }}>Department</span>
-                <strong style={{ color: '#1e293b', fontSize: '13px' }}>{selectedRoleDetails.department}</strong>
+                <strong style={{ color: '#1e293b', fontSize: '13px' }}>{selectedRoleDetails?.department || 'General'}</strong>
               </div>
 
               <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                 <span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '3px' }}>Experience</span>
-                <strong style={{ color: '#1e293b', fontSize: '13px' }}>{selectedRoleDetails.experience}</strong>
+                <strong style={{ color: '#1e293b', fontSize: '13px' }}>{selectedRoleDetails?.experience || 'All'}</strong>
               </div>
 
               <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                 <span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '3px' }}>Open Positions</span>
-                <strong style={{ color: '#1e293b', fontSize: '13px' }}>{selectedRoleDetails.openPositions || 1}</strong>
+                <strong style={{ color: '#1e293b', fontSize: '13px' }}>{selectedRoleDetails?.openPositions || 1}</strong>
               </div>
 
               <div style={{ padding: '12px', background: '#eff6ff', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
                 <span style={{ display: 'block', fontSize: '11px', color: '#1d4ed8', marginBottom: '3px' }}>Assigned Candidates</span>
                 <strong style={{ color: '#1e3a8a', fontSize: '14px' }}>
-                  {loadingAssigned ? '...' : assignedCandidates.length}
+                  {loadingAssigned ? '...' : (Array.isArray(assignedCandidates) ? assignedCandidates.length : 0)}
                 </strong>
               </div>
             </div>
@@ -974,7 +1009,7 @@ export default function JobRole() {
                 Required Skill Criteria
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                {(selectedRoleDetails.skills || []).map((s, idx) => (
+                {(selectedRoleDetails?.skills || []).map((s, idx) => (
                   <span
                     key={idx}
                     style={{
@@ -990,7 +1025,7 @@ export default function JobRole() {
                     {s}
                   </span>
                 ))}
-                {selectedRoleDetails.skills?.length === 0 && (
+                {(!selectedRoleDetails?.skills || selectedRoleDetails.skills.length === 0) && (
                   <span style={{ fontSize: '12px', color: '#94a3b8' }}>No criteria specified</span>
                 )}
               </div>
@@ -1001,7 +1036,7 @@ export default function JobRole() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                 <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <i className="fa-solid fa-users-viewfinder" style={{ color: '#2563eb' }}></i>
-                  Assigned Candidates Roster ({assignedCandidates.length})
+                  Assigned Candidates Roster ({Array.isArray(assignedCandidates) ? assignedCandidates.length : 0})
                 </h3>
                 <span style={{ fontSize: '11px', color: '#64748b' }}>
                   Real-time pipeline tracking for this role
@@ -1013,7 +1048,7 @@ export default function JobRole() {
                   <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '8px' }}></i>
                   Loading assigned candidates...
                 </div>
-              ) : assignedCandidates.length === 0 ? (
+              ) : (!Array.isArray(assignedCandidates) || assignedCandidates.length === 0) ? (
                 <div
                   style={{
                     padding: '24px',
@@ -1045,7 +1080,7 @@ export default function JobRole() {
                       </tr>
                     </thead>
                     <tbody>
-                      {assignedCandidates.map((cand) => (
+                      {(Array.isArray(assignedCandidates) ? assignedCandidates : []).map((cand) => (
                         <tr key={cand.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                           <td style={{ padding: '10px 14px' }}>
                             <div style={{ fontWeight: '600', color: '#0f172a' }}>{cand.name}</div>
@@ -1139,7 +1174,7 @@ export default function JobRole() {
                 Assign Candidate to this Role
               </div>
               <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '12px' }}>
-                Assign an unassigned applicant or transfer an active candidate directly to {selectedRoleDetails.name}.
+                Assign an unassigned applicant or transfer an active candidate directly to {selectedRoleDetails?.name || selectedRoleDetails?.title || 'this role'}.
               </p>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <select
@@ -1156,11 +1191,11 @@ export default function JobRole() {
                   }}
                 >
                   <option value="">Select Candidate to Assign...</option>
-                  {allAvailableCandidates
-                    .filter((c) => c.jobRoleId !== selectedRoleDetails.id)
+                  {(Array.isArray(allAvailableCandidates) ? allAvailableCandidates : [])
+                    .filter((c) => c && c.jobRoleId !== selectedRoleDetails?.id)
                     .map((c) => (
                       <option key={c.id} value={c.id}>
-                        {c.name} ({c.email}) — Current Role: {c.role || 'Unassigned'}
+                        {c.name} ({c.email}) — Current Role: {c.role || c.roleApplied || 'Unassigned'}
                       </option>
                     ))}
                 </select>
