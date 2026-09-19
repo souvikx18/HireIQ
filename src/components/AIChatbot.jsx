@@ -319,32 +319,25 @@ export default function AIChatbot() {
   return (
     <>
       {/* Floating Launcher Button */}
-      <div className="chatbot-launcher">
-        <button
-          type="button"
-          className={`chatbot-toggle-btn ${isOpen ? 'open' : ''}`}
-          aria-label={isOpen ? 'Close HireIQ Assistant' : 'Open HireIQ Assistant'}
-          title={isOpen ? 'Close Chat' : 'HireIQ Assistant'}
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          {isOpen ? (
-            <>
-              <i className="fa-solid fa-xmark"></i>
-              <span className="chatbot-btn-text">Close</span>
-            </>
-          ) : (
-            <>
-              <div className="chatbot-btn-logo-wrap">
-                <img src={logo} alt="HireIQ Logo" className="chatbot-btn-logo" />
-              </div>
-              <span className="chatbot-btn-text">
-                {isCandidate ? 'Career AI Copilot' : 'HireIQ Assistant'}
-              </span>
-              <span className="chatbot-btn-dot"></span>
-            </>
-          )}
-        </button>
-      </div>
+      {!isOpen && (
+        <div className="chatbot-launcher">
+          <button
+            type="button"
+            className="chatbot-toggle-btn"
+            aria-label="Open HireIQ Assistant"
+            title={isCandidate ? 'Career AI Copilot' : 'HireIQ Assistant'}
+            onClick={() => setIsOpen(true)}
+          >
+            <div className="chatbot-btn-logo-wrap">
+              <img src={logo} alt="HireIQ Logo" className="chatbot-btn-logo" />
+            </div>
+            <span className="chatbot-btn-text">
+              {isCandidate ? 'Career AI Copilot' : 'HireIQ Assistant'}
+            </span>
+            <span className="chatbot-btn-dot"></span>
+          </button>
+        </div>
+      )}
 
       {/* Chatbot Pop-up Panel */}
       {isOpen && (

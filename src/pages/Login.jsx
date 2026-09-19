@@ -221,7 +221,7 @@ export default function Login() {
           </button>
 
           <p className="existing-account">
-            New to TalentAI?{' '}
+            New to HireIQ?{' '}
             <a href="signup.html" onClick={handleNavWithTransition('/signup')}>
               Create an account
             </a>

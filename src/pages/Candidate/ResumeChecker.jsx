@@ -69,39 +69,6 @@ export default function ResumeChecker() {
     }
   };
 
-  const handleLoadSampleResume = () => {
-    const sampleText = `Alex Morgan
-alex.morgan@techmail.io | +1 (555) 234-5678 | San Francisco, CA | linkedin.com/in/alexmorgan-dev
-
-PROFESSIONAL SUMMARY
-Senior Frontend Engineer with 5+ years of experience engineering high-performance web applications using React, TypeScript, and modern state architectures. Proven track record reducing page latency by 35% and mentoring junior engineers in scalable component design systems.
-
-TECHNICAL SKILLS
-• Programming Languages: TypeScript, JavaScript (ES6+), HTML5, CSS3/Sass, SQL
-• Frameworks & Libraries: React.js, Next.js, Redux Toolkit, Tailwind CSS, Vite, Jest, Vitest
-• Cloud & Tools: Git, GitHub Actions, Docker, AWS (S3, CloudFront), RESTful APIs, GraphQL, Figma
-• Methodologies: Agile / Scrum, Continuous Integration, Test-Driven Development (TDD)
-
-PROFESSIONAL EXPERIENCE
-Senior Frontend Developer | TechNova Solutions | 2021 – Present
-• Architected and developed a core micro-frontend analytics dashboard in React & TypeScript serving 120,000+ monthly active enterprise users.
-• Spearheaded frontend build optimization migrating from Webpack to Vite, reducing compilation latency by 45%.
-• Engineered reusable design token component library in Figma and Tailwind, adopted across 4 distributed cross-functional teams.
-• Implemented end-to-end testing suite with Playwright and Vitest, achieving 92% automated code coverage.
-
-Frontend Software Engineer | CloudScale Networks | 2019 – 2021
-• Built real-time network topology visualization components using React and SVG charting.
-• Optimized state management flows with Redux and memoization, cutting unnecessary re-renders by 30%.
-• Collaborated closely with product designers and backend engineers to integrate RESTful endpoints.
-
-EDUCATION
-Bachelor of Science in Computer Science | University of California, Berkeley | GPA: 3.8 / 4.0`;
-
-    const blob = new Blob([sampleText], { type: 'text/plain' });
-    const sampleFile = new File([blob], 'Alex_Morgan_Senior_Frontend_Resume.txt', { type: 'text/plain' });
-    processFile(sampleFile);
-  };
-
   const getScoreColor = (score) => {
     if (score >= 85) return '#10b981';
     if (score >= 70) return '#3b82f6';
@@ -183,32 +150,6 @@ Bachelor of Science in Computer Science | University of California, Berkeley | G
                       ) : (
                         'Browse Files'
                       )}
-                    </button>
-
-                    <button
-                      type="button"
-                      style={{
-                        height: '38px',
-                        padding: '0 16px',
-                        borderRadius: '7px',
-                        border: '1px solid #cbd5e1',
-                        background: '#ffffff',
-                        color: '#334155',
-                        fontSize: '13px',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleLoadSampleResume();
-                      }}
-                      disabled={isAuditing}
-                    >
-                      <i className="fa-solid fa-flask" style={{ color: '#2563eb' }}></i>
-                      Try Sample Resume
                     </button>
                   </div>
                 </div>
@@ -493,7 +434,7 @@ Bachelor of Science in Computer Science | University of California, Berkeley | G
                   <i className="fa-regular fa-file-lines" style={{ fontSize: '48px', color: '#cbd5e1', marginBottom: '16px' }}></i>
                   <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#334155', margin: '0 0 6px 0' }}>No Resume Uploaded Yet</h3>
                   <p style={{ margin: 0, fontSize: '13.5px', maxWidth: '340px' }}>
-                    Upload your resume on the left or click <strong>"Try Sample Resume"</strong> to test instant AI ATS scoring!
+                    Upload your resume (PDF, DOCX, or TXT) on the left to test instant AI ATS scoring and keyword analysis.
                   </p>
                 </div>
               )}

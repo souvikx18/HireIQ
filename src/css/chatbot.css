@@ -108,11 +108,11 @@ body.dark-mode .chatbot-toggle-btn.open {
 /* Chatbot Main Panel (Half / Compact Page View Default) */
 .chatbot-panel {
   position: fixed;
-  bottom: 84px;
+  bottom: 24px;
   right: 24px;
   width: 390px;
-  height: 540px;
-  max-height: calc(100vh - 110px);
+  height: 560px;
+  max-height: calc(100vh - 48px);
   background: #ffffff;
   border-radius: 18px;
   box-shadow: 0 24px 64px rgba(7, 27, 58, 0.25), 0 4px 16px rgba(0, 0, 0, 0.08);
@@ -128,8 +128,8 @@ body.dark-mode .chatbot-toggle-btn.open {
 /* Full Page / Expanded View */
 .chatbot-panel.expanded {
   width: min(860px, calc(100vw - 48px));
-  height: min(84vh, 780px);
-  max-height: calc(100vh - 60px);
+  height: min(86vh, 800px);
+  max-height: calc(100vh - 48px);
   bottom: 24px;
   right: 24px;
 }
@@ -199,22 +199,30 @@ body.dark-mode .chatbot-toggle-btn.open {
 
 .chatbot-hdr-btn {
   background: rgba(255, 255, 255, 0.12);
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.16);
   color: #e2e8f0;
   width: 32px;
   height: 32px;
   border-radius: 50%;
   cursor: pointer;
-  display: grid;
-  place-items: center;
-  font-size: 13px;
-  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  outline: none;
+  box-shadow: none;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  flex-shrink: 0;
 }
 
 .chatbot-hdr-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.26);
   color: #ffffff;
-  transform: scale(1.08);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.chatbot-hdr-btn:active {
+  transform: scale(0.94);
 }
 
 /* Chat Messages Area */
