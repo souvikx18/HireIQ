@@ -21,20 +21,37 @@ body.page-leaving::after {
     }
 }
 
+:root {
+    --sidebar-width: 250px;
+    --sidebar-collapsed-width: 72px;
+}
+
+body.sidebar-collapsed {
+    --sidebar-width: 72px;
+}
+
 body.login-open .sidebar {
     display: none !important;
 }
 
 .sidebar {
+    width: var(--sidebar-width) !important;
     background: #000000 !important;
-    color: #fff;
+    color: #fff !important;
+    padding: 24px 15px !important;
+    position: fixed !important;
+    left: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
     display: flex !important;
     flex-direction: column !important;
-    overflow-y: auto;
-    overflow-x: hidden;
-    scrollbar-width: none;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-width: none !important;
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    z-index: 1000;
+    z-index: 1000 !important;
+    box-sizing: border-box !important;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -42,8 +59,17 @@ body.login-open .sidebar {
 }
 
 .main,
-.main-content {
-    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+.main-content,
+.portal-main-content,
+.jobrole-main,
+.setting-main,
+.report-main {
+    margin-left: var(--sidebar-width) !important;
+    width: calc(100% - var(--sidebar-width)) !important;
+    max-width: calc(100% - var(--sidebar-width)) !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1), width 0.3s cubic-bezier(0.4, 0, 0.2, 1), max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 /* Brand layout and toggle button */
@@ -112,8 +138,14 @@ body.sidebar-collapsed .sidebar,
 }
 
 body.sidebar-collapsed .main,
-body.sidebar-collapsed .main-content {
+body.sidebar-collapsed .main-content,
+body.sidebar-collapsed .portal-main-content,
+body.sidebar-collapsed .jobrole-main,
+body.sidebar-collapsed .setting-main,
+body.sidebar-collapsed .report-main {
     margin-left: 72px !important;
+    width: calc(100% - 72px) !important;
+    max-width: calc(100% - 72px) !important;
 }
 
 body.sidebar-collapsed .brand,
