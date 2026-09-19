@@ -66,9 +66,14 @@ export default function CandidateDashboard() {
     }
   };
 
+  const handleAskCopilot = (prompt) => {
+    window.dispatchEvent(new CustomEvent('hireiq-open-chatbot', { detail: { prompt } }));
+  };
+
   const candidateAtsScore = profile?.atsScore || profile?.resumes?.[0]?.atsScore || 0;
   const activeApplicationsCount = applications.length;
   const topJobs = jobs.slice(0, 3);
+  const recentApplications = applications.slice(0, 2);
 
   return (
     <div className="candidate-portal-root">
@@ -114,7 +119,48 @@ export default function CandidateDashboard() {
                 Optimize your resume for applicant tracking systems (ATS), inspect keyword gaps,
                 and discover tailored roles with 1-click applications.
               </p>
+
+              {/* Quick AI Copilot Prompts */}
+              <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => handleAskCopilot('How do I optimize my resume bullet points for high ATS match?')}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    color: '#ffffff',
+                    padding: '6px 12px',
+                    borderRadius: '20px',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <i className="fa-solid fa-robot"></i> How to optimize bullet points?
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleAskCopilot('What are common interview questions for software engineering roles?')}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    color: '#ffffff',
+                    padding: '6px 12px',
+                    borderRadius: '20px',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <i className="fa-solid fa-lightbulb"></i> Engineering interview prep tips
+                </button>
+              </div>
             </div>
+
             <div className="portal-hero-actions">
               <Link to="/candidate/resume-checker" className="hero-cta-btn primary">
                 <i className="fa-solid fa-file-shield"></i>
@@ -169,6 +215,75 @@ export default function CandidateDashboard() {
               </div>
             </div>
           </div>
+
+          {/* Recent Applications Tracker Preview (If applications exist) */}
+          {recentApplications.length > 0 && (
+            <div style={{ marginBottom: '32px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                <div>
+                  <h2 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 4px 0', color: 'var(--text-primary, #0f172a)' }}>
+                    Recent Applications
+                  </h2>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+                    Track latest hiring stage updates and recruiter reviews
+                  </p>
+                </div>
+                <Link
+                  to="/candidate/applications"
+                  style={{ fontSize: '13px', fontWeight: 600, color: '#2563eb', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
+                >
+                  View All ({applications.length}) <i className="fa-solid fa-arrow-right"></i>
+                </Link>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+                {recentApplications.map((app) => (
+                  <div
+                    key={app.id}
+                    style={{
+                      background: '#ffffff',
+                      borderRadius: '12px',
+                      border: '1px solid #e2e8f0',
+                      padding: '18px 20px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>
+                        {app.jobRole?.title || 'Software Role'}
+                      </div>
+                      <div style={{ fontSize: '12.5px', color: '#64748b' }}>
+                        {app.jobRole?.department || 'Engineering'} • Match: <strong style={{ color: '#059669' }}>{app.matchScore || 85}%</strong>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px' }}>
+                      <span className={`app-stage-badge ${app.status?.toLowerCase() || 'applied'}`}>
+                        {app.status?.replace('_', ' ') || 'Applied'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => navigate('/candidate/applications')}
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          color: '#2563eb',
+                          fontSize: '12px',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          padding: 0,
+                        }}
+                      >
+                        Track Progress →
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Recommended Jobs */}
           <div style={{ marginBottom: '32px' }}>
@@ -227,22 +342,33 @@ export default function CandidateDashboard() {
                       </div>
                     </div>
 
-                    <div>
-                      {job.isApplied ? (
-                        <button type="button" className="job-apply-btn applied" disabled>
-                          <i className="fa-solid fa-circle-check"></i>
-                          Applied ({job.applicationStatus || 'In Review'})
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className="job-apply-btn apply"
-                          onClick={() => handleApply(job.id)}
-                        >
-                          <i className="fa-solid fa-paper-plane"></i>
-                          1-Click Apply
-                        </button>
-                      )}
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '16px' }}>
+                      <button
+                        type="button"
+                        className="job-secondary-btn"
+                        onClick={() => navigate('/candidate/jobs')}
+                      >
+                        Details
+                      </button>
+
+                      <div style={{ flex: 1 }}>
+                        {job.isApplied ? (
+                          <button type="button" className="job-apply-btn applied" style={{ width: '100%', margin: 0 }} disabled>
+                            <i className="fa-solid fa-circle-check"></i>
+                            Applied
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="job-apply-btn apply"
+                            style={{ width: '100%', margin: 0 }}
+                            onClick={() => handleApply(job.id)}
+                          >
+                            <i className="fa-solid fa-paper-plane"></i>
+                            1-Click Apply
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}

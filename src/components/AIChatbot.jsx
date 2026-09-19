@@ -1,12 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useAuth } from '../context/AuthContext';
 import logo from '../assets/img/hireiq-logo.png';
 import '../css/chatbot.css';
 import { aiApi } from '../api/ai.js';
 
-const INITIAL_GREETING =
-  "Hello! 👋 I'm your HireIQ AI Assistant. How can I help you today with resume screening, candidate ranking, or skill gap analysis?";
+const CANDIDATE_SUGGESTIONS = [
+  '🎯 How to improve my ATS score?',
+  '📝 Tips for writing bullet points',
+  '💼 How to apply for open roles?',
+  '💡 Technical interview preparation',
+  '📊 How is match score calculated?',
+];
 
-const QUICK_SUGGESTIONS = [
+const RECRUITER_SUGGESTIONS = [
   '📄 How to upload resumes?',
   '👥 How are candidates ranked?',
   '📊 What is Skill Gap Analysis?',
@@ -15,6 +21,13 @@ const QUICK_SUGGESTIONS = [
 ];
 
 export default function AIChatbot() {
+  const { user } = useAuth();
+  const isCandidate = user?.role === 'CANDIDATE';
+
+  const initialGreeting = isCandidate
+    ? `Hello, ${user?.firstName || 'there'}! 👋 I'm your HireIQ AI Career Assistant. How can I help you optimize your resume, prepare for interviews, or match with open job roles?`
+    : "Hello! 👋 I'm your HireIQ AI Assistant. How can I help you today with resume screening, candidate ranking, or skill gap analysis?";
+
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [speakingId, setSpeakingId] = useState(null);
@@ -22,7 +35,7 @@ export default function AIChatbot() {
     {
       id: 1,
       sender: 'bot',
-      text: INITIAL_GREETING,
+      text: initialGreeting,
       time: 'Just now',
     },
   ]);
@@ -30,6 +43,8 @@ export default function AIChatbot() {
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+
+  const activeSuggestions = isCandidate ? CANDIDATE_SUGGESTIONS : RECRUITER_SUGGESTIONS;
 
   // Auto-scroll to bottom when messages update
   useEffect(() => {
@@ -63,6 +78,20 @@ export default function AIChatbot() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
+  // Support opening chatbot via custom event across app
+  useEffect(() => {
+    const handleOpenEvent = (e) => {
+      setIsOpen(true);
+      if (e?.detail?.prompt) {
+        setTimeout(() => {
+          handleSendMessage(e.detail.prompt);
+        }, 200);
+      }
+    };
+    window.addEventListener('hireiq-open-chatbot', handleOpenEvent);
+    return () => window.removeEventListener('hireiq-open-chatbot', handleOpenEvent);
+  }, []);
+
   // Cleanup speech on unmount
   useEffect(() => {
     return () => {
@@ -95,8 +124,44 @@ export default function AIChatbot() {
     window.speechSynthesis.speak(utterance);
   };
 
+  const formatBotText = (text) => {
+    if (!text) return '';
+    return text.split('\n').map((line, idx) => {
+      const parts = line.split(/(\*\*.*?\*\*)/g);
+      return (
+        <React.Fragment key={idx}>
+          {parts.map((part, pIdx) => {
+            if (part.startsWith('**') && part.endsWith('**')) {
+              return <strong key={pIdx}>{part.slice(2, -2)}</strong>;
+            }
+            return part;
+          })}
+          {idx < text.split('\n').length - 1 && <br />}
+        </React.Fragment>
+      );
+    });
+  };
+
   const generateBotReply = (userQuery) => {
     const query = userQuery.toLowerCase().trim();
+
+    if (isCandidate) {
+      if (query.includes('ats') || query.includes('score') || query.includes('audit')) {
+        return "To maximize your ATS score:\n1. Ensure standard section headings: **Work Experience**, **Education**, **Skills**.\n2. Avoid complex tables, text boxes, or graphics.\n3. Incorporate core keywords from target job descriptions.\n4. Start bullet points with quantifiable verbs (*Engineered*, *Optimized*, *Delivered*).";
+      }
+      if (query.includes('bullet') || query.includes('verb') || query.includes('write')) {
+        return "Tips for impactful bullet points:\n• Formula: **Action Verb + Task + Measurable Impact**.\n• *Weak*: 'Worked on React frontend.'\n• *Strong*: 'Architected 12+ responsive React components, reducing page load latency by 28% for 45,000 active users.'";
+      }
+      if (query.includes('apply') || query.includes('job') || query.includes('role')) {
+        return "To apply for jobs:\n1. Go to **'Explore Jobs'** in your sidebar.\n2. See roles ranked by your live Semantic Match score.\n3. Click **'1-Click Apply'** to submit your analyzed resume instantly!";
+      }
+      if (query.includes('interview') || query.includes('prep') || query.includes('question')) {
+        return "Technical Interview Tips:\n• Review required skills listed in the job opening.\n• Use the STAR method (*Situation, Task, Action, Result*) for behavioral questions.\n• Be ready to explain architecture trade-offs and code optimizations from your projects.";
+      }
+      if (query.includes('match') || query.includes('calculate') || query.includes('percentage')) {
+        return "Your **Match Score** is calculated by comparing your extracted skills, experience years, and technical depth against the company's required competencies for that specific opening.";
+      }
+    }
 
     if (
       query.includes('hello') ||
@@ -105,7 +170,9 @@ export default function AIChatbot() {
       query.includes('hola') ||
       query.includes('kemon acho')
     ) {
-      return "Hello! 😊 I'm here to assist you with HireIQ. You can ask me about uploading resumes, candidate rankings, skill gap evaluations, or creating job roles.";
+      return isCandidate
+        ? "Hello! 😊 I'm your AI Career Copilot. Ask me about improving your resume structure, ATS scores, applying to jobs, or technical interview tips!"
+        : "Hello! 😊 I'm here to assist you with HireIQ. You can ask me about uploading resumes, candidate rankings, skill gap evaluations, or creating job roles.";
     }
 
     if (
@@ -270,7 +337,9 @@ export default function AIChatbot() {
               <div className="chatbot-btn-logo-wrap">
                 <img src={logo} alt="HireIQ Logo" className="chatbot-btn-logo" />
               </div>
-              <span className="chatbot-btn-text">HireIQ Assistant</span>
+              <span className="chatbot-btn-text">
+                {isCandidate ? 'Career AI Copilot' : 'HireIQ Assistant'}
+              </span>
               <span className="chatbot-btn-dot"></span>
             </>
           )}
@@ -282,7 +351,7 @@ export default function AIChatbot() {
         <div
           className={`chatbot-panel ${isExpanded ? 'expanded' : ''}`}
           role="dialog"
-          aria-label="HireIQ AI Chatbot"
+          aria-label={isCandidate ? 'Career AI Copilot' : 'HireIQ AI Chatbot'}
         >
           {/* Header */}
           <div className="chatbot-header">
@@ -292,7 +361,7 @@ export default function AIChatbot() {
               </div>
               <div className="chatbot-title-wrap">
                 <h3>
-                  HireIQ Assistant{' '}
+                  {isCandidate ? 'Career AI Copilot' : 'HireIQ Assistant'}{' '}
                   <i
                     className="fa-solid fa-bolt"
                     style={{ color: '#ffd36a', fontSize: '11px' }}
@@ -305,23 +374,20 @@ export default function AIChatbot() {
             </div>
 
             <div className="chatbot-header-actions">
-              {/* Full Page / Half Page Button */}
               <button
                 type="button"
                 className="chatbot-hdr-btn"
-                aria-label={isExpanded ? 'Half page view' : 'Full page view'}
-                title={isExpanded ? 'Half page view' : 'Full page view'}
+                aria-label={isExpanded ? 'Restore size' : 'Maximize window'}
+                title={isExpanded ? 'Restore' : 'Expand'}
                 onClick={() => setIsExpanded(!isExpanded)}
               >
                 <i
-                  className={`fa-solid fa-${isExpanded ? 'compress' : 'up-right-and-down-left-from-center'}`}
+                  className={`fa-solid fa-${isExpanded ? 'compress' : 'expand'}`}
                 ></i>
               </button>
-
-              {/* Close Button */}
               <button
                 type="button"
-                className="chatbot-hdr-btn"
+                className="chatbot-hdr-btn close"
                 aria-label="Close chat"
                 title="Close chat"
                 onClick={() => setIsOpen(false)}
@@ -331,17 +397,18 @@ export default function AIChatbot() {
             </div>
           </div>
 
-          {/* Message List */}
+          {/* Messages Body */}
           <div className="chatbot-messages">
             {messages.map((msg) => (
               <div key={msg.id} className={`chatbot-msg-row ${msg.sender}`}>
+                {msg.sender === 'bot' && (
+                  <div className="chatbot-msg-avatar">
+                    <img src={logo} alt="HireIQ" />
+                  </div>
+                )}
+
                 <div className="chatbot-bubble">
-                  {msg.text.split('\n').map((line, idx) => (
-                    <React.Fragment key={idx}>
-                      {line}
-                      {idx < msg.text.split('\n').length - 1 && <br />}
-                    </React.Fragment>
-                  ))}
+                  {formatBotText(msg.text)}
                 </div>
 
                 <div className="chatbot-msg-meta">
@@ -378,9 +445,11 @@ export default function AIChatbot() {
           {/* Quick Suggestions Chips - Only show initially before chatting */}
           {messages.length <= 1 && (
             <div className="chatbot-suggestions-wrap">
-              <div className="chatbot-suggestions-title">Suggested Topics</div>
+              <div className="chatbot-suggestions-title">
+                {isCandidate ? 'Career & Resume Topics' : 'Suggested Topics'}
+              </div>
               <div className="chatbot-suggestions-list">
-                {QUICK_SUGGESTIONS.map((sug, idx) => (
+                {activeSuggestions.map((sug, idx) => (
                   <button
                     key={idx}
                     type="button"

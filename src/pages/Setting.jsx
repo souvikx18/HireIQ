@@ -356,79 +356,81 @@ export default function Setting() {
             showProfile={false}
           />
 
-          {/* TAB NAVIGATION */}
-          <div
-            style={{
-              display: 'flex',
-              gap: '10px',
-              margin: '18px 0 24px',
-              borderBottom: '1px solid #e1e7ef',
-              paddingBottom: '12px',
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => setActiveTab('account')}
+          {/* TAB NAVIGATION (Hidden for Candidates, active for HR/Admin) */}
+          {user?.role !== 'CANDIDATE' && (
+            <div
               style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '9px 18px',
-                borderRadius: '8px',
-                fontSize: '13px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                border: 'none',
-                background: activeTab === 'account' ? '#2869e8' : '#f1f5f9',
-                color: activeTab === 'account' ? '#ffffff' : '#64748b',
-                transition: 'all .2s ease',
+                display: 'flex',
+                gap: '10px',
+                margin: '18px 0 24px',
+                borderBottom: '1px solid #e1e7ef',
+                paddingBottom: '12px',
               }}
             >
-              <i className="fa-solid fa-user-gear"></i> Account & Preferences
-            </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('account')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '9px 18px',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  border: 'none',
+                  background: activeTab === 'account' ? '#2869e8' : '#f1f5f9',
+                  color: activeTab === 'account' ? '#ffffff' : '#64748b',
+                  transition: 'all .2s ease',
+                }}
+              >
+                <i className="fa-solid fa-user-gear"></i> Account & Preferences
+              </button>
 
-            <button
-              type="button"
-              onClick={() => setActiveTab('criteria')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '9px 18px',
-                borderRadius: '8px',
-                fontSize: '13px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                border: 'none',
-                background: activeTab === 'criteria' ? '#2869e8' : '#f1f5f9',
-                color: activeTab === 'criteria' ? '#ffffff' : '#64748b',
-                transition: 'all .2s ease',
-              }}
-            >
-              <i className="fa-solid fa-sliders"></i> Company Hiring Criteria & Benchmarks
-            </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('criteria')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '9px 18px',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  border: 'none',
+                  background: activeTab === 'criteria' ? '#2869e8' : '#f1f5f9',
+                  color: activeTab === 'criteria' ? '#ffffff' : '#64748b',
+                  transition: 'all .2s ease',
+                }}
+              >
+                <i className="fa-solid fa-sliders"></i> Company Hiring Criteria & Benchmarks
+              </button>
 
-            <button
-              type="button"
-              onClick={() => setActiveTab('admin')}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '9px 18px',
-                borderRadius: '8px',
-                fontSize: '13px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                border: 'none',
-                background: activeTab === 'admin' ? '#2869e8' : '#f1f5f9',
-                color: activeTab === 'admin' ? '#ffffff' : '#64748b',
-                transition: 'all .2s ease',
-              }}
-            >
-              <i className="fa-solid fa-shield-halved"></i> Admin Security & Audit Center
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={() => setActiveTab('admin')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '9px 18px',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  border: 'none',
+                  background: activeTab === 'admin' ? '#2869e8' : '#f1f5f9',
+                  color: activeTab === 'admin' ? '#ffffff' : '#64748b',
+                  transition: 'all .2s ease',
+                }}
+              >
+                <i className="fa-solid fa-shield-halved"></i> Admin Security & Audit Center
+              </button>
+            </div>
+          )}
 
           {activeTab === 'account' && (
             <>
@@ -508,11 +510,18 @@ export default function Setting() {
                       id="role"
                       value={role}
                       onChange={(e) => setRole(e.target.value)}
+                      disabled={user?.role === 'CANDIDATE'}
                     >
-                      <option value="Administrator">Administrator</option>
-                      <option value="HR Manager">HR Manager</option>
-                      <option value="Recruiter">Recruiter</option>
-                      <option value="Hiring Manager">Hiring Manager</option>
+                      {user?.role === 'CANDIDATE' ? (
+                        <option value="CANDIDATE">Candidate / Job Seeker</option>
+                      ) : (
+                        <>
+                          <option value="Administrator">Administrator</option>
+                          <option value="HR Manager">HR Manager</option>
+                          <option value="Recruiter">Recruiter</option>
+                          <option value="Hiring Manager">Hiring Manager</option>
+                        </>
+                      )}
                     </select>
                   </div>
                 </div>

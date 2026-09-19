@@ -14,6 +14,7 @@ export default function ResumeChecker() {
   const [isAuditing, setIsAuditing] = useState(false);
   const [auditReport, setAuditReport] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [activeReportTab, setActiveReportTab] = useState('diagnostics'); // 'diagnostics', 'skills', 'optimizer'
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -66,6 +67,39 @@ export default function ResumeChecker() {
     } finally {
       setIsAuditing(false);
     }
+  };
+
+  const handleLoadSampleResume = () => {
+    const sampleText = `Alex Morgan
+alex.morgan@techmail.io | +1 (555) 234-5678 | San Francisco, CA | linkedin.com/in/alexmorgan-dev
+
+PROFESSIONAL SUMMARY
+Senior Frontend Engineer with 5+ years of experience engineering high-performance web applications using React, TypeScript, and modern state architectures. Proven track record reducing page latency by 35% and mentoring junior engineers in scalable component design systems.
+
+TECHNICAL SKILLS
+• Programming Languages: TypeScript, JavaScript (ES6+), HTML5, CSS3/Sass, SQL
+• Frameworks & Libraries: React.js, Next.js, Redux Toolkit, Tailwind CSS, Vite, Jest, Vitest
+• Cloud & Tools: Git, GitHub Actions, Docker, AWS (S3, CloudFront), RESTful APIs, GraphQL, Figma
+• Methodologies: Agile / Scrum, Continuous Integration, Test-Driven Development (TDD)
+
+PROFESSIONAL EXPERIENCE
+Senior Frontend Developer | TechNova Solutions | 2021 – Present
+• Architected and developed a core micro-frontend analytics dashboard in React & TypeScript serving 120,000+ monthly active enterprise users.
+• Spearheaded frontend build optimization migrating from Webpack to Vite, reducing compilation latency by 45%.
+• Engineered reusable design token component library in Figma and Tailwind, adopted across 4 distributed cross-functional teams.
+• Implemented end-to-end testing suite with Playwright and Vitest, achieving 92% automated code coverage.
+
+Frontend Software Engineer | CloudScale Networks | 2019 – 2021
+• Built real-time network topology visualization components using React and SVG charting.
+• Optimized state management flows with Redux and memoization, cutting unnecessary re-renders by 30%.
+• Collaborated closely with product designers and backend engineers to integrate RESTful endpoints.
+
+EDUCATION
+Bachelor of Science in Computer Science | University of California, Berkeley | GPA: 3.8 / 4.0`;
+
+    const blob = new Blob([sampleText], { type: 'text/plain' });
+    const sampleFile = new File([blob], 'Alex_Morgan_Senior_Frontend_Resume.txt', { type: 'text/plain' });
+    processFile(sampleFile);
   };
 
   const getScoreColor = (score) => {
@@ -131,24 +165,52 @@ export default function ResumeChecker() {
                     </div>
                   )}
 
-                  <button
-                    type="button"
-                    className="browse-files-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      fileInputRef.current?.click();
-                    }}
-                    disabled={isAuditing}
-                  >
-                    {isAuditing ? (
-                      <>
-                        <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '6px' }}></i>
-                        Auditing Structure...
-                      </>
-                    ) : (
-                      'Browse Files'
-                    )}
-                  </button>
+                  <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      className="browse-files-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        fileInputRef.current?.click();
+                      }}
+                      disabled={isAuditing}
+                    >
+                      {isAuditing ? (
+                        <>
+                          <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '6px' }}></i>
+                          Auditing Structure...
+                        </>
+                      ) : (
+                        'Browse Files'
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      style={{
+                        height: '38px',
+                        padding: '0 16px',
+                        borderRadius: '7px',
+                        border: '1px solid #cbd5e1',
+                        background: '#ffffff',
+                        color: '#334155',
+                        fontSize: '13px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLoadSampleResume();
+                      }}
+                      disabled={isAuditing}
+                    >
+                      <i className="fa-solid fa-flask" style={{ color: '#2563eb' }}></i>
+                      Try Sample Resume
+                    </button>
+                  </div>
                 </div>
 
                 {errorMessage && (
@@ -206,12 +268,35 @@ export default function ResumeChecker() {
                 </div>
               ) : auditReport ? (
                 <div className="checker-card">
-                  <div className="checker-card-header">
-                    <h2>
-                      <i className="fa-solid fa-square-poll-vertical" style={{ color: '#10b981' }}></i>
-                      ATS Audit Results
-                    </h2>
-                    <p>Report generated for {auditReport.candidateName}</p>
+                  <div className="checker-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <h2>
+                        <i className="fa-solid fa-square-poll-vertical" style={{ color: '#10b981' }}></i>
+                        ATS Audit Results
+                      </h2>
+                      <p>Report generated for {auditReport.candidateName}</p>
+                    </div>
+                    <button
+                      type="button"
+                      style={{
+                        padding: '6px 14px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        background: '#ffffff',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        color: '#475569',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                      }}
+                      onClick={() => window.print()}
+                      title="Print or Save PDF"
+                    >
+                      <i className="fa-solid fa-print"></i>
+                      Print / Save
+                    </button>
                   </div>
 
                   {/* Score Highlight Box */}
@@ -234,56 +319,147 @@ export default function ResumeChecker() {
                     </div>
                   </div>
 
-                  {/* Structural Diagnostic Checks */}
-                  <h4 style={{ fontSize: '14px', fontWeight: 700, margin: '0 0 12px 0', color: '#1e293b' }}>
-                    Structural & Formatting Checks
-                  </h4>
-                  <div className="diagnostics-list">
-                    {auditReport.formattingChecks?.map((check, idx) => (
-                      <div key={idx} className="diagnostic-item">
-                        <i
-                          className={`diag-icon ${check.status} ${
-                            check.status === 'PASSED'
-                              ? 'fa-solid fa-circle-check'
-                              : check.status === 'WARNING'
-                              ? 'fa-solid fa-triangle-exclamation'
-                              : 'fa-solid fa-circle-info'
-                          }`}
-                        ></i>
-                        <div className="diag-content">
-                          <strong>{check.name}</strong>
-                          <span>{check.detail}</span>
+                  {/* Navigation Tabs for Audit Details */}
+                  <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px', marginBottom: '18px' }}>
+                    <button
+                      type="button"
+                      style={{
+                        padding: '7px 14px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        fontSize: '12.5px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        background: activeReportTab === 'diagnostics' ? '#2563eb' : '#f1f5f9',
+                        color: activeReportTab === 'diagnostics' ? '#ffffff' : '#475569',
+                      }}
+                      onClick={() => setActiveReportTab('diagnostics')}
+                    >
+                      <i className="fa-solid fa-list-check" style={{ marginRight: '6px' }}></i>
+                      Diagnostics ({auditReport.formattingChecks?.length || 0})
+                    </button>
+
+                    <button
+                      type="button"
+                      style={{
+                        padding: '7px 14px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        fontSize: '12.5px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        background: activeReportTab === 'skills' ? '#2563eb' : '#f1f5f9',
+                        color: activeReportTab === 'skills' ? '#ffffff' : '#475569',
+                      }}
+                      onClick={() => setActiveReportTab('skills')}
+                    >
+                      <i className="fa-solid fa-bolt" style={{ marginRight: '6px' }}></i>
+                      Skills & Gaps
+                    </button>
+
+                    <button
+                      type="button"
+                      style={{
+                        padding: '7px 14px',
+                        borderRadius: '6px',
+                        border: 'none',
+                        fontSize: '12.5px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        background: activeReportTab === 'optimizer' ? '#2563eb' : '#f1f5f9',
+                        color: activeReportTab === 'optimizer' ? '#ffffff' : '#475569',
+                      }}
+                      onClick={() => setActiveReportTab('optimizer')}
+                    >
+                      <i className="fa-solid fa-wand-magic-sparkles" style={{ marginRight: '6px' }}></i>
+                      Bullet Optimizer
+                    </button>
+                  </div>
+
+                  {/* TAB 1: Structural Diagnostic Checks */}
+                  {activeReportTab === 'diagnostics' && (
+                    <div className="diagnostics-list">
+                      {auditReport.formattingChecks?.map((check, idx) => (
+                        <div key={idx} className="diagnostic-item">
+                          <i
+                            className={`diag-icon ${check.status} ${
+                              check.status === 'PASSED'
+                                ? 'fa-solid fa-circle-check'
+                                : check.status === 'WARNING'
+                                ? 'fa-solid fa-triangle-exclamation'
+                                : 'fa-solid fa-circle-info'
+                            }`}
+                          ></i>
+                          <div className="diag-content">
+                            <strong>{check.name}</strong>
+                            <span>{check.detail}</span>
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
 
-                  {/* Extracted Skills */}
-                  <h4 style={{ fontSize: '14px', fontWeight: 700, margin: '0 0 10px 0', color: '#1e293b' }}>
-                    Extracted Technical Skills ({auditReport.extractedSkills?.length || 0})
-                  </h4>
-                  <div className="skills-tags-wrap">
-                    {auditReport.extractedSkills?.map((skill, idx) => (
-                      <span key={idx} className="skill-tag-pill found">
-                        <i className="fa-solid fa-check"></i>
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Missing High Demand Skills */}
-                  {auditReport.missingRecommendations?.length > 0 && (
-                    <div style={{ marginTop: '16px' }}>
-                      <h4 style={{ fontSize: '13.5px', fontWeight: 700, margin: '0 0 8px 0', color: '#b91c1c' }}>
-                        High-Demand Skills to Consider Adding:
+                  {/* TAB 2: Extracted Skills & Missing High Demand Skills */}
+                  {activeReportTab === 'skills' && (
+                    <div>
+                      <h4 style={{ fontSize: '13.5px', fontWeight: 700, margin: '0 0 10px 0', color: '#1e293b' }}>
+                        Identified Competencies ({auditReport.extractedSkills?.length || 0})
                       </h4>
                       <div className="skills-tags-wrap">
-                        {auditReport.missingRecommendations.map((skill, idx) => (
-                          <span key={idx} className="skill-tag-pill missing">
-                            <i className="fa-solid fa-plus"></i>
+                        {auditReport.extractedSkills?.map((skill, idx) => (
+                          <span key={idx} className="skill-tag-pill found">
+                            <i className="fa-solid fa-check"></i>
                             {skill}
                           </span>
                         ))}
+                      </div>
+
+                      {auditReport.missingRecommendations?.length > 0 && (
+                        <div style={{ marginTop: '18px' }}>
+                          <h4 style={{ fontSize: '13.5px', fontWeight: 700, margin: '0 0 8px 0', color: '#b91c1c' }}>
+                            Recommended High-Demand Tech to Add:
+                          </h4>
+                          <div className="skills-tags-wrap">
+                            {auditReport.missingRecommendations.map((skill, idx) => (
+                              <span key={idx} className="skill-tag-pill missing">
+                                <i className="fa-solid fa-plus"></i>
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* TAB 3: Bullet Point Optimizer Examples */}
+                  {activeReportTab === 'optimizer' && (
+                    <div>
+                      <h4 style={{ fontSize: '13.5px', fontWeight: 700, margin: '0 0 10px 0', color: '#1e293b' }}>
+                        Action Verbs & Impact Formula
+                      </h4>
+                      <p style={{ fontSize: '12.5px', color: '#64748b', margin: '0 0 14px 0', lineHeight: 1.5 }}>
+                        Enterprise recruiters look for quantifiable metrics. Replace generic tasks with measurable achievements.
+                      </p>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 14px' }}>
+                          <div style={{ fontSize: '12px', color: '#ef4444', textDecoration: 'line-through', marginBottom: '4px' }}>
+                            ❌ "Worked on building React frontend interfaces."
+                          </div>
+                          <div style={{ fontSize: '12.5px', color: '#059669', fontWeight: 600 }}>
+                            ✔ "Architected 14+ reusable React component modules, decreasing page render latency by 32%."
+                          </div>
+                        </div>
+
+                        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 14px' }}>
+                          <div style={{ fontSize: '12px', color: '#ef4444', textDecoration: 'line-through', marginBottom: '4px' }}>
+                            ❌ "Responsible for writing tests."
+                          </div>
+                          <div style={{ fontSize: '12.5px', color: '#059669', fontWeight: 600 }}>
+                            ✔ "Implemented automated test pipeline with Vitest & Playwright, expanding test coverage to 94%."
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -317,7 +493,7 @@ export default function ResumeChecker() {
                   <i className="fa-regular fa-file-lines" style={{ fontSize: '48px', color: '#cbd5e1', marginBottom: '16px' }}></i>
                   <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#334155', margin: '0 0 6px 0' }}>No Resume Uploaded Yet</h3>
                   <p style={{ margin: 0, fontSize: '13.5px', maxWidth: '340px' }}>
-                    Upload your resume on the left to see your full ATS compatibility breakdown and suggestions.
+                    Upload your resume on the left or click <strong>"Try Sample Resume"</strong> to test instant AI ATS scoring!
                   </p>
                 </div>
               )}

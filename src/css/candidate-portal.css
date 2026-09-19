@@ -739,3 +739,279 @@ body.dark-mode .diagnostic-item {
     background: #0f172a;
     border-color: #1e293b;
 }
+
+/* =========================================
+   PORTAL MODAL DIALOGS
+========================================= */
+
+.portal-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 10000;
+    animation: fadeInModal 0.2s ease-out;
+}
+
+@keyframes fadeInModal {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.portal-modal-card {
+    background: #ffffff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 680px;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.25);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    animation: scaleInModal 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes scaleInModal {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.portal-modal-header {
+    padding: 20px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.portal-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.portal-modal-close-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 15px;
+    transition: all 0.15s ease;
+}
+
+.portal-modal-close-btn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.portal-modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.portal-modal-footer {
+    padding: 16px 24px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+/* Modal Specs Grid */
+.portal-specs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+    background: #f8fafc;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.portal-spec-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.portal-spec-item .spec-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 0.5px;
+}
+
+.portal-spec-item .spec-val {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+/* Filter Tab Pills */
+.portal-filter-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.portal-tab-pill {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.18s ease;
+}
+
+.portal-tab-pill:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.portal-tab-pill.active {
+    background: #2563eb;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+
+.portal-tab-pill .pill-count {
+    background: rgba(0, 0, 0, 0.08);
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-size: 11px;
+}
+
+.portal-tab-pill.active .pill-count {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+
+/* Secondary Button In Cards */
+.job-secondary-btn {
+    height: 38px;
+    padding: 0 14px;
+    border-radius: 8px;
+    background: #f1f5f9;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+}
+
+.job-secondary-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+/* Copilot Trigger Button */
+.copilot-trigger-btn {
+    height: 38px;
+    padding: 0 16px;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.18s ease;
+}
+
+.copilot-trigger-btn:hover {
+    background: #dbeafe;
+    border-color: #93c5fd;
+    transform: translateY(-1px);
+}
+
+body.dark-mode .portal-modal-card {
+    background: #131d33;
+    border-color: #1e293b;
+}
+
+body.dark-mode .portal-modal-header {
+    border-color: #1e293b;
+}
+
+body.dark-mode .portal-modal-header h3 {
+    color: #f8fafc;
+}
+
+body.dark-mode .portal-modal-footer {
+    background: #0f172a;
+    border-color: #1e293b;
+}
+
+body.dark-mode .portal-specs-grid {
+    background: #0f172a;
+    border-color: #1e293b;
+}
+
+body.dark-mode .portal-spec-item .spec-val {
+    color: #f8fafc;
+}
+
+body.dark-mode .portal-tab-pill {
+    background: #1e293b;
+    color: #94a3b8;
+}
+
+body.dark-mode .portal-tab-pill:hover {
+    background: #334155;
+    color: #f8fafc;
+}
+
+body.dark-mode .portal-tab-pill.active {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+body.dark-mode .job-secondary-btn {
+    background: #1e293b;
+    color: #cbd5e1;
+    border-color: #334155;
+}
+
+body.dark-mode .job-secondary-btn:hover {
+    background: #334155;
+    color: #ffffff;
+}
+
