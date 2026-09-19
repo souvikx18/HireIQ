@@ -85,7 +85,64 @@ export default function Login() {
       <section className="signup-form-panel" aria-label="Login form">
         <form className="signup-form" id="loginForm" onSubmit={handleLoginSubmit}>
           <h2>Welcome Back</h2>
-          <p className="login-subtitle">Login with email</p>
+          <p className="login-subtitle">Login with your credentials or select a demo account</p>
+
+          {/* Quick Demo Switcher */}
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '18px' }}>
+            <button
+              type="button"
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                borderRadius: '8px',
+                fontSize: '12px',
+                fontWeight: 600,
+                border: loginEmail.includes('admin') ? '1.5px solid #2563eb' : '1px solid #cbd5e1',
+                background: loginEmail.includes('admin') ? '#eff6ff' : '#ffffff',
+                color: loginEmail.includes('admin') ? '#1d4ed8' : '#475569',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                transition: 'all 0.2s ease',
+              }}
+              onClick={() => {
+                setLoginEmail('admin@hireiq.com');
+                setLoginPassword('Admin@123456');
+              }}
+            >
+              <i className="fa-solid fa-user-shield"></i>
+              Recruiter Demo
+            </button>
+
+            <button
+              type="button"
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                borderRadius: '8px',
+                fontSize: '12px',
+                fontWeight: 600,
+                border: loginEmail.includes('candidate') ? '1.5px solid #2563eb' : '1px solid #cbd5e1',
+                background: loginEmail.includes('candidate') ? '#eff6ff' : '#ffffff',
+                color: loginEmail.includes('candidate') ? '#1d4ed8' : '#475569',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                transition: 'all 0.2s ease',
+              }}
+              onClick={() => {
+                setLoginEmail('candidate@hireiq.com');
+                setLoginPassword('Candidate@123456');
+              }}
+            >
+              <i className="fa-solid fa-user-graduate"></i>
+              Candidate Demo
+            </button>
+          </div>
 
           {errorMessage && (
             <div
