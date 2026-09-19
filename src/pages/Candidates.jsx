@@ -628,6 +628,7 @@ export default function Candidates() {
                           type="button"
                           onClick={() => setSelectedCandidateModal(c)}
                         >
+                          <i className="fa-regular fa-eye" style={{ marginRight: '6px' }}></i>
                           View Details
                         </button>
 

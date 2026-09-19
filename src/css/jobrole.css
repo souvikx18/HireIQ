@@ -868,9 +868,11 @@ table .candidate-count i,
 }
 
 .view-btn:hover {
-    background: #eaf1ff;
+    background: #2563eb !important;
 
-    border-color: #3777e8;
+    border-color: #2563eb !important;
+
+    color: #ffffff !important;
 }
 
 .edit-btn {
@@ -880,9 +882,11 @@ table .candidate-count i,
 }
 
 .edit-btn:hover {
-    background: #eaf1ff;
+    background: #2563eb !important;
 
-    border-color: #3777e8;
+    border-color: #2563eb !important;
+
+    color: #ffffff !important;
 }
 
 .delete-btn {
@@ -892,9 +896,11 @@ table .candidate-count i,
 }
 
 .delete-btn:hover {
-    background: #fff0f1;
+    background: #ef4444 !important;
 
-    border-color: #ef555f;
+    border-color: #ef4444 !important;
+
+    color: #ffffff !important;
 }
 
 

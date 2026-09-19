@@ -320,6 +320,8 @@ export default function ResumeUpload() {
 
   const handleShortlist = async () => {
     setShortlisted(true);
+    setPassed(false);
+    setRejected(false);
     if (activeCandidate?.id) {
       try {
         await candidatesApi.updateStatus(activeCandidate.id, 'SHORTLISTED');
@@ -332,6 +334,7 @@ export default function ResumeUpload() {
 
   const handlePass = async () => {
     setPassed(true);
+    setShortlisted(false);
     setRejected(false);
     if (activeCandidate?.id) {
       try {
@@ -833,50 +836,35 @@ export default function ResumeUpload() {
                   </div>
 
                   {/* ACTION BUTTONS */}
-                  <div className="actions" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                  <div className="resume-decision-actions">
                     <button
                       type="button"
-                      className="shortlist-btn"
+                      className={`action-pill-btn shortlist ${shortlisted ? 'is-active' : ''}`}
                       id="shortlistBtn"
                       onClick={handleShortlist}
-                      style={shortlisted ? { background: '#0c8275', color: '#ffffff' } : {}}
                     >
-                      {shortlisted ? '✓ Shortlisted' : 'Shortlist Candidate'}
+                      <i className={shortlisted ? "fa-solid fa-circle-check" : "fa-solid fa-check"}></i>
+                      <span>{shortlisted ? 'Shortlisted' : 'Shortlist Candidate'}</span>
                     </button>
 
                     <button
                       type="button"
-                      className="pass-btn"
+                      className={`action-pill-btn pass ${passed ? 'is-active' : ''}`}
                       id="passBtn"
                       onClick={handlePass}
-                      style={passed ? { background: '#edf3ff', color: '#2869e8', borderColor: '#2869e8' } : {}}
                     >
-                      {passed ? '✓ Passed' : 'Pass'}
+                      <i className={passed ? "fa-solid fa-circle-check" : "fa-regular fa-calendar-check"}></i>
+                      <span>{passed ? 'Passed to Interview' : 'Pass to Interview'}</span>
                     </button>
 
                     <button
                       type="button"
-                      className="reject-btn"
+                      className={`action-pill-btn reject ${rejected ? 'is-active' : ''}`}
                       id="rejectBtn"
                       onClick={handleReject}
-                      style={{
-                        padding: '12px 24px',
-                        borderRadius: '8px',
-                        border: '1px solid #fecaca',
-                        background: rejected ? '#dc2626' : '#fff1f2',
-                        color: rejected ? '#ffffff' : '#e11d48',
-                        fontWeight: '600',
-                        fontSize: '13px',
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px',
-                        transition: 'all .2s ease',
-                      }}
                     >
-                      <i className="fa-solid fa-ban"></i>
-                      {rejected ? '✓ Rejected' : 'Reject'}
+                      <i className={rejected ? "fa-solid fa-circle-xmark" : "fa-solid fa-xmark"}></i>
+                      <span>{rejected ? 'Rejected' : 'Reject'}</span>
                     </button>
                   </div>
                 </>
