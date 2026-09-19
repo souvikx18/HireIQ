@@ -20,13 +20,15 @@ export const authService = {
     const salt = await bcrypt.genSalt(12);
     const passwordHash = await bcrypt.hash(password, salt);
 
+    const normalizedRole = normalizeRole(role);
+
     const user = await prisma.user.create({
       data: {
         email: email.toLowerCase().trim(),
         passwordHash,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
-        role: normalizeRole(role),
+        role: normalizedRole,
       },
       select: {
         id: true,
@@ -38,6 +40,23 @@ export const authService = {
         createdAt: true,
       },
     });
+
+    if (normalizedRole === 'CANDIDATE') {
+      try {
+        await prisma.candidate.create({
+          data: {
+            userId: user.id,
+            name: `${user.firstName} ${user.lastName}`.trim(),
+            email: user.email,
+            roleApplied: 'Job Seeker',
+            status: 'ACTIVE',
+            currentStage: 'UPLOADED',
+          },
+        });
+      } catch {
+        // ignore if candidate record with that email already exists
+      }
+    }
 
     const accessToken = generateAccessToken(user);
     const refreshToken = await this.createRefreshToken(user.id);

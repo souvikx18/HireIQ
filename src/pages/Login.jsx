@@ -40,7 +40,7 @@ export default function Login() {
     setIsSubmitting(true);
 
     try {
-      await login({
+      const loggedUser = await login({
         email: loginEmail,
         password: loginPassword,
       });
@@ -48,7 +48,11 @@ export default function Login() {
       document.body.classList.add('page-leaving');
       setTimeout(() => {
         document.body.classList.remove('page-leaving');
-        navigate('/dashboard');
+        if (loggedUser?.role === 'CANDIDATE') {
+          navigate('/candidate/dashboard');
+        } else {
+          navigate('/dashboard');
+        }
       }, 350);
     } catch (err) {
       setErrorMessage(err.message || 'Login failed. Please check your credentials.');

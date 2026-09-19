@@ -8,10 +8,10 @@ export const authApi = {
     });
   },
 
-  register: async ({ firstName, lastName, email, password }) => {
+  register: async ({ firstName, lastName, email, password, role }) => {
     return apiClient('/auth/register', {
       method: 'POST',
-      body: { firstName, lastName, email, password },
+      body: { firstName, lastName, email, password, role },
     });
   },
 

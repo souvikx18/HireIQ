@@ -5,6 +5,7 @@ export const ROLES = {
   HR_MANAGER: 'HR_MANAGER',
   RECRUITER: 'RECRUITER',
   INTERVIEWER: 'INTERVIEWER',
+  CANDIDATE: 'CANDIDATE',
 };
 
 // Normalize role strings from different formats (e.g. 'Administrator' -> 'ADMIN', 'HR Manager' -> 'HR_MANAGER')
@@ -14,6 +15,7 @@ export const normalizeRole = (role) => {
   if (upper.includes('ADMIN')) return ROLES.ADMIN;
   if (upper.includes('HR')) return ROLES.HR_MANAGER;
   if (upper.includes('INTERVIEW')) return ROLES.INTERVIEWER;
+  if (upper.includes('CANDIDATE') || upper.includes('JOB_SEEKER') || upper.includes('SEEKER')) return ROLES.CANDIDATE;
   return ROLES.RECRUITER;
 };
 

@@ -255,6 +255,81 @@ body.page-leaving .signup-form-panel {
     letter-spacing: -0.3px;
 }
 
+/* =========================================
+   ROLE SELECTOR PILLS
+========================================= */
+
+.role-selector-container {
+    margin-bottom: 18px;
+    width: 100%;
+}
+
+.role-selector-label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #536479;
+    margin-bottom: 8px;
+}
+
+.role-selector-pills {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.role-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1.5px solid #d6dee7;
+    background: #ffffff;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.role-pill i {
+    font-size: 18px;
+    color: #64748b;
+    transition: color 0.2s ease;
+}
+
+.role-pill strong {
+    display: block;
+    font-size: 13px;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.role-pill span {
+    display: block;
+    font-size: 11px;
+    color: #64748b;
+}
+
+.role-pill:hover {
+    border-color: #93c5fd;
+    background: #f8fafc;
+}
+
+.role-pill.active {
+    border-color: #2563eb;
+    background: #eff6ff;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+}
+
+.role-pill.active i {
+    color: #2563eb;
+}
+
+.role-pill.active strong {
+    color: #1d4ed8;
+}
+
 .login-subtitle {
     margin: -12px 0 20px 0;
     color: #65758a;

@@ -133,6 +133,10 @@ export default function LandingPage() {
           </nav>
 
           <div className="lp-nav-actions">
+            <Link to="/resume-checker" className="lp-btn-login" style={{ color: '#2563eb', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <i className="fa-solid fa-file-shield"></i>
+              ATS Check
+            </Link>
             <Link to="/login" className="lp-btn-login">
               Login
             </Link>

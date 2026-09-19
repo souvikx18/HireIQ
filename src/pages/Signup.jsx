@@ -6,6 +6,7 @@ import '../css/signup.css';
 export default function Signup() {
   const navigate = useNavigate();
   const { signup } = useAuth();
+  const [accountRole, setAccountRole] = useState('RECRUITER');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -54,17 +55,22 @@ export default function Signup() {
 
     setIsSubmitting(true);
     try {
-      await signup({
+      const registeredUser = await signup({
         firstName,
         lastName,
         email,
         password,
+        role: accountRole,
       });
 
       document.body.classList.add('page-leaving');
       setTimeout(() => {
         document.body.classList.remove('page-leaving');
-        navigate('/dashboard');
+        if (registeredUser?.role === 'CANDIDATE' || accountRole === 'CANDIDATE') {
+          navigate('/candidate/dashboard');
+        } else {
+          navigate('/dashboard');
+        }
       }, 350);
     } catch (err) {
       setErrorMessage(err.message || 'Signup failed. Please try again.');
@@ -97,6 +103,36 @@ export default function Signup() {
       <section className="signup-form-panel">
         <form className="signup-form" id="signupForm" onSubmit={handleSubmit}>
           <h2>Create your account</h2>
+
+          {/* Account Role Selector */}
+          <div className="role-selector-container">
+            <label className="role-selector-label">I want to:</label>
+            <div className="role-selector-pills">
+              <button
+                type="button"
+                className={`role-pill ${accountRole === 'RECRUITER' ? 'active' : ''}`}
+                onClick={() => setAccountRole('RECRUITER')}
+              >
+                <i className="fa-solid fa-briefcase"></i>
+                <div>
+                  <strong>Hire Talent</strong>
+                  <span>Recruiter / HR</span>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                className={`role-pill ${accountRole === 'CANDIDATE' ? 'active' : ''}`}
+                onClick={() => setAccountRole('CANDIDATE')}
+              >
+                <i className="fa-solid fa-user-graduate"></i>
+                <div>
+                  <strong>Find Jobs</strong>
+                  <span>Candidate Portal</span>
+                </div>
+              </button>
+            </div>
+          </div>
 
           {errorMessage && (
             <div

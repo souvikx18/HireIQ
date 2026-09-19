@@ -1,0 +1,741 @@
+/* =========================================================
+   HIREIQ CANDIDATE PORTAL STYLES
+========================================================= */
+
+.candidate-portal-root {
+    display: flex;
+    min-height: 100vh;
+    background-color: var(--bg-main, #f4f6fa);
+    color: var(--text-primary, #1e293b);
+    font-family: Inter, sans-serif;
+}
+
+.portal-main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow-y: auto;
+}
+
+.portal-body {
+    padding: 24px 32px 48px;
+    max-width: 1400px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* =========================================
+   HERO WELCOME BANNER
+========================================= */
+
+.portal-hero {
+    background: linear-gradient(135deg, #1e3a8a, #2563eb 65%, #3b82f6);
+    border-radius: 16px;
+    padding: 32px 36px;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.25);
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+}
+
+.portal-hero::after {
+    content: '';
+    position: absolute;
+    right: -40px;
+    bottom: -40px;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.15), transparent 70%);
+    pointer-events: none;
+}
+
+.portal-hero-text h1 {
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.3px;
+}
+
+.portal-hero-text p {
+    font-size: 14px;
+    color: #dbeafe;
+    margin: 0;
+    max-width: 580px;
+    line-height: 1.5;
+}
+
+.portal-hero-actions {
+    display: flex;
+    gap: 12px;
+    z-index: 1;
+}
+
+.hero-cta-btn {
+    height: 42px;
+    padding: 0 20px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.hero-cta-btn.primary {
+    background: #ffffff;
+    color: #1d4ed8;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.hero-cta-btn.primary:hover {
+    background: #f8fafc;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.hero-cta-btn.secondary {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(8px);
+}
+
+.hero-cta-btn.secondary:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+}
+
+/* =========================================
+   OVERVIEW STATS CARDS
+========================================= */
+
+.portal-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.stat-card-portal {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 22px 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card-portal:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.stat-card-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.stat-card-icon.blue {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.stat-card-icon.emerald {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.stat-card-icon.amber {
+    background: #fffbeb;
+    color: #d97706;
+}
+
+.stat-card-icon.purple {
+    background: #faf5ff;
+    color: #7c3aed;
+}
+
+.stat-card-info span {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.stat-card-info h3 {
+    margin: 4px 0 0 0;
+    font-size: 24px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+/* =========================================
+   ATS RESUME CHECKER VIEW
+========================================= */
+
+.checker-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    align-items: start;
+}
+
+.checker-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 28px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.checker-card-header {
+    margin-bottom: 20px;
+}
+
+.checker-card-header h2 {
+    margin: 0 0 6px 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.checker-card-header p {
+    margin: 0;
+    font-size: 13.5px;
+    color: #64748b;
+    line-height: 1.4;
+}
+
+/* Upload Dropzone */
+.checker-dropzone {
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 36px 20px;
+    text-align: center;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    margin-bottom: 20px;
+}
+
+.checker-dropzone:hover,
+.checker-dropzone.active {
+    border-color: #2563eb;
+    background: #eff6ff;
+}
+
+.dropzone-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: #e0e7ff;
+    color: #3730a3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin: 0 auto 16px;
+}
+
+.checker-dropzone h4 {
+    margin: 0 0 6px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.checker-dropzone p {
+    margin: 0 0 16px 0;
+    font-size: 12.5px;
+    color: #64748b;
+}
+
+.browse-files-btn {
+    height: 38px;
+    padding: 0 20px;
+    border-radius: 7px;
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.browse-files-btn:hover {
+    background: #1d4ed8;
+}
+
+/* Score Metric Showcase */
+.score-badge-box {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 18px 22px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.score-badge-circle {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #10b981;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    flex-shrink: 0;
+}
+
+.score-badge-circle .num {
+    font-size: 22px;
+    line-height: 1;
+}
+
+.score-badge-circle .sub {
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+}
+
+.score-badge-desc h4 {
+    margin: 0 0 4px 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: #065f46;
+}
+
+.score-badge-desc p {
+    margin: 0;
+    font-size: 12.5px;
+    color: #047857;
+    line-height: 1.4;
+}
+
+/* Diagnostic Checks */
+.diagnostics-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.diagnostic-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+}
+
+.diag-icon {
+    font-size: 16px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.diag-icon.PASSED {
+    color: #10b981;
+}
+
+.diag-icon.WARNING {
+    color: #f59e0b;
+}
+
+.diag-icon.REVIEW,
+.diag-icon.INFO {
+    color: #3b82f6;
+}
+
+.diag-content {
+    flex: 1;
+}
+
+.diag-content strong {
+    display: block;
+    font-size: 13px;
+    color: #1e293b;
+    margin-bottom: 2px;
+}
+
+.diag-content span {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.35;
+}
+
+/* Skills Tags Cloud */
+.skills-tags-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.skill-tag-pill {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.skill-tag-pill.found {
+    background: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+}
+
+.skill-tag-pill.missing {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+/* =========================================
+   EXPLORE JOBS & 1-CLICK APPLY
+========================================= */
+
+.jobs-explorer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 20px;
+}
+
+.job-card-candidate {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.2s ease;
+}
+
+.job-card-candidate:hover {
+    border-color: #93c5fd;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.08);
+}
+
+.job-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.job-role-code {
+    font-size: 11px;
+    font-weight: 700;
+    color: #2563eb;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: #eff6ff;
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.job-match-pill {
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.job-match-pill.high {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+
+.job-match-pill.medium {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+.job-card-candidate h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 6px 0;
+}
+
+.job-meta-row {
+    display: flex;
+    gap: 14px;
+    font-size: 12.5px;
+    color: #64748b;
+    margin-bottom: 14px;
+}
+
+.job-meta-row span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.job-desc-snippet {
+    font-size: 13px;
+    color: #475569;
+    line-height: 1.45;
+    margin-bottom: 16px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.job-skills-req {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 20px;
+}
+
+.job-skill-chip {
+    background: #f1f5f9;
+    color: #334155;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11.5px;
+    font-weight: 500;
+}
+
+.job-apply-btn {
+    width: 100%;
+    height: 40px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border: none;
+    transition: all 0.2s ease;
+}
+
+.job-apply-btn.apply {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.job-apply-btn.apply:hover {
+    background: #1d4ed8;
+    box-shadow: 0 3px 10px rgba(37, 99, 235, 0.25);
+}
+
+.job-apply-btn.applied {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+    cursor: default;
+}
+
+/* =========================================
+   MY APPLICATIONS TRACKER
+========================================= */
+
+.app-tracker-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 24px 28px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    margin-bottom: 18px;
+}
+
+.app-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.app-title-block h3 {
+    margin: 0 0 4px 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.app-title-block span {
+    font-size: 12.5px;
+    color: #64748b;
+}
+
+.app-stage-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.app-stage-badge.applied {
+    background: #eff6ff;
+    color: #2563eb;
+}
+
+.app-stage-badge.under_review {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.app-stage-badge.interview {
+    background: #faf5ff;
+    color: #7e22ce;
+}
+
+.app-stage-badge.shortlisted {
+    background: #ecfdf5;
+    color: #059669;
+}
+
+.app-stage-badge.rejected {
+    background: #fff1f2;
+    color: #e11d48;
+}
+
+/* Stepper Progress Bar */
+.stepper-timeline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    margin-top: 14px;
+}
+
+.stepper-timeline::before {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 40px;
+    right: 40px;
+    height: 3px;
+    background: #e2e8f0;
+    z-index: 0;
+}
+
+.step-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 1;
+}
+
+.step-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #ffffff;
+    border: 2px solid #cbd5e1;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.step-node.active .step-circle {
+    border-color: #2563eb;
+    background: #2563eb;
+    color: #ffffff;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+}
+
+.step-node.completed .step-circle {
+    border-color: #10b981;
+    background: #10b981;
+    color: #ffffff;
+}
+
+.step-node span {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.step-node.active span {
+    color: #2563eb;
+}
+
+/* =========================================
+   DARK MODE ADJUSTMENTS
+========================================= */
+
+body.dark-mode .candidate-portal-root {
+    background-color: #0b1120;
+    color: #e2e8f0;
+}
+
+body.dark-mode .stat-card-portal,
+body.dark-mode .checker-card,
+body.dark-mode .job-card-candidate,
+body.dark-mode .app-tracker-card {
+    background: #131d33;
+    border-color: #1e293b;
+}
+
+body.dark-mode .stat-card-info h3,
+body.dark-mode .checker-card-header h2,
+body.dark-mode .job-card-candidate h3,
+body.dark-mode .app-title-block h3,
+body.dark-mode .diag-content strong {
+    color: #f8fafc;
+}
+
+body.dark-mode .checker-dropzone {
+    background: #0f172a;
+    border-color: #334155;
+}
+
+body.dark-mode .diagnostic-item {
+    background: #0f172a;
+    border-color: #1e293b;
+}

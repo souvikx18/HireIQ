@@ -22,6 +22,7 @@ import reportRoutes from './routes/report.routes.js';
 import aiRoutes from './routes/ai.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import skillRoutes from './routes/skill.routes.js';
+import candidatePortalRoutes from './routes/candidatePortal.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -112,6 +113,7 @@ app.use('/api/reports', reportRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/skills', skillRoutes);
+app.use('/api/candidate-portal', candidatePortalRoutes);
 
 // 8. 404 Route Handler
 app.use((req, res) => {

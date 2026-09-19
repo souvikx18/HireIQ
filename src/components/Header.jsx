@@ -28,7 +28,15 @@ export default function Header({
   const menuRef = useRef(null);
 
   const profileName = user ? `${user.firstName} ${user.lastName}`.trim() : "HR Manager";
-  const profileRole = user ? (user.role === 'ADMIN' ? 'Administrator' : user.role === 'HR_MANAGER' ? 'HR Manager' : user.role) : "Administrator";
+  const profileRole = user
+    ? (user.role === 'ADMIN'
+        ? 'Administrator'
+        : user.role === 'HR_MANAGER'
+        ? 'HR Manager'
+        : user.role === 'CANDIDATE'
+        ? 'Job Seeker'
+        : user.role)
+    : "Administrator";
   const avatarText = user
     ? `${user.firstName?.[0] || 'H'}${user.lastName?.[0] || 'R'}`.toUpperCase()
     : "HR";

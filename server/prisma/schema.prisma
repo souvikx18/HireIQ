@@ -12,6 +12,7 @@ enum Role {
   HR_MANAGER
   RECRUITER
   INTERVIEWER
+  CANDIDATE
 }
 
 enum JobStatus {
@@ -66,6 +67,7 @@ model User {
   candidateReviews     CandidateReview[]
   aiConversations      AiConversation[]
   auditLogs            AuditLog[]
+  candidate            Candidate?
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
 }
@@ -95,6 +97,7 @@ model JobRole {
   status          String      @default("ACTIVE") // JobStatus enum string
   skills          JobSkill[]
   candidates      Candidate[]
+  applications    CandidateApplication[]
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 }
@@ -129,6 +132,8 @@ model JobSkill {
 
 model Candidate {
   id              String           @id @default(uuid())
+  userId          String?          @unique
+  user            User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
   name            String
   email           String           @unique
   phone           String?
@@ -151,6 +156,7 @@ model Candidate {
   skillGaps       SkillGap[]
   resumes         Resume[]
   reviews         CandidateReview[]
+  applications    CandidateApplication[]
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
 }
@@ -258,4 +264,20 @@ model AuditLog {
   details      String?
   ipAddress    String?
   createdAt    DateTime @default(now())
+}
+
+model CandidateApplication {
+  id          String    @id @default(uuid())
+  candidateId String
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  jobRoleId   String
+  jobRole     JobRole   @relation(fields: [jobRoleId], references: [id], onDelete: Cascade)
+  resumeId    String?
+  matchScore  Int       @default(0)
+  status      String    @default("APPLIED") // APPLIED, UNDER_REVIEW, INTERVIEW, SHORTLISTED, REJECTED, HIRED
+  feedback    String?
+  appliedAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([candidateId, jobRoleId])
 }

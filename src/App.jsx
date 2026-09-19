@@ -13,11 +13,15 @@ import Setting from './pages/Setting';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
 import Upgrade from './pages/Upgrade';
+import CandidateDashboard from './pages/Candidate/CandidateDashboard';
+import ResumeChecker from './pages/Candidate/ResumeChecker';
+import CandidateJobs from './pages/Candidate/CandidateJobs';
+import MyApplications from './pages/Candidate/MyApplications';
 import AIChatbot from './components/AIChatbot';
 
 function AppRoutes() {
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const path = location.pathname.toLowerCase();
 
   const hideChatbot =
@@ -203,6 +207,42 @@ function AppRoutes() {
           }
         />
 
+        {/* Candidate Portal Routes */}
+        <Route
+          path="/candidate/dashboard"
+          element={
+            <ProtectedRoute>
+              <CandidateDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/candidate/resume-checker"
+          element={
+            <ProtectedRoute>
+              <ResumeChecker />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/candidate/jobs"
+          element={
+            <ProtectedRoute>
+              <CandidateJobs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/candidate/applications"
+          element={
+            <ProtectedRoute>
+              <MyApplications />
+            </ProtectedRoute>
+          }
+        />
+        {/* Public shortcut for ATS Resume Checker */}
+        <Route path="/resume-checker" element={<ResumeChecker />} />
+
         {/* Auth Routes */}
         <Route path="/signup" element={<Signup />} />
         <Route path="/signup.html" element={<Signup />} />
@@ -215,7 +255,11 @@ function AppRoutes() {
           path="*"
           element={
             isAuthenticated ? (
-              <Navigate to="/dashboard" replace />
+              user?.role === 'CANDIDATE' ? (
+                <Navigate to="/candidate/dashboard" replace />
+              ) : (
+                <Navigate to="/dashboard" replace />
+              )
             ) : (
               <Navigate to="/" replace />
             )
