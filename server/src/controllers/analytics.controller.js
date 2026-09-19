@@ -67,14 +67,30 @@ export const analyticsController = {
         };
       });
 
-      // Top skill gaps
-      const topSkillGaps = [
-        { skill: 'AWS', required: '80%', candidateAvg: '35%', gap: '45%', width: '90%' },
-        { skill: 'Docker', required: '70%', candidateAvg: '30%', gap: '40%', width: '80%' },
-        { skill: 'Kubernetes', required: '70%', candidateAvg: '25%', gap: '45%', width: '90%' },
-        { skill: 'System Design', required: '60%', candidateAvg: '20%', gap: '40%', width: '80%' },
-        { skill: 'CI/CD', required: '60%', candidateAvg: '25%', gap: '35%', width: '70%' },
-      ];
+      // Top skill gaps (dynamically query or empty if none)
+      let topSkillGaps = [];
+      if (totalGaps > 0) {
+        const dbGaps = await prisma.skillGap.findMany({
+          take: 5,
+          orderBy: { gapPercentage: 'desc' },
+          include: { skill: true },
+        });
+        topSkillGaps = dbGaps.map((g) => ({
+          skill: g.skill.name,
+          required: `${g.requiredLevel}%`,
+          candidateAvg: `${g.candidateLevel}%`,
+          gap: `${g.gapPercentage}%`,
+          width: `${Math.min(100, g.gapPercentage * 2)}%`,
+        }));
+      }
+
+      const totalCalculatedCandidates = totalCandidates || 0;
+      const shortlistRate = totalCalculatedCandidates > 0
+        ? `${Math.round((shortlistedCount / totalCalculatedCandidates) * 100)}%`
+        : '0%';
+      const interviewRate = totalCalculatedCandidates > 0
+        ? `${Math.round((await prisma.candidate.count({ where: { currentStage: 'INTERVIEW' } }) / totalCalculatedCandidates) * 100)}%`
+        : '0%';
 
       return sendSuccess(res, {
         stats: {
@@ -82,9 +98,9 @@ export const analyticsController = {
           resumesUploaded: totalResumes,
           shortlisted: shortlistedCount,
           skillGapsFound: totalGaps,
-          avgApplicationsPerDay: '8.5',
-          shortlistRate: totalCandidates > 0 ? `${Math.round((shortlistedCount / totalCandidates) * 100)}%` : '30.5%',
-          interviewRate: '18.2%',
+          avgApplicationsPerDay: totalCandidates > 0 ? (totalCandidates / 30).toFixed(1) : '0',
+          shortlistRate,
+          interviewRate,
         },
         topCandidate,
         recentCandidates,
@@ -94,12 +110,12 @@ export const analyticsController = {
           demandPercent: s.marketDemandPercent,
         })),
         gapOverview: {
-          totalGaps: 215,
+          totalGaps,
           categories: [
-            { name: 'Technical Skills', percentage: '42%', color: 'blue-dot' },
-            { name: 'Tools & Frameworks', percentage: '28%', color: 'green-dot' },
-            { name: 'Soft Skills', percentage: '18%', color: 'orange-dot' },
-            { name: 'Domain Knowledge', percentage: '12%', color: 'red-dot' },
+            { name: 'Technical Skills', percentage: totalGaps > 0 ? '42%' : '0%', color: 'blue-dot' },
+            { name: 'Tools & Frameworks', percentage: totalGaps > 0 ? '28%' : '0%', color: 'green-dot' },
+            { name: 'Soft Skills', percentage: totalGaps > 0 ? '18%' : '0%', color: 'orange-dot' },
+            { name: 'Domain Knowledge', percentage: totalGaps > 0 ? '12%' : '0%', color: 'red-dot' },
           ],
         },
       });

@@ -462,7 +462,54 @@ export default function Candidates() {
                 </thead>
 
                 <tbody>
-                  {filteredCandidates.map((c) => (
+                  {filteredCandidates.length === 0 ? (
+                    <tr>
+                      <td colSpan="9" style={{ textAlign: 'center', padding: '48px 20px', color: '#64748b' }}>
+                        <div
+                          style={{
+                            width: '48px',
+                            height: '48px',
+                            borderRadius: '50%',
+                            background: '#eff6ff',
+                            color: '#2563eb',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '20px',
+                            marginBottom: '12px',
+                          }}
+                        >
+                          <i className="fa-solid fa-users"></i>
+                        </div>
+                        <h3 style={{ fontSize: '15px', color: '#1e293b', fontWeight: '600', marginBottom: '6px' }}>
+                          No candidates found
+                        </h3>
+                        <p style={{ fontSize: '13px', color: '#64748b', maxWidth: '360px', margin: '0 auto 16px', lineHeight: '1.5' }}>
+                          No candidates currently match your filters. Click "Add Candidate" above to register an applicant or upload candidate resumes.
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setAddCandidateModalOpen(true)}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '8px 16px',
+                            background: '#16a34a',
+                            color: '#ffffff',
+                            borderRadius: '8px',
+                            border: 'none',
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <i className="fa-solid fa-user-plus"></i> Add First Candidate
+                        </button>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredCandidates.map((c) => (
                     <tr key={c.id}>
                       <td style={{ textAlign: 'center' }}>
                         <input
@@ -593,7 +640,7 @@ export default function Candidates() {
                         </button>
                       </td>
                     </tr>
-                  ))}
+                  )))}
                 </tbody>
               </table>
             </div>

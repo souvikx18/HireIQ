@@ -21,24 +21,18 @@ export default function Index() {
 
   // Live analytics state
   const [stats, setStats] = useState({
-    totalCandidates: 5,
-    resumesUploaded: 5,
-    shortlisted: 2,
-    skillGapsFound: 5,
-    shortlistRate: '40%',
-    interviewRate: '18.2%',
-    avgApplicationsPerDay: '8.5',
+    totalCandidates: 0,
+    resumesUploaded: 0,
+    shortlisted: 0,
+    skillGapsFound: 0,
+    shortlistRate: '0%',
+    interviewRate: '0%',
+    avgApplicationsPerDay: '0',
   });
-  const [topCandidate, setTopCandidate] = useState({
-    name: 'Sarah Jenkins',
-    role: 'Frontend Engineer',
-    location: 'Bangalore, India',
-    experience: '5 Years Exp.',
-    available: 'Available',
-    matchScore: 92,
-    skills: ['React', 'JavaScript', 'SQL', 'Docker'],
-  });
+  const [topCandidate, setTopCandidate] = useState(null);
   const [recentCandidates, setRecentCandidates] = useState([]);
+  const [topSkillGaps, setTopSkillGaps] = useState([]);
+  const [gapOverview, setGapOverview] = useState({ totalGaps: 0, categories: [] });
 
   const periodPickerRef = useRef(null);
   const periodDateRef = useRef(null);
@@ -50,11 +44,13 @@ export default function Index() {
       const res = await analyticsApi.getOverview();
       if (res?.data) {
         if (res.data.stats) setStats(res.data.stats);
-        if (res.data.topCandidate) setTopCandidate(res.data.topCandidate);
-        if (res.data.recentCandidates?.length) setRecentCandidates(res.data.recentCandidates);
+        setTopCandidate(res.data.topCandidate || null);
+        setRecentCandidates(res.data.recentCandidates || []);
+        setTopSkillGaps(res.data.topSkillGaps || []);
+        if (res.data.gapOverview) setGapOverview(res.data.gapOverview);
       }
     } catch {
-      // Keep initial fallback
+      // Keep empty defaults
     }
   };
 
@@ -549,35 +545,79 @@ export default function Index() {
               <Link to="/candidates">View All</Link>
             </div>
 
-            <div className="candidate-content">
-              <div className="score-circle">
-                <div>
-                  <strong>{topCandidate.matchScore}%</strong>
-                  <span>Match Score</span>
+            {topCandidate ? (
+              <div className="candidate-content">
+                <div className="score-circle">
+                  <div>
+                    <strong>{topCandidate.matchScore}%</strong>
+                    <span>Match Score</span>
+                  </div>
+                </div>
+
+                <div className="candidate-info">
+                  <h2>{topCandidate.name}</h2>
+                  <p>{topCandidate.role}</p>
+                  <span className="location">
+                    <i className="fa-solid fa-location-dot"></i>
+                    {topCandidate.location}
+                  </span>
+
+                  <div className="badges">
+                    <span>{topCandidate.experience}</span>
+                    <span className="available">{topCandidate.available}</span>
+                  </div>
+
+                  <h4>Top Skills</h4>
+                  <div className="skills">
+                    {(topCandidate.skills || []).map((sk, idx) => (
+                      <span key={idx}>{sk}</span>
+                    ))}
+                  </div>
                 </div>
               </div>
-
-              <div className="candidate-info">
-                <h2>{topCandidate.name}</h2>
-                <p>{topCandidate.role}</p>
-                <span className="location">
-                  <i className="fa-solid fa-location-dot"></i>
-                  {topCandidate.location}
-                </span>
-
-                <div className="badges">
-                  <span>{topCandidate.experience}</span>
-                  <span className="available">{topCandidate.available}</span>
+            ) : (
+              <div style={{ padding: '36px 20px', textAlign: 'center', color: '#64748b' }}>
+                <div
+                  style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '50%',
+                    background: '#eff6ff',
+                    color: '#2563eb',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '20px',
+                    marginBottom: '12px',
+                  }}
+                >
+                  <i className="fa-solid fa-user-plus"></i>
                 </div>
-
-                <h4>Top Skills</h4>
-                <div className="skills">
-                  {topCandidate.skills.map((sk, idx) => (
-                    <span key={idx}>{sk}</span>
-                  ))}
-                </div>
+                <h3 style={{ fontSize: '15px', color: '#1e293b', fontWeight: '600', marginBottom: '6px' }}>
+                  No evaluated candidates yet
+                </h3>
+                <p style={{ fontSize: '13px', color: '#64748b', maxWidth: '300px', margin: '0 auto 16px', lineHeight: '1.5' }}>
+                  Upload resumes or register candidates to see your top matches and evaluation scores.
+                </p>
+                <Link
+                  to="/resumeupload"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 16px',
+                    background: '#2563eb',
+                    color: '#ffffff',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    textDecoration: 'none',
+                  }}
+                >
+                  <i className="fa-solid fa-upload"></i> Upload Resume
+                </Link>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Skill Gap */}
@@ -590,7 +630,7 @@ export default function Index() {
             <div className="gap-content">
               <div className="donut">
                 <div>
-                  <strong>215</strong>
+                  <strong>{gapOverview.totalGaps || 0}</strong>
                   <span>Total Gaps</span>
                 </div>
               </div>
@@ -599,22 +639,22 @@ export default function Index() {
                 <div>
                   <span className="dot blue-dot"></span>
                   <p>Technical Skills</p>
-                  <strong>42%</strong>
+                  <strong>{gapOverview.categories?.[0]?.percentage || '0%'}</strong>
                 </div>
                 <div>
                   <span className="dot green-dot"></span>
                   <p>Tools &amp; Frameworks</p>
-                  <strong>28%</strong>
+                  <strong>{gapOverview.categories?.[1]?.percentage || '0%'}</strong>
                 </div>
                 <div>
                   <span className="dot orange-dot"></span>
                   <p>Soft Skills</p>
-                  <strong>18%</strong>
+                  <strong>{gapOverview.categories?.[2]?.percentage || '0%'}</strong>
                 </div>
                 <div>
                   <span className="dot red-dot"></span>
                   <p>Domain Knowledge</p>
-                  <strong>12%</strong>
+                  <strong>{gapOverview.categories?.[3]?.percentage || '0%'}</strong>
                 </div>
               </div>
             </div>
@@ -643,125 +683,51 @@ export default function Index() {
                 </thead>
 
                 <tbody>
-                  <tr>
-                    <td>
-                      <div className="candidate-name">
-                        <div className="small-avatar">AM</div>
-                        Arjun Mehta
-                      </div>
-                    </td>
-                    <td>Full Stack Developer</td>
-                    <td>
-                      <div className="match">
-                        <span>92%</span>
-                        <div className="progress">
-                          <div style={{ width: '92%' }}></div>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="status shortlisted">Shortlisted</span>
-                    </td>
-                    <td>
-                      <button
-                        className="view-btn"
-                        type="button"
-                        onClick={() => handleCandidateView('Arjun Mehta')}
-                      >
-                        <i className="fa-regular fa-eye"></i>
-                      </button>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>
-                      <div className="candidate-name">
-                        <div className="small-avatar pink">SK</div>
-                        Sneha Kapoor
-                      </div>
-                    </td>
-                    <td>Frontend Developer</td>
-                    <td>
-                      <div className="match">
-                        <span>78%</span>
-                        <div className="progress">
-                          <div style={{ width: '78%' }}></div>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="status review">Under Review</span>
-                    </td>
-                    <td>
-                      <button
-                        className="view-btn"
-                        type="button"
-                        onClick={() => handleCandidateView('Sneha Kapoor')}
-                      >
-                        <i className="fa-regular fa-eye"></i>
-                      </button>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>
-                      <div className="candidate-name">
-                        <div className="small-avatar orange-bg">RD</div>
-                        Rohan Das
-                      </div>
-                    </td>
-                    <td>Backend Developer</td>
-                    <td>
-                      <div className="match">
-                        <span>65%</span>
-                        <div className="progress">
-                          <div style={{ width: '65%' }}></div>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="status maybe">Maybe</span>
-                    </td>
-                    <td>
-                      <button
-                        className="view-btn"
-                        type="button"
-                        onClick={() => handleCandidateView('Rohan Das')}
-                      >
-                        <i className="fa-regular fa-eye"></i>
-                      </button>
-                    </td>
-                  </tr>
-
-                  <tr>
-                    <td>
-                      <div className="candidate-name">
-                        <div className="small-avatar purple-bg">AI</div>
-                        Ananya Iyer
-                      </div>
-                    </td>
-                    <td>UI/UX Designer</td>
-                    <td>
-                      <div className="match">
-                        <span>88%</span>
-                        <div className="progress">
-                          <div style={{ width: '88%' }}></div>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span className="status shortlisted">Shortlisted</span>
-                    </td>
-                    <td>
-                      <button
-                        className="view-btn"
-                        type="button"
-                        onClick={() => handleCandidateView('Ananya Iyer')}
-                      >
-                        <i className="fa-regular fa-eye"></i>
-                      </button>
-                    </td>
-                  </tr>
+                  {recentCandidates.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" style={{ textAlign: 'center', padding: '36px 16px', color: '#64748b' }}>
+                        <i className="fa-solid fa-users" style={{ fontSize: '24px', color: '#94a3b8', display: 'block', marginBottom: '8px' }}></i>
+                        No candidates found yet. Upload resumes or add candidates to start evaluating.
+                      </td>
+                    </tr>
+                  ) : (
+                    recentCandidates.map((c) => (
+                      <tr key={c.id}>
+                        <td>
+                          <div className="candidate-name">
+                            <div className={`small-avatar ${c.statusClass === 'shortlisted' ? 'green-bg' : c.statusClass === 'under_review' ? 'orange-bg' : 'blue-bg'}`}>
+                              {c.avatar || 'CD'}
+                            </div>
+                            {c.name}
+                          </div>
+                        </td>
+                        <td>{c.role || 'General Talent Pool'}</td>
+                        <td>
+                          <div className="match">
+                            <span>{c.matchScore || 0}%</span>
+                            <div className="progress">
+                              <div style={{ width: `${c.matchScore || 0}%` }}></div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span className={`status ${c.statusClass === 'shortlisted' ? 'shortlisted' : c.statusClass === 'under_review' ? 'review' : 'maybe'}`}>
+                            {c.status}
+                          </span>
+                        </td>
+                        <td>
+                          <button
+                            className="view-btn"
+                            type="button"
+                            onClick={() => navigate('/candidates')}
+                            title="View in Candidates"
+                          >
+                            <i className="fa-regular fa-eye"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -782,65 +748,26 @@ export default function Index() {
                 <span>Gap</span>
               </div>
 
-              <div className="gap-row">
-                <span>AWS</span>
-                <span>80%</span>
-                <span>35%</span>
-                <div className="gap-progress">
-                  <b>45%</b>
-                  <div>
-                    <span style={{ width: '90%' }}></span>
-                  </div>
+              {topSkillGaps.length === 0 ? (
+                <div style={{ padding: '36px 16px', textAlign: 'center', color: '#64748b', fontSize: '13px' }}>
+                  <i className="fa-solid fa-chart-pie" style={{ fontSize: '24px', color: '#94a3b8', display: 'block', marginBottom: '8px' }}></i>
+                  No skill gaps detected in candidate talent pool. Gaps will populate dynamically as applicants are screened.
                 </div>
-              </div>
-
-              <div className="gap-row">
-                <span>Docker</span>
-                <span>70%</span>
-                <span>30%</span>
-                <div className="gap-progress">
-                  <b>40%</b>
-                  <div>
-                    <span style={{ width: '80%' }}></span>
+              ) : (
+                topSkillGaps.map((gap, idx) => (
+                  <div className="gap-row" key={idx}>
+                    <span>{gap.skill}</span>
+                    <span>{gap.required}</span>
+                    <span>{gap.candidateAvg}</span>
+                    <div className="gap-progress">
+                      <b>{gap.gap}</b>
+                      <div>
+                        <span style={{ width: gap.width || '50%' }}></span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-
-              <div className="gap-row">
-                <span>Kubernetes</span>
-                <span>70%</span>
-                <span>25%</span>
-                <div className="gap-progress">
-                  <b>45%</b>
-                  <div>
-                    <span style={{ width: '90%' }}></span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="gap-row">
-                <span>System Design</span>
-                <span>60%</span>
-                <span>20%</span>
-                <div className="gap-progress">
-                  <b>40%</b>
-                  <div>
-                    <span style={{ width: '80%' }}></span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="gap-row">
-                <span>CI/CD</span>
-                <span>60%</span>
-                <span>25%</span>
-                <div className="gap-progress">
-                  <b>35%</b>
-                  <div>
-                    <span style={{ width: '70%' }}></span>
-                  </div>
-                </div>
-              </div>
+                ))
+              )}
             </div>
           </div>
         </section>

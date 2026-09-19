@@ -576,7 +576,7 @@ export default function ResumeUpload() {
                   <i className="fa-solid fa-magnifying-glass"></i>
                 </div>
                 <h3>No Candidate Found</h3>
-                <p>No candidate found matching "{searchTerm}". Try searching for Sarah, Rohan, Ananya, Vikram, or Neha.</p>
+                <p>No candidate found matching "{searchTerm}". Try searching by candidate name, role, or email.</p>
               </div>
             )}
 

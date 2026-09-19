@@ -33,10 +33,169 @@ body.login-open .sidebar {
     overflow-y: auto;
     overflow-x: hidden;
     scrollbar-width: none;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    z-index: 1000;
 }
 
 .sidebar::-webkit-scrollbar {
     display: none;
+}
+
+.main,
+.main-content {
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Brand layout and toggle button */
+.brand {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    padding: 0 5px 30px !important;
+}
+
+.brand-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.brand-info {
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.brand-info h2 {
+    font-size: 19px;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.brand-info span {
+    font-size: 10px;
+    color: #b8c6db;
+}
+
+.sidebar-toggle-btn {
+    background: rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    color: #d4dfef !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    font-size: 12px !important;
+    transition: all 0.25s ease !important;
+    flex-shrink: 0 !important;
+    padding: 0 !important;
+}
+
+.sidebar-toggle-btn:hover {
+    background: #1769ff !important;
+    color: #ffffff !important;
+    border-color: #1769ff !important;
+    transform: scale(1.08);
+    box-shadow: 0 0 10px rgba(23, 105, 255, 0.4);
+}
+
+/* Collapsed Sidebar Styles */
+body.sidebar-collapsed .sidebar,
+.sidebar.collapsed {
+    width: 72px !important;
+    padding: 20px 10px !important;
+    align-items: center !important;
+}
+
+body.sidebar-collapsed .main,
+body.sidebar-collapsed .main-content {
+    margin-left: 72px !important;
+}
+
+body.sidebar-collapsed .brand,
+.sidebar.collapsed .brand {
+    flex-direction: column !important;
+    gap: 12px !important;
+    padding: 0 0 20px !important;
+    width: 100% !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+body.sidebar-collapsed .brand-main,
+.sidebar.collapsed .brand-main {
+    justify-content: center !important;
+}
+
+body.sidebar-collapsed .brand-info,
+.sidebar.collapsed .brand-info {
+    display: none !important;
+}
+
+body.sidebar-collapsed .sidebar-toggle-btn,
+.sidebar.collapsed .sidebar-toggle-btn {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 11px !important;
+}
+
+body.sidebar-collapsed .menu,
+.sidebar.collapsed .menu {
+    width: 100% !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+body.sidebar-collapsed .menu-item,
+.sidebar.collapsed .menu-item {
+    width: 48px !important;
+    height: 46px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    border-radius: 8px !important;
+    text-align: center !important;
+}
+
+body.sidebar-collapsed .menu-item i,
+.sidebar.collapsed .menu-item i {
+    font-size: 16px !important;
+    width: auto !important;
+    margin: 0 !important;
+    transform: none !important;
+}
+
+body.sidebar-collapsed .menu-item span,
+.sidebar.collapsed .menu-item span {
+    display: none !important;
+}
+
+.upgrade-card-collapsed {
+    margin-top: auto;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: linear-gradient(145deg, #2869e8, #42b5db);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(24, 105, 255, 0.3);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    flex-shrink: 0;
+}
+
+.upgrade-card-collapsed:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(24, 105, 255, 0.5);
 }
 
 .menu {
