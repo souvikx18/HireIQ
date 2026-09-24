@@ -41,6 +41,108 @@ export default function Header({
     ? `${user.firstName?.[0] || 'H'}${user.lastName?.[0] || 'R'}`.toUpperCase()
     : "HR";
 
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const notificationRef = useRef(null);
+
+  const isCandidate = user?.role === 'CANDIDATE';
+  const [notifications, setNotifications] = useState(() => {
+    return isCandidate
+      ? [
+          {
+            id: 1,
+            title: "Application Under Review",
+            desc: "Your application for Senior Full Stack Engineer is being reviewed by hiring team.",
+            time: "25m ago",
+            read: false,
+            icon: "fa-solid fa-briefcase",
+            color: "#2563eb",
+            bg: "#eff6ff",
+            link: "/candidate/applications",
+          },
+          {
+            id: 2,
+            title: "ATS Optimization Tip",
+            desc: "Add 2+ quantifiable metric bullet points to boost your ATS match score above 90%.",
+            time: "2h ago",
+            read: false,
+            icon: "fa-solid fa-wand-magic-sparkles",
+            color: "#059669",
+            bg: "#ecfdf5",
+            link: "/candidate/resume-checker",
+          },
+          {
+            id: 3,
+            title: "New Matching Job Opening",
+            desc: "DevOps Engineer role matches 88% of your skill profile.",
+            time: "1d ago",
+            read: false,
+            icon: "fa-solid fa-bolt",
+            color: "#7c3aed",
+            bg: "#faf5ff",
+            link: "/candidate/jobs",
+          },
+          {
+            id: 4,
+            title: "Candidate Profile Configured",
+            desc: "Your job preferences and notification settings are active.",
+            time: "3d ago",
+            read: true,
+            icon: "fa-solid fa-circle-check",
+            color: "#10b981",
+            bg: "#f0fdf4",
+            link: "/setting",
+          },
+        ]
+      : [
+          {
+            id: 1,
+            title: "New Candidate Application",
+            desc: "Alex Morgan applied for Senior Full Stack Engineer role.",
+            time: "15m ago",
+            read: false,
+            icon: "fa-solid fa-user-plus",
+            color: "#2563eb",
+            bg: "#eff6ff",
+            link: "/candidates",
+          },
+          {
+            id: 2,
+            title: "Skill Gap Benchmark Alert",
+            desc: "React & Node.js benchmarks updated for Engineering department.",
+            time: "2h ago",
+            read: false,
+            icon: "fa-solid fa-chart-pie",
+            color: "#d97706",
+            bg: "#fffbeb",
+            link: "/skillgapanalysis",
+          },
+          {
+            id: 3,
+            title: "Resume Intake Complete",
+            desc: "12 candidate resumes successfully parsed with ATS scores computed.",
+            time: "5h ago",
+            read: false,
+            icon: "fa-solid fa-file-shield",
+            color: "#059669",
+            bg: "#ecfdf5",
+            link: "/resumeupload",
+          },
+          {
+            id: 4,
+            title: "System Telemetry Healthy",
+            desc: "Database connections, AI models, and background services 100% operational.",
+            time: "1d ago",
+            read: true,
+            icon: "fa-solid fa-server",
+            color: "#10b981",
+            bg: "#f0fdf4",
+            link: "/setting",
+          },
+        ];
+  });
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
   useEffect(() => {
     const isDark = theme === "dark";
     document.body.classList.toggle("dark-mode", isDark);
@@ -51,6 +153,9 @@ export default function Header({
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setMenuOpen(false);
+      }
+      if (notificationRef.current && !notificationRef.current.contains(e.target)) {
+        setNotificationOpen(false);
       }
     };
     document.addEventListener("click", handleClickOutside);
@@ -66,6 +171,7 @@ export default function Header({
       onProfileClick(e);
     } else {
       setMenuOpen(!menuOpen);
+      setNotificationOpen(false);
     }
   };
 
@@ -78,7 +184,22 @@ export default function Header({
     if (onNotificationClick) {
       onNotificationClick(e);
     } else {
-      window.alert("Notifications\n\nYou are all caught up.");
+      setNotificationOpen((prev) => !prev);
+      setMenuOpen(false);
+    }
+  };
+
+  const markAllAsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  };
+
+  const handleNotificationItemClick = (item) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === item.id ? { ...n, read: true } : n))
+    );
+    setNotificationOpen(false);
+    if (item.link) {
+      navigate(item.link);
     }
   };
 
@@ -141,17 +262,84 @@ export default function Header({
             </button>
           )}
 
-          {/* Notification Button */}
+          {/* Notification Button & Dropdown */}
           {showNotification && (
-            <button
-              className="notification"
-              type="button"
-              aria-label="Notifications"
-              onClick={handleNotification}
-            >
-              <i className="fa-regular fa-bell"></i>
-              <span></span>
-            </button>
+            <div className="notification-wrapper" ref={notificationRef}>
+              <button
+                className="notification"
+                type="button"
+                aria-label="Notifications"
+                onClick={handleNotification}
+                title="Notifications"
+              >
+                <i className="fa-regular fa-bell"></i>
+                {unreadCount > 0 && <span></span>}
+              </button>
+
+              {notificationOpen && (
+                <div className="notification-dropdown">
+                  <div className="notification-dropdown-header">
+                    <div className="notif-header-left">
+                      <h4>Notifications</h4>
+                      {unreadCount > 0 && (
+                        <span className="notif-badge-count">{unreadCount} new</span>
+                      )}
+                    </div>
+                    {unreadCount > 0 && (
+                      <button
+                        type="button"
+                        className="notif-mark-read-btn"
+                        onClick={markAllAsRead}
+                      >
+                        Mark all as read
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="notification-dropdown-body">
+                    {notifications.length === 0 ? (
+                      <div className="notif-empty-state">
+                        <i className="fa-regular fa-bell-slash" style={{ fontSize: "24px", color: "#94a3b8", marginBottom: "8px", display: "block" }}></i>
+                        You have no notifications.
+                      </div>
+                    ) : (
+                      notifications.map((item) => (
+                        <div
+                          key={item.id}
+                          className={`notif-item ${!item.read ? "unread" : ""}`}
+                          onClick={() => handleNotificationItemClick(item)}
+                        >
+                          <div
+                            className="notif-item-icon"
+                            style={{ background: item.bg, color: item.color }}
+                          >
+                            <i className={item.icon}></i>
+                          </div>
+
+                          <div className="notif-item-content">
+                            <div className="notif-item-title">{item.title}</div>
+                            <div className="notif-item-desc">{item.desc}</div>
+                            <div className="notif-item-time">{item.time}</div>
+                          </div>
+
+                          {!item.read && <span className="notif-unread-dot"></span>}
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  <div className="notification-dropdown-footer">
+                    <button
+                      type="button"
+                      className="notif-footer-link"
+                      onClick={() => setNotificationOpen(false)}
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
 
           {/* Profile / Menu Area */}

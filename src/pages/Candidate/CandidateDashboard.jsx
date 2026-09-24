@@ -221,16 +221,16 @@ export default function CandidateDashboard() {
             <div style={{ marginBottom: '32px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
                 <div>
-                  <h2 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 4px 0', color: 'var(--text-primary, #0f172a)' }}>
+                  <h2 style={{ fontSize: '16px', fontWeight: 700, margin: '0 0 4px 0', color: 'var(--text-primary, #0f172a)' }}>
                     Recent Applications
                   </h2>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+                  <p style={{ margin: 0, fontSize: '11.5px', color: '#64748b' }}>
                     Track latest hiring stage updates and recruiter reviews
                   </p>
                 </div>
                 <Link
                   to="/candidate/applications"
-                  style={{ fontSize: '13px', fontWeight: 600, color: '#2563eb', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  style={{ fontSize: '11.5px', fontWeight: 600, color: '#2563eb', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
                 >
                   View All ({applications.length}) <i className="fa-solid fa-arrow-right"></i>
                 </Link>
@@ -244,17 +244,17 @@ export default function CandidateDashboard() {
                       background: '#ffffff',
                       borderRadius: '12px',
                       border: '1px solid #e2e8f0',
-                      padding: '18px 20px',
+                      padding: '16px 18px',
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
                     }}
                   >
                     <div>
-                      <div style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>
+                      <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>
                         {app.jobRole?.title || 'Software Role'}
                       </div>
-                      <div style={{ fontSize: '12.5px', color: '#64748b' }}>
+                      <div style={{ fontSize: '11px', color: '#64748b' }}>
                         {app.jobRole?.department || 'Engineering'} • Match: <strong style={{ color: '#059669' }}>{app.matchScore || 85}%</strong>
                       </div>
                     </div>
@@ -270,7 +270,7 @@ export default function CandidateDashboard() {
                           background: 'transparent',
                           border: 'none',
                           color: '#2563eb',
-                          fontSize: '12px',
+                          fontSize: '11px',
                           fontWeight: 600,
                           cursor: 'pointer',
                           padding: 0,
@@ -287,18 +287,18 @@ export default function CandidateDashboard() {
 
           {/* Recommended Jobs */}
           <div style={{ marginBottom: '32px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div>
-                <h2 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 4px 0', color: 'var(--text-primary, #0f172a)' }}>
+                <h2 style={{ fontSize: '16px', fontWeight: 700, margin: '0 0 4px 0', color: 'var(--text-primary, #0f172a)' }}>
                   Recommended Openings For You
                 </h2>
-                <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>
+                <p style={{ margin: 0, fontSize: '11.5px', color: '#64748b' }}>
                   Positions sorted by semantic match against your experience and skills
                 </p>
               </div>
               <Link
                 to="/candidate/jobs"
-                style={{ fontSize: '13px', fontWeight: 600, color: '#2563eb', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
+                style={{ fontSize: '11.5px', fontWeight: 600, color: '#2563eb', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}
               >
                 View All Jobs <i className="fa-solid fa-arrow-right"></i>
               </Link>
@@ -394,10 +394,10 @@ export default function CandidateDashboard() {
                   <i className="fa-solid fa-file-arrow-up"></i>
                 </div>
                 <div>
-                  <h4 style={{ margin: '0 0 2px 0', fontSize: '15px', color: '#1e3a8a', fontWeight: 700 }}>
+                  <h4 style={{ margin: '0 0 2px 0', fontSize: '13.5px', color: '#1e3a8a', fontWeight: 700 }}>
                     Have you audited your resume today?
                   </h4>
-                  <p style={{ margin: 0, fontSize: '13px', color: '#1e40af' }}>
+                  <p style={{ margin: 0, fontSize: '11.5px', color: '#1e40af' }}>
                     Upload your resume to receive an immediate ATS compatibility analysis and action verb suggestions.
                   </p>
                 </div>

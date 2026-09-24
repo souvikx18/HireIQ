@@ -218,11 +218,7 @@ function AppRoutes() {
         />
         <Route
           path="/candidate/resume-checker"
-          element={
-            <ProtectedRoute>
-              <ResumeChecker />
-            </ProtectedRoute>
-          }
+          element={<ResumeChecker />}
         />
         <Route
           path="/candidate/jobs"

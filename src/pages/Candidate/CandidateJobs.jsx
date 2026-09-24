@@ -133,7 +133,7 @@ export default function CandidateJobs() {
               alignItems: 'center',
               gap: '8px',
               fontWeight: 600,
-              fontSize: '13.5px',
+              fontSize: '12px',
             }}
           >
             <i className="fa-solid fa-circle-check"></i>
@@ -201,7 +201,7 @@ export default function CandidateJobs() {
                   padding: '0 14px 0 38px',
                   borderRadius: '8px',
                   border: '1px solid #cbd5e1',
-                  fontSize: '13.5px',
+                  fontSize: '12px',
                   outline: 'none',
                 }}
               />
@@ -209,7 +209,7 @@ export default function CandidateJobs() {
 
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Dept:</span>
+                <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#64748b' }}>Dept:</span>
                 <select
                   value={selectedDept}
                   onChange={(e) => setSelectedDept(e.target.value)}
@@ -218,7 +218,7 @@ export default function CandidateJobs() {
                     padding: '0 12px',
                     borderRadius: '8px',
                     border: '1px solid #cbd5e1',
-                    fontSize: '13px',
+                    fontSize: '11.5px',
                     color: '#1e293b',
                     background: '#ffffff',
                     outline: 'none',
@@ -234,7 +234,7 @@ export default function CandidateJobs() {
               </div>
 
               <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                <span style={{ fontSize: '13px', fontWeight: 600, color: '#64748b' }}>Sort:</span>
+                <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#64748b' }}>Sort:</span>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
@@ -243,7 +243,7 @@ export default function CandidateJobs() {
                     padding: '0 12px',
                     borderRadius: '8px',
                     border: '1px solid #cbd5e1',
-                    fontSize: '13px',
+                    fontSize: '11.5px',
                     color: '#1e293b',
                     background: '#ffffff',
                     outline: 'none',
@@ -402,8 +402,8 @@ export default function CandidateJobs() {
 
               {/* Role Overview */}
               <div style={{ marginBottom: '22px' }}>
-                <h4 style={{ margin: '0 0 8px 0', fontSize: '14.5px', color: '#0f172a' }}>Role Description</h4>
-                <p style={{ margin: 0, fontSize: '13.5px', lineHeight: 1.6, color: '#475569', whiteSpace: 'pre-line' }}>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#0f172a' }}>Role Description</h4>
+                <p style={{ margin: 0, fontSize: '12px', lineHeight: 1.6, color: '#475569', whiteSpace: 'pre-line' }}>
                   {selectedJob.description ||
                     'In this position, you will collaborate with cross-functional teams to build, deploy, and scale robust software solutions. You will participate in architecture reviews, code reviews, and drive engineering excellence.'}
                 </p>
@@ -411,7 +411,7 @@ export default function CandidateJobs() {
 
               {/* Required Skills & Candidate Match */}
               <div style={{ marginBottom: '22px' }}>
-                <h4 style={{ margin: '0 0 8px 0', fontSize: '14.5px', color: '#0f172a' }}>
+                <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#0f172a' }}>
                   Required Competencies & Skills
                 </h4>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
@@ -422,7 +422,7 @@ export default function CandidateJobs() {
                         padding: '6px 12px',
                         background: '#f1f5f9',
                         borderRadius: '6px',
-                        fontSize: '12.5px',
+                        fontSize: '11px',
                         fontWeight: 600,
                         color: '#334155',
                         border: '1px solid #e2e8f0',
@@ -431,7 +431,7 @@ export default function CandidateJobs() {
                         gap: '6px',
                       }}
                     >
-                      <i className="fa-solid fa-check" style={{ color: '#059669', fontSize: '11px' }}></i>
+                      <i className="fa-solid fa-check" style={{ color: '#059669', fontSize: '10px' }}></i>
                       {skill}
                     </span>
                   ))}
@@ -454,10 +454,10 @@ export default function CandidateJobs() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                   <i className="fa-solid fa-robot" style={{ color: '#16a34a', fontSize: '20px' }}></i>
                   <div>
-                    <h5 style={{ margin: 0, fontSize: '13px', color: '#166534', fontWeight: 700 }}>
+                    <h5 style={{ margin: 0, fontSize: '11.5px', color: '#166534', fontWeight: 700 }}>
                       Ask AI Career Copilot
                     </h5>
-                    <span style={{ fontSize: '12px', color: '#15803d' }}>
+                    <span style={{ fontSize: '11px', color: '#15803d' }}>
                       Get personalized interview questions and resume tips for this role
                     </span>
                   </div>

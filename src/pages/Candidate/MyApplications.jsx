@@ -177,10 +177,10 @@ export default function MyApplications() {
               >
                 <i className="fa-regular fa-paper-plane"></i>
               </div>
-              <h3 style={{ margin: '0 0 6px 0', fontSize: '18px', color: '#0f172a', fontWeight: 700 }}>
+              <h3 style={{ margin: '0 0 6px 0', fontSize: '16px', color: '#0f172a', fontWeight: 700 }}>
                 {activeTab === 'ALL' ? 'No active applications yet' : 'No applications in this category'}
               </h3>
-              <p style={{ margin: '0 0 20px 0', fontSize: '13.5px', color: '#64748b', lineHeight: 1.5 }}>
+              <p style={{ margin: '0 0 20px 0', fontSize: '12px', color: '#64748b', lineHeight: 1.5 }}>
                 Explore open positions and submit your resume with 1 click to begin your hiring process.
               </p>
               <button

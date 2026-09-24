@@ -60,14 +60,14 @@
 }
 
 .portal-hero-text h1 {
-    font-size: 26px;
+    font-size: 21px;
     font-weight: 700;
-    margin: 0 0 8px 0;
+    margin: 0 0 6px 0;
     letter-spacing: -0.3px;
 }
 
 .portal-hero-text p {
-    font-size: 14px;
+    font-size: 12.5px;
     color: #dbeafe;
     margin: 0;
     max-width: 580px;
@@ -81,15 +81,15 @@
 }
 
 .hero-cta-btn {
-    height: 42px;
-    padding: 0 20px;
+    height: 38px;
+    padding: 0 16px;
     border-radius: 8px;
-    font-size: 13.5px;
+    font-size: 12.5px;
     font-weight: 600;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 7px;
     border: none;
     transition: all 0.2s ease;
     text-decoration: none;
@@ -179,14 +179,14 @@
 }
 
 .stat-card-info span {
-    font-size: 13px;
+    font-size: 11.5px;
     color: #64748b;
     font-weight: 500;
 }
 
 .stat-card-info h3 {
-    margin: 4px 0 0 0;
-    font-size: 24px;
+    margin: 3px 0 0 0;
+    font-size: 20px;
     font-weight: 700;
     color: #0f172a;
 }
@@ -206,17 +206,17 @@
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 14px;
-    padding: 28px;
+    padding: 24px 26px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 .checker-card-header {
-    margin-bottom: 20px;
+    margin-bottom: 18px;
 }
 
 .checker-card-header h2 {
-    margin: 0 0 6px 0;
-    font-size: 18px;
+    margin: 0 0 5px 0;
+    font-size: 16px;
     font-weight: 700;
     color: #0f172a;
     display: flex;
@@ -226,7 +226,7 @@
 
 .checker-card-header p {
     margin: 0;
-    font-size: 13.5px;
+    font-size: 12px;
     color: #64748b;
     line-height: 1.4;
 }
@@ -498,18 +498,18 @@
 }
 
 .job-card-candidate h3 {
-    font-size: 17px;
+    font-size: 15px;
     font-weight: 700;
     color: #0f172a;
-    margin: 0 0 6px 0;
+    margin: 0 0 5px 0;
 }
 
 .job-meta-row {
     display: flex;
     gap: 14px;
-    font-size: 12.5px;
+    font-size: 11px;
     color: #64748b;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
 }
 
 .job-meta-row span {
@@ -519,10 +519,10 @@
 }
 
 .job-desc-snippet {
-    font-size: 13px;
+    font-size: 12px;
     color: #475569;
     line-height: 1.45;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -533,7 +533,7 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .job-skill-chip {
@@ -541,15 +541,15 @@
     color: #334155;
     padding: 3px 8px;
     border-radius: 4px;
-    font-size: 11.5px;
+    font-size: 10.5px;
     font-weight: 500;
 }
 
 .job-apply-btn {
     width: 100%;
-    height: 40px;
+    height: 38px;
     border-radius: 8px;
-    font-size: 13.5px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     display: flex;
@@ -585,34 +585,34 @@
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 14px;
-    padding: 24px 28px;
+    padding: 22px 24px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-    margin-bottom: 18px;
+    margin-bottom: 16px;
 }
 
 .app-header-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
 }
 
 .app-title-block h3 {
     margin: 0 0 4px 0;
-    font-size: 18px;
+    font-size: 15.5px;
     font-weight: 700;
     color: #0f172a;
 }
 
 .app-title-block span {
-    font-size: 12.5px;
+    font-size: 11.5px;
     color: #64748b;
 }
 
 .app-stage-badge {
-    padding: 6px 14px;
+    padding: 5px 12px;
     border-radius: 20px;
-    font-size: 12.5px;
+    font-size: 11.5px;
     font-weight: 600;
     text-transform: capitalize;
 }
@@ -1018,4 +1018,237 @@ body.dark-mode .job-secondary-btn:hover {
     background: #334155;
     color: #ffffff;
 }
+
+/* =========================================
+   PUBLIC GUEST ATS CHECKER STYLES
+========================================= */
+
+.public-checker-wrapper {
+    min-height: 100vh;
+    background-color: var(--bg-main, #f8fafc);
+    color: var(--text-primary, #0f172a);
+    font-family: Inter, sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+.public-checker-nav {
+    height: 64px;
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.public-checker-nav-inner {
+    max-width: 1240px;
+    margin: 0 auto;
+    height: 100%;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.public-checker-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+}
+
+.public-free-badge {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 9999px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.public-nav-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.public-nav-link {
+    color: #475569;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: color 0.15s ease;
+}
+
+.public-nav-link:hover {
+    color: #0f172a;
+}
+
+.public-btn-secondary {
+    color: #2563eb;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.public-btn-secondary:hover {
+    background: #dbeafe;
+}
+
+.public-btn-primary {
+    color: #ffffff;
+    background: #2563eb;
+    border: none;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 7px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+}
+
+.public-btn-primary:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.public-checker-main {
+    flex: 1;
+    max-width: 1240px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 28px 24px 60px;
+    box-sizing: border-box;
+}
+
+.public-checker-hero {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.public-checker-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 14px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 9999px;
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+
+.public-checker-hero h1 {
+    font-size: 24px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.02em;
+}
+
+.public-checker-hero p {
+    font-size: 13px;
+    color: #64748b;
+    max-width: 620px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+
+/* Guest Conversion CTA Card */
+.guest-conversion-card {
+    margin-top: 24px;
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    border-radius: 12px;
+    padding: 22px 24px;
+    color: #ffffff;
+    box-shadow: 0 8px 20px -4px rgba(37, 99, 235, 0.3);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.guest-conversion-text h4 {
+    margin: 0 0 4px 0;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.guest-conversion-text p {
+    margin: 0;
+    font-size: 12px;
+    color: #dbeafe;
+    max-width: 480px;
+    line-height: 1.45;
+}
+
+.guest-conversion-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.guest-conversion-actions .btn-white {
+    background: #ffffff;
+    color: #1d4ed8;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+}
+
+.guest-conversion-actions .btn-white:hover {
+    background: #f8fafc;
+    transform: translateY(-1px);
+}
+
+.guest-conversion-actions .btn-translucent {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    transition: all 0.2s ease;
+}
+
+.guest-conversion-actions .btn-translucent:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
 

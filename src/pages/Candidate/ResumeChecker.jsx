@@ -1,12 +1,15 @@
 import React, { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
+import { useAuth } from '../../context/AuthContext';
 import { candidatePortalApi } from '../../api/candidatePortal';
+import logo from '../../assets/img/hireiq-logo.png';
 import '../../css/candidate-portal.css';
 
 export default function ResumeChecker() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const fileInputRef = useRef(null);
 
   const [isDragging, setIsDragging] = useState(false);
@@ -75,19 +78,8 @@ export default function ResumeChecker() {
     return '#f59e0b';
   };
 
-  return (
-    <div className="candidate-portal-root">
-      <Sidebar activePage="resume-checker" />
-
-      <div className="portal-main-content">
-        <Header
-          title="ATS Resume Audit & Health Check"
-          subtitle="Scan your resume structure, keyword density, and formatting against enterprise ATS standards"
-          eyebrow="AI RESUME AUDITOR"
-        />
-
-        <div className="portal-body">
-          <div className="checker-container">
+  const checkerContent = (
+    <div className="checker-container">
             {/* Left Column: Upload Box & Guidelines */}
             <div>
               <div className="checker-card" style={{ marginBottom: '24px' }}>
@@ -405,18 +397,45 @@ export default function ResumeChecker() {
                     </div>
                   )}
 
-                  {/* CTA to Explore Jobs */}
-                  <div style={{ marginTop: '24px', paddingTop: '18px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '12px' }}>
-                    <button
-                      type="button"
-                      className="hero-cta-btn primary"
-                      style={{ flex: 1, justifyContent: 'center' }}
-                      onClick={() => navigate('/candidate/jobs')}
-                    >
-                      <i className="fa-solid fa-briefcase"></i>
-                      Match Against Open Jobs
-                    </button>
-                  </div>
+                  {/* Role adaptive CTA */}
+                  {!isAuthenticated ? (
+                    <div className="guest-conversion-card">
+                      <div className="guest-conversion-text">
+                        <h4>🚀 Ready to apply with your ATS-optimized resume?</h4>
+                        <p>
+                          Create a free Candidate account to auto-match your skills with hundreds of verified open positions and apply with 1 click.
+                        </p>
+                      </div>
+                      <div className="guest-conversion-actions">
+                        <button
+                          type="button"
+                          className="btn-white"
+                          onClick={() => navigate('/signup')}
+                        >
+                          <i className="fa-solid fa-user-plus"></i> Create Free Account
+                        </button>
+                        <button
+                          type="button"
+                          className="btn-translucent"
+                          onClick={() => navigate('/login')}
+                        >
+                          Sign In
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ marginTop: '24px', paddingTop: '18px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '12px' }}>
+                      <button
+                        type="button"
+                        className="hero-cta-btn primary"
+                        style={{ flex: 1, justifyContent: 'center' }}
+                        onClick={() => navigate('/candidate/jobs')}
+                      >
+                        <i className="fa-solid fa-briefcase"></i>
+                        Match Against Open Jobs
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div
@@ -440,6 +459,65 @@ export default function ResumeChecker() {
               )}
             </div>
           </div>
+  );
+
+  if (!isAuthenticated) {
+    return (
+      <div className="public-checker-wrapper">
+        <header className="public-checker-nav">
+          <div className="public-checker-nav-inner">
+            <Link to="/" className="public-checker-brand">
+              <img src={logo} alt="HireIQ" style={{ height: '32px' }} />
+              <span style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
+                Hire<span style={{ color: '#2563eb' }}>IQ</span>
+              </span>
+              <span className="public-free-badge">FREE ATS TOOL</span>
+            </Link>
+
+            <div className="public-nav-right">
+              <Link to="/" className="public-nav-link">
+                <i className="fa-solid fa-arrow-left"></i> Back to Home
+              </Link>
+              <Link to="/login" className="public-btn-secondary">
+                Log In
+              </Link>
+              <Link to="/signup" className="public-btn-primary">
+                Sign Up Free
+              </Link>
+            </div>
+          </div>
+        </header>
+
+        <main className="public-checker-main">
+          <div className="public-checker-hero">
+            <div className="public-checker-hero-badge">
+              <i className="fa-solid fa-wand-magic-sparkles"></i> 100% Free Instant ATS Audit • No Sign-up Required
+            </div>
+            <h1>Free ATS Resume Checker & Format Auditor</h1>
+            <p>
+              Upload your resume in PDF, DOCX, or TXT format to simulate enterprise applicant tracking system parsing, identify formatting gaps, and detect keyword density.
+            </p>
+          </div>
+
+          {checkerContent}
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="candidate-portal-root">
+      <Sidebar activePage="resume-checker" />
+
+      <div className="portal-main-content">
+        <Header
+          title="ATS Resume Audit & Health Check"
+          subtitle="Scan your resume structure, keyword density, and formatting against enterprise ATS standards"
+          eyebrow="AI RESUME AUDITOR"
+        />
+
+        <div className="portal-body">
+          {checkerContent}
         </div>
       </div>
     </div>
