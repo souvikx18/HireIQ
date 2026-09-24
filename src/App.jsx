@@ -218,7 +218,11 @@ function AppRoutes() {
         />
         <Route
           path="/candidate/resume-checker"
-          element={<ResumeChecker />}
+          element={
+            <ProtectedRoute>
+              <ResumeChecker />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="/candidate/jobs"
@@ -236,8 +240,15 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
-        {/* Public shortcut for ATS Resume Checker */}
-        <Route path="/resume-checker" element={<ResumeChecker />} />
+        {/* ATS Resume Checker Route */}
+        <Route
+          path="/resume-checker"
+          element={
+            <ProtectedRoute>
+              <ResumeChecker />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Auth Routes */}
         <Route path="/signup" element={<Signup />} />

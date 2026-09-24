@@ -39,4 +39,8 @@ export const authApi = {
       body: { currentPassword, newPassword },
     });
   },
+
+  getNotifications: async () => {
+    return apiClient('/users/notifications');
+  },
 };

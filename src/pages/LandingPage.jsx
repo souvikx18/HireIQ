@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import logo from '../assets/img/hireiq-logo.png';
 import '../css/landing.css';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [activeNav, setActiveNav] = useState('home');
   const [openFaq, setOpenFaq] = useState(0); // First question open by default
 
@@ -133,7 +135,11 @@ export default function LandingPage() {
           </nav>
 
           <div className="lp-nav-actions">
-            <Link to="/resume-checker" className="lp-btn-login" style={{ color: '#2563eb', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <Link
+              to={isAuthenticated ? "/candidate/resume-checker" : "/login?redirect=/candidate/resume-checker"}
+              className="lp-btn-login"
+              style={{ color: '#2563eb', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+            >
               <i className="fa-solid fa-file-shield"></i>
               ATS Check
             </Link>

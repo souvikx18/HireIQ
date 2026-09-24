@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../css/signup.css';
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { login } = useAuth();
   const [loginEmail, setLoginEmail] = useState('admin@hireiq.com');
   const [loginPassword, setLoginPassword] = useState('Admin@123456');
@@ -45,10 +47,19 @@ export default function Login() {
         password: loginPassword,
       });
 
+      const redirectTarget =
+        searchParams.get('redirect') ||
+        location.state?.from?.pathname ||
+        (location.state?.from && typeof location.state?.from === 'string'
+          ? location.state.from
+          : null);
+
       document.body.classList.add('page-leaving');
       setTimeout(() => {
         document.body.classList.remove('page-leaving');
-        if (loggedUser?.role === 'CANDIDATE') {
+        if (redirectTarget) {
+          navigate(redirectTarget);
+        } else if (loggedUser?.role === 'CANDIDATE') {
           navigate('/candidate/dashboard');
         } else {
           navigate('/dashboard');

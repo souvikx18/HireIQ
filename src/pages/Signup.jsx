@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../css/signup.css';
 
 export default function Signup() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const { signup } = useAuth();
   const [accountRole, setAccountRole] = useState('RECRUITER');
   const [firstName, setFirstName] = useState('');
@@ -63,10 +65,19 @@ export default function Signup() {
         role: accountRole,
       });
 
+      const redirectTarget =
+        searchParams.get('redirect') ||
+        location.state?.from?.pathname ||
+        (location.state?.from && typeof location.state?.from === 'string'
+          ? location.state.from
+          : null);
+
       document.body.classList.add('page-leaving');
       setTimeout(() => {
         document.body.classList.remove('page-leaving');
-        if (registeredUser?.role === 'CANDIDATE' || accountRole === 'CANDIDATE') {
+        if (redirectTarget) {
+          navigate(redirectTarget);
+        } else if (registeredUser?.role === 'CANDIDATE' || accountRole === 'CANDIDATE') {
           navigate('/candidate/dashboard');
         } else {
           navigate('/dashboard');

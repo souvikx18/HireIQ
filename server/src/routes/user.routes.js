@@ -8,6 +8,7 @@ const router = Router();
 router.use(authenticate);
 
 router.get('/profile', userController.getProfile);
+router.get('/notifications', userController.getNotifications);
 router.put('/profile', userController.updateProfile);
 router.put('/change-password', validate(changePasswordSchema), userController.changePassword);
 

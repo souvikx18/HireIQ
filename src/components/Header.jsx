@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { authApi } from "../api/auth.js";
 import "../css/header-common.css";
 
 export default function Header({
@@ -44,102 +45,42 @@ export default function Header({
   const [notificationOpen, setNotificationOpen] = useState(false);
   const notificationRef = useRef(null);
 
-  const isCandidate = user?.role === 'CANDIDATE';
-  const [notifications, setNotifications] = useState(() => {
-    return isCandidate
-      ? [
-          {
-            id: 1,
-            title: "Application Under Review",
-            desc: "Your application for Senior Full Stack Engineer is being reviewed by hiring team.",
-            time: "25m ago",
-            read: false,
-            icon: "fa-solid fa-briefcase",
-            color: "#2563eb",
-            bg: "#eff6ff",
-            link: "/candidate/applications",
-          },
-          {
-            id: 2,
-            title: "ATS Optimization Tip",
-            desc: "Add 2+ quantifiable metric bullet points to boost your ATS match score above 90%.",
-            time: "2h ago",
-            read: false,
-            icon: "fa-solid fa-wand-magic-sparkles",
-            color: "#059669",
-            bg: "#ecfdf5",
-            link: "/candidate/resume-checker",
-          },
-          {
-            id: 3,
-            title: "New Matching Job Opening",
-            desc: "DevOps Engineer role matches 88% of your skill profile.",
-            time: "1d ago",
-            read: false,
-            icon: "fa-solid fa-bolt",
-            color: "#7c3aed",
-            bg: "#faf5ff",
-            link: "/candidate/jobs",
-          },
-          {
-            id: 4,
-            title: "Candidate Profile Configured",
-            desc: "Your job preferences and notification settings are active.",
-            time: "3d ago",
-            read: true,
-            icon: "fa-solid fa-circle-check",
-            color: "#10b981",
-            bg: "#f0fdf4",
-            link: "/setting",
-          },
-        ]
-      : [
-          {
-            id: 1,
-            title: "New Candidate Application",
-            desc: "Alex Morgan applied for Senior Full Stack Engineer role.",
-            time: "15m ago",
-            read: false,
-            icon: "fa-solid fa-user-plus",
-            color: "#2563eb",
-            bg: "#eff6ff",
-            link: "/candidates",
-          },
-          {
-            id: 2,
-            title: "Skill Gap Benchmark Alert",
-            desc: "React & Node.js benchmarks updated for Engineering department.",
-            time: "2h ago",
-            read: false,
-            icon: "fa-solid fa-chart-pie",
-            color: "#d97706",
-            bg: "#fffbeb",
-            link: "/skillgapanalysis",
-          },
-          {
-            id: 3,
-            title: "Resume Intake Complete",
-            desc: "12 candidate resumes successfully parsed with ATS scores computed.",
-            time: "5h ago",
-            read: false,
-            icon: "fa-solid fa-file-shield",
-            color: "#059669",
-            bg: "#ecfdf5",
-            link: "/resumeupload",
-          },
-          {
-            id: 4,
-            title: "System Telemetry Healthy",
-            desc: "Database connections, AI models, and background services 100% operational.",
-            time: "1d ago",
-            read: true,
-            icon: "fa-solid fa-server",
-            color: "#10b981",
-            bg: "#f0fdf4",
-            link: "/setting",
-          },
-        ];
-  });
+  const [notifications, setNotifications] = useState([]);
+  const [loadingNotifs, setLoadingNotifs] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+    const loadRealNotifications = async () => {
+      if (!user) {
+        setNotifications([]);
+        return;
+      }
+      try {
+        setLoadingNotifs(true);
+        const res = await authApi.getNotifications();
+        if (res?.data && isMounted) {
+          const userKey = user.id || user.userId || 'curr';
+          const storedReadIds = JSON.parse(
+            localStorage.getItem(`hireiq_read_notifs_${userKey}`) || '[]'
+          );
+          const mapped = res.data.map((item) => ({
+            ...item,
+            read: storedReadIds.includes(item.id),
+          }));
+          setNotifications(mapped);
+        }
+      } catch (err) {
+        console.error('Failed to load notifications:', err);
+      } finally {
+        if (isMounted) setLoadingNotifs(false);
+      }
+    };
+
+    loadRealNotifications();
+    return () => {
+      isMounted = false;
+    };
+  }, [user]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -190,10 +131,25 @@ export default function Header({
   };
 
   const markAllAsRead = () => {
+    if (user) {
+      const userKey = user.id || user.userId || 'curr';
+      const allIds = notifications.map((n) => n.id);
+      localStorage.setItem(`hireiq_read_notifs_${userKey}`, JSON.stringify(allIds));
+    }
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
   const handleNotificationItemClick = (item) => {
+    if (user) {
+      const userKey = user.id || user.userId || 'curr';
+      const storedReadIds = JSON.parse(
+        localStorage.getItem(`hireiq_read_notifs_${userKey}`) || '[]'
+      );
+      if (!storedReadIds.includes(item.id)) {
+        storedReadIds.push(item.id);
+        localStorage.setItem(`hireiq_read_notifs_${userKey}`, JSON.stringify(storedReadIds));
+      }
+    }
     setNotifications((prev) =>
       prev.map((n) => (n.id === item.id ? { ...n, read: true } : n))
     );
@@ -297,10 +253,16 @@ export default function Header({
                   </div>
 
                   <div className="notification-dropdown-body">
-                    {notifications.length === 0 ? (
-                      <div className="notif-empty-state">
-                        <i className="fa-regular fa-bell-slash" style={{ fontSize: "24px", color: "#94a3b8", marginBottom: "8px", display: "block" }}></i>
-                        You have no notifications.
+                    {loadingNotifs ? (
+                      <div style={{ padding: '24px 20px', textAlign: 'center', color: '#64748b', fontSize: '12px' }}>
+                        <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '6px' }}></i>
+                        Loading updates...
+                      </div>
+                    ) : notifications.length === 0 ? (
+                      <div className="notif-empty-state" style={{ padding: '28px 20px', textAlign: 'center' }}>
+                        <i className="fa-regular fa-bell" style={{ fontSize: "26px", color: "#cbd5e1", marginBottom: "8px", display: "block" }}></i>
+                        <div style={{ fontWeight: 600, color: "#334155", fontSize: '13px', marginBottom: "4px" }}>No new notifications</div>
+                        <div style={{ fontSize: "11.5px", color: "#94a3b8", lineHeight: 1.4 }}>Real-time updates regarding your applications, resume audits, and candidates will appear here.</div>
                       </div>
                     ) : (
                       notifications.map((item) => (

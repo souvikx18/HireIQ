@@ -240,14 +240,18 @@ export default function ResumeChecker() {
                     </div>
                     <div className="score-badge-desc">
                       <h4>
-                        {auditReport.atsScore >= 85
+                        {auditReport.wordCount < 15
+                          ? 'Critical Alert: Unreadable Text Layer'
+                          : auditReport.atsScore >= 85
                           ? 'Excellent ATS Compatibility'
                           : auditReport.atsScore >= 70
                           ? 'Good Foundation with Optimization Areas'
                           : 'Action Needed: Formatting Gaps Detected'}
                       </h4>
                       <p>
-                        Your resume contains {auditReport.wordCount} words and meets key structural ATS benchmarks.
+                        {auditReport.wordCount < 15
+                          ? `Only ${auditReport.wordCount} selectable words detected. ATS engines cannot parse text from image-only/scanned files. Please export as a text-based PDF or DOCX.`
+                          : `Your resume contains ${auditReport.wordCount} words and meets key structural ATS benchmarks.`}
                       </p>
                     </div>
                   </div>
