@@ -239,29 +239,29 @@ body {
 ===================================================== */
 
 .top-header {
-    min-height: 70px;
+    min-height: 52px;
 
     display: flex;
     align-items: center;
     justify-content: space-between;
 
-    margin-bottom: 25px;
+    margin-bottom: 18px;
 }
 
 .page-heading h1 {
     color: #182235;
 
-    font-size: 31px;
+    font-size: 20px;
 
     font-weight: 700;
 
-    margin-bottom: 6px;
+    margin-bottom: 4px;
 }
 
 .page-heading p {
     color: #647084;
 
-    font-size: 14px;
+    font-size: 11.5px;
 }
 
 
@@ -271,15 +271,15 @@ body {
     display: flex;
     align-items: center;
 
-    gap: 16px;
+    gap: 12px;
 }
 
 
 /* Header icon */
 
 .header-icon {
-    width: 45px;
-    height: 45px;
+    width: 36px;
+    height: 36px;
 
     display: flex;
     align-items: center;
@@ -293,7 +293,7 @@ body {
 
     color: #647084;
 
-    font-size: 17px;
+    font-size: 14px;
 
     cursor: pointer;
 
@@ -312,24 +312,24 @@ body {
 /* Upload Resume */
 
 .upload-resume-btn {
-    height: 45px;
+    height: 36px;
 
-    padding: 0 19px;
+    padding: 0 14px;
 
     display: flex;
     align-items: center;
 
-    gap: 9px;
+    gap: 7px;
 
     border: none;
 
-    border-radius: 7px;
+    border-radius: 6px;
 
     background: #1769ff;
 
     color: #ffffff;
 
-    font-size: 14px;
+    font-size: 12px;
 
     font-weight: 600;
 
@@ -352,27 +352,27 @@ body {
 
     grid-template-columns: repeat(4, 1fr);
 
-    gap: 18px;
+    gap: 14px;
 
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .stat-card {
-    min-height: 120px;
+    min-height: 80px;
 
     display: flex;
     align-items: center;
 
-    gap: 16px;
+    gap: 12px;
 
-    padding: 20px;
+    padding: 13px 15px;
 
     /* LIGHT MODE */
     background: #ffffff;
 
     border: 1px solid #e4e8ef;
 
-    border-radius: 11px;
+    border-radius: 9px;
 
     box-shadow:
         0 4px 14px rgba(24, 34, 53, 0.07);
@@ -393,8 +393,8 @@ body {
 }
 
 .stat-icon {
-    width: 58px;
-    height: 58px;
+    width: 40px;
+    height: 40px;
 
     flex-shrink: 0;
 
@@ -402,9 +402,9 @@ body {
     align-items: center;
     justify-content: center;
 
-    border-radius: 14px;
+    border-radius: 10px;
 
-    font-size: 25px;
+    font-size: 18px;
 }
 
 .views-icon {
@@ -434,11 +434,11 @@ body {
 .stat-content h3 {
     color: #647084;
 
-    font-size: 13px;
+    font-size: 11px;
 
     font-weight: 500;
 
-    margin-bottom: 5px;
+    margin-bottom: 3px;
 }
 
 .stat-content strong {
@@ -446,23 +446,23 @@ body {
 
     color: #182235;
 
-    font-size: 26px;
+    font-size: 20px;
 
     line-height: 1.1;
 
-    margin-bottom: 6px;
+    margin-bottom: 3px;
 }
 
 .positive {
     color: #12b978;
 
-    font-size: 11px;
+    font-size: 10px;
 }
 
 .rating-stars {
     color: #ffb000;
 
-    font-size: 12px;
+    font-size: 11px;
 
     letter-spacing: 1px;
 }
@@ -492,9 +492,9 @@ body {
 ===================================================== */
 
 .table-header {
-    min-height: 74px;
+    min-height: 54px;
 
-    padding: 16px 20px;
+    padding: 12px 16px;
 
     display: flex;
     align-items: center;
@@ -509,27 +509,27 @@ body {
     display: flex;
     align-items: center;
 
-    gap: 10px;
+    gap: 8px;
 }
 
 .table-title h2 {
     color: #182235;
 
-    font-size: 18px;
+    font-size: 15px;
 
     font-weight: 600;
 }
 
 .table-title .candidate-count {
-    padding: 4px 9px;
+    padding: 3px 7px;
 
     background: #2b73ec;
 
     color: #ffffff;
 
-    border-radius: 12px;
+    border-radius: 10px;
 
-    font-size: 11px;
+    font-size: 10px;
 
     font-weight: 700;
 }
@@ -541,24 +541,24 @@ body {
     display: flex;
     align-items: center;
 
-    gap: 10px;
+    gap: 8px;
 }
 
 .table-controls select,
 .table-controls input {
-    height: 38px;
+    height: 32px;
 
-    padding: 0 12px;
+    padding: 0 10px;
 
     background: #ffffff;
 
     border: 1px solid #d6dce8;
 
-    border-radius: 7px;
+    border-radius: 6px;
 
     color: #182235;
 
-    font-size: 12px;
+    font-size: 11px;
 
     outline: none;
 
@@ -568,11 +568,11 @@ body {
 }
 
 .table-controls select {
-    min-width: 125px;
+    min-width: 115px;
 }
 
 .table-controls input {
-    width: 145px;
+    width: 135px;
 }
 
 .table-controls select:focus,
@@ -587,24 +587,24 @@ body {
 /* Export */
 
 .export-btn {
-    height: 38px;
+    height: 32px;
 
-    padding: 0 15px;
+    padding: 0 12px;
 
     display: flex;
     align-items: center;
 
-    gap: 7px;
+    gap: 6px;
 
     background: #ffffff;
 
     border: 1px solid #d6dce8;
 
-    border-radius: 7px;
+    border-radius: 6px;
 
     color: #475569;
 
-    font-size: 12px;
+    font-size: 11px;
 
     cursor: pointer;
 }
@@ -641,11 +641,11 @@ thead {
 }
 
 th {
-    padding: 15px 16px;
+    padding: 10px 14px;
 
     color: #647084;
 
-    font-size: 11px;
+    font-size: 10.5px;
 
     font-weight: 600;
 
@@ -655,11 +655,11 @@ th {
 }
 
 td {
-    padding: 17px 16px;
+    padding: 11px 14px;
 
     color: #334155;
 
-    font-size: 12px;
+    font-size: 11px;
 
     border-bottom: 1px solid #eef2f7;
 
@@ -685,14 +685,14 @@ tbody tr:hover {
     display: flex;
     align-items: center;
 
-    gap: 11px;
+    gap: 9px;
 
-    min-width: 220px;
+    min-width: 190px;
 }
 
 .candidate-avatar {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
 
     flex-shrink: 0;
 
@@ -702,7 +702,7 @@ tbody tr:hover {
 
     border-radius: 50%;
 
-    font-size: 12px;
+    font-size: 11px;
 
     font-weight: 700;
 }
@@ -736,9 +736,9 @@ tbody tr:hover {
 
     color: #182235;
 
-    font-size: 12px;
+    font-size: 11.5px;
 
-    margin-bottom: 4px;
+    margin-bottom: 2px;
 }
 
 .candidate-info span {
@@ -746,7 +746,7 @@ tbody tr:hover {
 
     color: #647084;
 
-    font-size: 10px;
+    font-size: 9.5px;
 }
 
 
@@ -757,17 +757,17 @@ tbody tr:hover {
 .views {
     color: #182235;
 
-    font-size: 15px;
+    font-size: 13px;
 }
 
 td small {
     display: block;
 
-    margin-top: 4px;
+    margin-top: 3px;
 
     color: #11b77a;
 
-    font-size: 10px;
+    font-size: 9.5px;
 }
 
 
@@ -778,15 +778,15 @@ td small {
 td strong {
     color: #182235;
 
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .stars {
-    margin-top: 4px;
+    margin-top: 3px;
 
     color: #ffae00;
 
-    font-size: 11px;
+    font-size: 10px;
 }
 
 .stars span {
@@ -802,13 +802,13 @@ td strong {
     display: flex;
     align-items: center;
 
-    gap: 6px;
+    gap: 5px;
 
     color: #475569;
 
-    font-size: 10px;
+    font-size: 9.5px;
 
-    margin-bottom: 7px;
+    margin-bottom: 5px;
 }
 
 .reviewer i {
@@ -818,23 +818,23 @@ td strong {
 .reviewer small {
     display: inline;
 
-    margin-left: 5px;
+    margin-left: 4px;
 
     color: #94a0b0;
 
-    font-size: 9px;
+    font-size: 8.5px;
 }
 
 .review {
-    max-width: 190px;
+    max-width: 170px;
 
-    padding: 8px 10px;
+    padding: 6px 8px;
 
-    border-radius: 6px;
+    border-radius: 5px;
 
-    font-size: 10px;
+    font-size: 9.5px;
 
-    line-height: 1.45;
+    line-height: 1.4;
 
     margin: 0;
 }
@@ -869,19 +869,19 @@ td strong {
 ===================================================== */
 
 .view-btn {
-    height: 35px;
+    height: 30px;
 
-    padding: 0 14px;
+    padding: 0 11px;
 
     background: #ffffff;
 
     border: 1px solid #2563eb;
 
-    border-radius: 6px;
+    border-radius: 5px;
 
     color: #2563eb;
 
-    font-size: 12px;
+    font-size: 11px;
 
     font-weight: 500;
 
@@ -895,7 +895,7 @@ td strong {
 
     justify-content: center;
 
-    gap: 6px;
+    gap: 5px;
 
     transition: all 0.2s ease;
 }
@@ -911,16 +911,16 @@ td strong {
 }
 
 .more-btn {
-    width: 35px;
-    height: 35px;
+    width: 30px;
+    height: 30px;
 
-    margin-left: 5px;
+    margin-left: 4px;
 
     background: #ffffff;
 
     border: 1px solid #d6dce8;
 
-    border-radius: 6px;
+    border-radius: 5px;
 
     color: #64748b;
 
@@ -941,9 +941,9 @@ td strong {
 ===================================================== */
 
 .table-footer {
-    min-height: 65px;
+    min-height: 48px;
 
-    padding: 14px 20px;
+    padding: 10px 16px;
 
     display: flex;
     align-items: center;
@@ -951,7 +951,7 @@ td strong {
 
     color: #647084;
 
-    font-size: 11px;
+    font-size: 10.5px;
 
     background: #ffffff;
 }
@@ -960,24 +960,24 @@ td strong {
     display: flex;
     align-items: center;
 
-    gap: 6px;
+    gap: 5px;
 }
 
 .pagination button {
-    width: 34px;
-    height: 34px;
+    width: 28px;
+    height: 28px;
 
     background: #ffffff;
 
     border: 1px solid #d6dce8;
 
-    border-radius: 6px;
+    border-radius: 5px;
 
     color: #647084;
 
     cursor: pointer;
 
-    font-size: 11px;
+    font-size: 10.5px;
 
     transition:
         background 0.2s ease,

@@ -244,43 +244,43 @@
         }
 
         .header-left h1 {
-            font-size: 27px;
+            font-size: 20px;
 
             line-height: 1.2;
 
-            letter-spacing: -.7px;
+            letter-spacing: -.5px;
 
             font-weight: 700;
         }
 
         .header-left p {
-            margin-top: 7px;
+            margin-top: 5px;
 
             color: var(--text-light);
 
-            font-size: 14px;
+            font-size: 11.5px;
         }
 
 
         /* Search */
 
         .search {
-            width: 280px;
+            width: 250px;
 
-            height: 44px;
+            height: 36px;
 
             background: linear-gradient(135deg, #f8f9fb, #f0f3f9);
             border: 1px solid #e5e8f0;
 
-            border-radius: 25px;
+            border-radius: 20px;
 
             display: flex;
 
             align-items: center;
 
-            padding: 0 18px;
+            padding: 0 14px;
 
-            gap: 11px;
+            gap: 9px;
             
             transition: all 0.3s ease;
         }
@@ -293,7 +293,7 @@
         .search i {
             color: #607086;
 
-            font-size: 17px;
+            font-size: 14px;
         }
 
         .search input {
@@ -305,7 +305,7 @@
 
             background: transparent;
 
-            font-size: 13px;
+            font-size: 11.5px;
 
             color: var(--text);
         }
@@ -331,11 +331,11 @@
                 minmax(0, 1fr)
                 minmax(0, 1fr);
 
-            gap: 24px;
+            gap: 20px;
 
             align-items: stretch;
 
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
 
 
@@ -344,14 +344,14 @@
         ========================================= */
 
         .upload-box {
-            height: 315px;
+            height: 260px;
 
             background: linear-gradient(135deg, #ffffff 0%, #fafbff 100%);
 
             border:
                 2px dashed #625bdb;
 
-            border-radius: 15px;
+            border-radius: 12px;
 
             display: flex;
 
@@ -381,8 +381,8 @@
         }
 
         .upload-icon {
-            width: 65px;
-            height: 65px;
+            width: 48px;
+            height: 48px;
 
             background: linear-gradient(135deg, #eef0ff, #e8e6ff);
             box-shadow: 0 4px 12px rgba(91, 85, 217, 0.2);
@@ -395,9 +395,9 @@
 
             color: #5d57d8;
 
-            font-size: 25px;
+            font-size: 20px;
 
-            margin-bottom: 20px;
+            margin-bottom: 12px;
             
             transition: 0.3s ease;
         }
@@ -407,21 +407,21 @@
         }
 
         .upload-box h2 {
-            font-size: 19px;
+            font-size: 15px;
 
-            margin-bottom: 7px;
+            margin-bottom: 5px;
         }
 
         .upload-box p {
             color: #697487;
 
-            font-size: 13px;
+            font-size: 11px;
 
-            margin-bottom: 20px;
+            margin-bottom: 14px;
         }
 
         .browse-btn {
-            padding: 10px 19px;
+            padding: 8px 14px;
 
             background: white;
 
@@ -429,9 +429,9 @@
 
             color: #625bd5;
 
-            border-radius: 8px;
+            border-radius: 7px;
 
-            font-size: 13px;
+            font-size: 11.5px;
 
             font-weight: 600;
 
@@ -725,9 +725,9 @@
 
             border: 1px solid var(--border);
 
-            border-radius: 15px;
+            border-radius: 12px;
 
-            padding: 28px 32px;
+            padding: 20px 24px;
 
             width: 100%;
             box-sizing: border-box;
@@ -752,9 +752,9 @@
 
             align-items: center;
 
-            gap: 15px;
+            gap: 12px;
 
-            padding-bottom: 22px;
+            padding-bottom: 16px;
 
             border-bottom: 1px solid #e7e9ed;
             min-width: 0;
@@ -762,8 +762,8 @@
         }
 
         .candidate-avatar {
-            width: 65px;
-            height: 65px;
+            width: 48px;
+            height: 48px;
 
             border-radius: 50%;
 
@@ -784,7 +784,7 @@
 
             color: white;
 
-            font-size: 22px;
+            font-size: 18px;
 
             font-weight: 700;
             flex-shrink: 0;
@@ -804,9 +804,9 @@
         }
 
         .candidate-header h2 {
-            font-size: 18px;
+            font-size: 15px;
 
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -816,7 +816,7 @@
         .candidate-header p {
             color: #667184;
 
-            font-size: 13px;
+            font-size: 11.5px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -829,7 +829,7 @@
         ========================================= */
 
         .match-section {
-            padding: 25px 0;
+            padding: 18px 0;
         }
 
         .match-row {
@@ -837,12 +837,12 @@
 
             align-items: center;
 
-            gap: 18px;
+            gap: 14px;
         }
 
         .match-circle {
-            width: 75px;
-            height: 75px;
+            width: 60px;
+            height: 60px;
 
             border-radius: 50%;
 
@@ -863,8 +863,8 @@
         }
 
         .match-circle-inner {
-            width: 59px;
-            height: 59px;
+            width: 46px;
+            height: 46px;
 
             background: white;
 
@@ -877,23 +877,23 @@
 
             color: #159b8e;
 
-            font-size: 16px;
+            font-size: 13px;
 
             font-weight: 700;
         }
 
         .match-info h3 {
-            font-size: 15px;
+            font-size: 13px;
 
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .match-info p {
             color: #6b7586;
 
-            font-size: 11px;
+            font-size: 10.5px;
 
-            line-height: 1.5;
+            line-height: 1.45;
         }
 
 
@@ -1484,22 +1484,22 @@
         .resume-decision-actions {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-top: 20px;
+            gap: 10px;
+            margin-top: 16px;
             width: 100%;
         }
 
         .action-pill-btn {
-            height: 44px;
-            padding: 0 18px;
-            border-radius: 8px;
-            font-size: 13.5px;
+            height: 36px;
+            padding: 0 14px;
+            border-radius: 7px;
+            font-size: 11.5px;
             font-weight: 600;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 7px;
             border: 1px solid transparent;
             transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
             font-family: inherit;
@@ -1509,7 +1509,7 @@
         }
 
         .action-pill-btn i {
-            font-size: 13.5px;
+            font-size: 12px;
             transition: transform 0.2s ease;
         }
 
@@ -1592,14 +1592,14 @@
         .actions {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 14px;
+            gap: 12px;
         }
 
         .shortlist-btn,
         .pass-btn {
-            height: 44px;
-            border-radius: 8px;
-            font-size: 13.5px;
+            height: 36px;
+            border-radius: 7px;
+            font-size: 11.5px;
             font-weight: 600;
             cursor: pointer;
             transition: .2s;
@@ -1642,16 +1642,16 @@
         .history-card {
             margin-top: 0;
 
-            height: 315px;
-            max-height: 315px;
+            height: 260px;
+            max-height: 260px;
 
             background: white;
 
             border: 1px solid var(--border);
 
-            border-radius: 15px;
+            border-radius: 12px;
 
-            padding: 20px 24px;
+            padding: 16px 20px;
             
             box-shadow: var(--shadow-md);
             
@@ -1675,12 +1675,12 @@
 
             justify-content: space-between;
 
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             flex-shrink: 0;
         }
 
         .history-header h2 {
-            font-size: 17px;
+            font-size: 14px;
         }
 
         .history-header span {

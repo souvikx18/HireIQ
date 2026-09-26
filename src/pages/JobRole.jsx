@@ -910,8 +910,7 @@ export default function JobRole() {
               maxWidth: '100%',
               maxHeight: '92vh',
               overflowY: 'auto',
-              padding: '28px',
-              background: '#ffffff',
+              padding: '24px',
               borderRadius: '14px',
               boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
             }}
@@ -924,16 +923,13 @@ export default function JobRole() {
                 position: 'absolute',
                 top: '18px',
                 right: '18px',
-                width: '34px',
-                height: '34px',
-                border: '1px solid #d9e2ef',
+                width: '32px',
+                height: '32px',
                 borderRadius: '8px',
-                background: '#f8fafc',
-                color: '#64748b',
                 cursor: 'pointer',
                 display: 'grid',
                 placeItems: 'center',
-                fontSize: '15px',
+                fontSize: '13px',
               }}
               onClick={() => setSelectedRoleDetails(null)}
             >
@@ -941,14 +937,14 @@ export default function JobRole() {
             </button>
 
             {/* Header */}
-            <div className="modal-header" style={{ marginBottom: '18px' }}>
+            <div className="modal-header" style={{ marginBottom: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <h2 style={{ fontSize: '22px', fontWeight: '700', color: '#0f172a' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: '700' }}>
                   {selectedRoleDetails?.name || selectedRoleDetails?.title || 'Job Role'}
                 </h2>
                 <span
                   style={{
-                    fontSize: '11px',
+                    fontSize: '10.5px',
                     fontWeight: '700',
                     padding: '3px 8px',
                     borderRadius: '12px',
@@ -960,12 +956,12 @@ export default function JobRole() {
                 </span>
                 <span
                   className={`status ${selectedRoleDetails?.statusVal || 'active'}`}
-                  style={{ fontSize: '11px', padding: '3px 9px', borderRadius: '12px' }}
+                  style={{ fontSize: '10.5px', padding: '3px 9px', borderRadius: '12px' }}
                 >
                   {selectedRoleDetails?.status || 'Active'}
                 </span>
               </div>
-              <p style={{ color: '#64748b', fontSize: '13px', marginTop: '3px' }}>
+              <p style={{ fontSize: '12px', marginTop: '3px' }}>
                 Role specifications and candidates assigned to this field
               </p>
             </div>
@@ -977,64 +973,53 @@ export default function JobRole() {
                 display: 'grid',
                 gridTemplateColumns: 'repeat(4, 1fr)',
                 gap: '12px',
-                margin: '16px 0 20px 0',
+                margin: '14px 0 18px 0',
               }}
             >
-              <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                <span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '3px' }}>Department</span>
-                <strong style={{ color: '#1e293b', fontSize: '13px' }}>{selectedRoleDetails?.department || 'General'}</strong>
+              <div className="role-meta-box">
+                <span>Department</span>
+                <strong>{selectedRoleDetails?.department || 'General'}</strong>
               </div>
 
-              <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                <span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '3px' }}>Experience</span>
-                <strong style={{ color: '#1e293b', fontSize: '13px' }}>{selectedRoleDetails?.experience || 'All'}</strong>
+              <div className="role-meta-box">
+                <span>Experience</span>
+                <strong>{selectedRoleDetails?.experience || 'All'}</strong>
               </div>
 
-              <div style={{ padding: '12px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                <span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginBottom: '3px' }}>Open Positions</span>
-                <strong style={{ color: '#1e293b', fontSize: '13px' }}>{selectedRoleDetails?.openPositions || 1}</strong>
+              <div className="role-meta-box">
+                <span>Open Positions</span>
+                <strong>{selectedRoleDetails?.openPositions || 1}</strong>
               </div>
 
-              <div style={{ padding: '12px', background: '#eff6ff', borderRadius: '8px', border: '1px solid #bfdbfe' }}>
-                <span style={{ display: 'block', fontSize: '11px', color: '#1d4ed8', marginBottom: '3px' }}>Assigned Candidates</span>
-                <strong style={{ color: '#1e3a8a', fontSize: '14px' }}>
+              <div className="role-meta-box highlight">
+                <span>Assigned Candidates</span>
+                <strong>
                   {loadingAssigned ? '...' : (Array.isArray(assignedCandidates) ? assignedCandidates.length : 0)}
                 </strong>
               </div>
             </div>
 
             {/* Required & Preferred Skills */}
-            <div style={{ marginBottom: '22px', padding: '14px 16px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-              <div style={{ fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '8px' }}>
+            <div className="role-criteria-box">
+              <div className="role-criteria-title">
                 Required Skill Criteria
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
                 {(selectedRoleDetails?.skills || []).map((s, idx) => (
-                  <span
-                    key={idx}
-                    style={{
-                      padding: '4px 10px',
-                      background: '#ffffff',
-                      border: '1px solid #cbd5e1',
-                      borderRadius: '6px',
-                      fontSize: '12px',
-                      fontWeight: '500',
-                      color: '#1e293b',
-                    }}
-                  >
+                  <span key={idx} className="role-skill-badge">
                     {s}
                   </span>
                 ))}
                 {(!selectedRoleDetails?.skills || selectedRoleDetails.skills.length === 0) && (
-                  <span style={{ fontSize: '12px', color: '#94a3b8' }}>No criteria specified</span>
+                  <span style={{ fontSize: '11.5px', color: '#94a3b8' }}>No criteria specified</span>
                 )}
               </div>
             </div>
 
             {/* ASSIGNED CANDIDATES ROSTER */}
-            <div style={{ marginBottom: '24px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                <h3 style={{ fontSize: '15px', fontWeight: '700', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ marginBottom: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <h3 style={{ fontSize: '13.5px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <i className="fa-solid fa-users-viewfinder" style={{ color: '#2563eb' }}></i>
                   Assigned Candidates Roster ({Array.isArray(assignedCandidates) ? assignedCandidates.length : 0})
                 </h3>
@@ -1068,30 +1053,30 @@ export default function JobRole() {
                   </span>
                 </div>
               ) : (
-                <div style={{ border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                <div className="role-table-container">
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11.5px' }}>
                     <thead>
                       <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0', textAlign: 'left' }}>
-                        <th style={{ padding: '10px 14px', color: '#475569', fontWeight: '600' }}>Candidate</th>
-                        <th style={{ padding: '10px 14px', color: '#475569', fontWeight: '600' }}>Stage</th>
-                        <th style={{ padding: '10px 14px', color: '#475569', fontWeight: '600' }}>Match Score</th>
-                        <th style={{ padding: '10px 14px', color: '#475569', fontWeight: '600' }}>ATS Score</th>
-                        <th style={{ padding: '10px 14px', color: '#475569', fontWeight: '600', textAlign: 'right' }}>Action</th>
+                        <th style={{ padding: '8px 12px', color: '#475569', fontWeight: '600' }}>Candidate</th>
+                        <th style={{ padding: '8px 12px', color: '#475569', fontWeight: '600' }}>Stage</th>
+                        <th style={{ padding: '8px 12px', color: '#475569', fontWeight: '600' }}>Match Score</th>
+                        <th style={{ padding: '8px 12px', color: '#475569', fontWeight: '600' }}>ATS Score</th>
+                        <th style={{ padding: '8px 12px', color: '#475569', fontWeight: '600', textAlign: 'right' }}>Action</th>
                       </tr>
                     </thead>
                     <tbody>
                       {(Array.isArray(assignedCandidates) ? assignedCandidates : []).map((cand) => (
                         <tr key={cand.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                          <td style={{ padding: '10px 14px' }}>
-                            <div style={{ fontWeight: '600', color: '#0f172a' }}>{cand.name}</div>
-                            <div style={{ fontSize: '11px', color: '#64748b' }}>{cand.email}</div>
+                          <td style={{ padding: '8px 12px' }}>
+                            <div className="role-cand-name" style={{ fontWeight: '600' }}>{cand.name}</div>
+                            <div className="role-cand-email" style={{ fontSize: '10.5px' }}>{cand.email}</div>
                           </td>
-                          <td style={{ padding: '10px 14px' }}>
+                          <td style={{ padding: '8px 12px' }}>
                             <span
                               style={{
-                                padding: '3px 8px',
+                                padding: '2px 7px',
                                 borderRadius: '12px',
-                                fontSize: '10px',
+                                fontSize: '9.5px',
                                 fontWeight: '700',
                                 textTransform: 'uppercase',
                                 background:
@@ -1119,17 +1104,17 @@ export default function JobRole() {
                               {(cand.currentStage || 'Screening').replace('_', ' ')}
                             </span>
                           </td>
-                          <td style={{ padding: '10px 14px' }}>
+                          <td style={{ padding: '8px 12px' }}>
                             <strong style={{ color: (cand.matchScore || 85) >= 80 ? '#16a34a' : '#d97706' }}>
                               {cand.matchScore ? `${cand.matchScore}%` : '85%'}
                             </strong>
                           </td>
-                          <td style={{ padding: '10px 14px' }}>
+                          <td style={{ padding: '8px 12px' }}>
                             <strong style={{ color: '#2563eb' }}>
                               {cand.atsScore || 90}
                             </strong>
                           </td>
-                          <td style={{ padding: '10px 14px', textAlign: 'right' }}>
+                          <td style={{ padding: '8px 12px', textAlign: 'right' }}>
                             <button
                               type="button"
                               onClick={() => handleUnassignCandidate(cand)}
@@ -1137,12 +1122,12 @@ export default function JobRole() {
                                 display: 'inline-flex',
                                 alignItems: 'center',
                                 gap: '4px',
-                                padding: '5px 9px',
+                                padding: '4px 8px',
                                 border: '1px solid #fecdd3',
                                 borderRadius: '6px',
                                 background: '#fff1f2',
                                 color: '#be123c',
-                                fontSize: '11px',
+                                fontSize: '10.5px',
                                 fontWeight: '600',
                                 cursor: 'pointer',
                               }}
@@ -1160,20 +1145,12 @@ export default function JobRole() {
             </div>
 
             {/* QUICK ASSIGN TOOL */}
-            <div
-              style={{
-                padding: '16px',
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: '10px',
-                marginBottom: '20px',
-              }}
-            >
-              <div style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div className="role-assign-box">
+              <div className="role-assign-title">
                 <i className="fa-solid fa-user-plus" style={{ color: '#16a34a' }}></i>
                 Assign Candidate to this Role
               </div>
-              <p style={{ fontSize: '12px', color: '#64748b', marginBottom: '12px' }}>
+              <p className="role-assign-desc">
                 Assign an unassigned applicant or transfer an active candidate directly to {selectedRoleDetails?.name || selectedRoleDetails?.title || 'this role'}.
               </p>
               <div style={{ display: 'flex', gap: '10px' }}>
@@ -1182,12 +1159,10 @@ export default function JobRole() {
                   onChange={(e) => setSelectedCandidateToAssign(e.target.value)}
                   style={{
                     flex: 1,
-                    padding: '8px 12px',
+                    padding: '7px 11px',
                     borderRadius: '8px',
                     border: '1px solid #cbd5e1',
-                    fontSize: '12px',
-                    background: '#ffffff',
-                    color: '#1e293b',
+                    fontSize: '11.5px',
                   }}
                 >
                   <option value="">Select Candidate to Assign...</option>
@@ -1208,12 +1183,12 @@ export default function JobRole() {
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '6px',
-                    padding: '8px 16px',
+                    padding: '7px 14px',
                     borderRadius: '8px',
                     border: 'none',
                     background: selectedCandidateToAssign ? '#16a34a' : '#94a3b8',
                     color: '#ffffff',
-                    fontSize: '12px',
+                    fontSize: '11.5px',
                     fontWeight: '600',
                     cursor: selectedCandidateToAssign ? 'pointer' : 'not-allowed',
                   }}
@@ -1233,13 +1208,11 @@ export default function JobRole() {
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
-                  padding: '9px 16px',
+                  padding: '8px 14px',
                   borderRadius: '8px',
-                  fontSize: '12px',
+                  fontSize: '11.5px',
                   fontWeight: '600',
                   border: '1px solid #cbd5e1',
-                  background: '#ffffff',
-                  color: '#334155',
                   cursor: 'pointer',
                 }}
                 onClick={() => {
@@ -1256,13 +1229,11 @@ export default function JobRole() {
                 className="cancel-btn role-details-close-btn"
                 onClick={() => setSelectedRoleDetails(null)}
                 style={{
-                  padding: '9px 20px',
+                  padding: '8px 18px',
                   borderRadius: '8px',
-                  fontSize: '12px',
+                  fontSize: '11.5px',
                   fontWeight: '600',
                   border: '1px solid #cbd5e1',
-                  background: '#f8fafc',
-                  color: '#475569',
                   cursor: 'pointer',
                 }}
               >

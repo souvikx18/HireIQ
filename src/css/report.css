@@ -420,17 +420,17 @@ body {
 
     justify-content: space-between;
 
-    gap: 20px;
+    gap: 16px;
 
-    margin-bottom: 26px;
+    margin-bottom: 18px;
 }
 
 .page-heading h1 {
-    margin-bottom: 7px;
+    margin-bottom: 4px;
 
     color: var(--text);
 
-    font-size: 28px;
+    font-size: 20px;
 
     font-weight: 700;
 }
@@ -438,7 +438,7 @@ body {
 .page-heading p {
     color: var(--text-light);
 
-    font-size: 12px;
+    font-size: 11.5px;
 }
 
 
@@ -449,12 +449,12 @@ body {
 
     align-items: center;
 
-    gap: 12px;
+    gap: 10px;
 }
 
 .theme-btn {
-    width: 39px;
-    height: 39px;
+    width: 34px;
+    height: 34px;
 
     display: grid;
     place-items: center;
@@ -464,7 +464,7 @@ body {
     background: #ffffff;
     color: var(--text-light);
     font-family: inherit;
-    font-size: 14px;
+    font-size: 13px;
     cursor: pointer;
     transition: 0.2s ease;
 }
@@ -484,9 +484,9 @@ body {
 }
 
 .date-selector {
-    min-width: 188px;
+    min-width: 170px;
 
-    height: 39px;
+    height: 34px;
 
     display: flex;
 
@@ -494,9 +494,9 @@ body {
 
     justify-content: space-between;
 
-    gap: 12px;
+    gap: 10px;
 
-    padding: 0 13px;
+    padding: 0 11px;
 
     border: 1px solid #dce3ec;
 
@@ -609,7 +609,7 @@ body {
 ========================================================= */
 
 .generate-btn {
-    height: 39px;
+    height: 34px;
 
     display: flex;
 
@@ -617,9 +617,9 @@ body {
 
     justify-content: center;
 
-    gap: 8px;
+    gap: 7px;
 
-    padding: 0 16px;
+    padding: 0 14px;
 
     border: none;
 
@@ -631,7 +631,7 @@ body {
 
     font-family: inherit;
 
-    font-size: 12px;
+    font-size: 11.5px;
 
     font-weight: 600;
 
@@ -650,7 +650,7 @@ body {
 }
 
 .generate-btn i {
-    font-size: 11px;
+    font-size: 10px;
 }
 
 
@@ -676,13 +676,13 @@ body {
 /* Card Header */
 
 .reports-card-header {
-    height: 53px;
+    height: 42px;
 
     display: flex;
 
     align-items: center;
 
-    padding: 0 16px;
+    padding: 0 14px;
 
     border-bottom: 1px solid var(--border-light);
 }
@@ -690,7 +690,7 @@ body {
 .reports-card-header h2 {
     color: var(--text);
 
-    font-size: 12px;
+    font-size: 11.5px;
 
     font-weight: 600;
 }
@@ -722,15 +722,15 @@ body {
 }
 
 .reports-table th {
-    height: 47px;
+    height: 38px;
 
-    padding: 0 22px;
+    padding: 0 18px;
 
     text-align: left;
 
     color: #26344b;
 
-    font-size: 11px;
+    font-size: 10px;
 
     font-weight: 600;
 
@@ -745,7 +745,7 @@ body {
 /* Table Rows */
 
 .reports-table tbody tr {
-    height: 78px;
+    height: 56px;
 
     transition: 0.2s ease;
 }
@@ -755,11 +755,11 @@ body {
 }
 
 .reports-table td {
-    padding: 10px 22px;
+    padding: 7px 18px;
 
     color: #526078;
 
-    font-size: 11px;
+    font-size: 10.5px;
 
     border-bottom: 1px solid var(--border-light);
 
@@ -784,14 +784,14 @@ body {
 
     align-items: center;
 
-    gap: 13px;
+    gap: 10px;
 
-    min-width: 225px;
+    min-width: 200px;
 }
 
 .report-icon {
-    width: 35px;
-    height: 35px;
+    width: 28px;
+    height: 28px;
 
     flex-shrink: 0;
 
@@ -800,9 +800,9 @@ body {
     align-items: center;
     justify-content: center;
 
-    border-radius: 7px;
+    border-radius: 6px;
 
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .report-icon.blue {
@@ -832,7 +832,7 @@ body {
 .report-name strong {
     color: #1c2940;
 
-    font-size: 12px;
+    font-size: 11px;
 
     font-weight: 600;
 }
@@ -845,9 +845,9 @@ body {
 .report-description {
     color: #65728a;
 
-    font-size: 11px;
+    font-size: 10px;
 
-    line-height: 1.5;
+    line-height: 1.45;
 }
 
 
@@ -862,11 +862,11 @@ body {
 
     justify-content: flex-end;
 
-    gap: 7px;
+    gap: 6px;
 }
 
 .report-btn {
-    height: 30px;
+    height: 27px;
 
     display: inline-flex;
 
@@ -874,9 +874,9 @@ body {
 
     justify-content: center;
 
-    gap: 11px;
+    gap: 8px;
 
-    padding: 0 12px;
+    padding: 0 10px;
 
     border: 1px solid #d9e2ee;
 
@@ -888,7 +888,7 @@ body {
 
     font-family: inherit;
 
-    font-size: 11px;
+    font-size: 10px;
 
     font-weight: 600;
 
@@ -904,7 +904,7 @@ body {
 }
 
 .report-btn i {
-    font-size: 10px;
+    font-size: 9px;
 }
 
 
