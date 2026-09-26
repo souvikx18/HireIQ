@@ -405,9 +405,9 @@ export default function ResumeChecker() {
                   {!isAuthenticated ? (
                     <div className="guest-conversion-card">
                       <div className="guest-conversion-text">
-                        <h4>🚀 Ready to apply with your ATS-optimized resume?</h4>
+                        <h4>🚀 Want to track your resume audit history?</h4>
                         <p>
-                          Create a free Candidate account to auto-match your skills with hundreds of verified open positions and apply with 1 click.
+                          Create a free Candidate account to save your ATS score reports, unlock AI bullet-point rewrites, and benchmark your tech skills.
                         </p>
                       </div>
                       <div className="guest-conversion-actions">
@@ -433,10 +433,21 @@ export default function ResumeChecker() {
                         type="button"
                         className="hero-cta-btn primary"
                         style={{ flex: 1, justifyContent: 'center' }}
-                        onClick={() => navigate('/candidate/jobs')}
+                        onClick={() => navigate('/candidate/dashboard')}
                       >
-                        <i className="fa-solid fa-briefcase"></i>
-                        Match Against Open Jobs
+                        <i className="fa-solid fa-gauge-high"></i>
+                        View Dashboard Overview
+                      </button>
+                      <button
+                        type="button"
+                        className="hero-cta-btn secondary"
+                        style={{ flex: 1, justifyContent: 'center' }}
+                        onClick={() => {
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                      >
+                        <i className="fa-solid fa-file-arrow-up"></i>
+                        Scan Another Resume
                       </button>
                     </div>
                   )}

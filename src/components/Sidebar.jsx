@@ -75,24 +75,6 @@ export default function Sidebar({ activePage }) {
             </Link>
 
             <Link
-              to="/candidate/jobs"
-              className={`menu-item ${activePage === 'candidate-jobs' ? 'active' : ''}`}
-              title="Explore Jobs"
-            >
-              <i className="fa-solid fa-briefcase"></i>
-              {!isCollapsed && <span>Explore Jobs</span>}
-            </Link>
-
-            <Link
-              to="/candidate/applications"
-              className={`menu-item ${activePage === 'candidate-applications' ? 'active' : ''}`}
-              title="My Applications"
-            >
-              <i className="fa-solid fa-paper-plane"></i>
-              {!isCollapsed && <span>My Applications</span>}
-            </Link>
-
-            <Link
               to="/setting"
               className={`menu-item ${activePage === 'setting' ? 'active' : ''}`}
               title="Account Settings"

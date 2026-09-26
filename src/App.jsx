@@ -15,8 +15,6 @@ import Login from './pages/Login';
 import Upgrade from './pages/Upgrade';
 import CandidateDashboard from './pages/Candidate/CandidateDashboard';
 import ResumeChecker from './pages/Candidate/ResumeChecker';
-import CandidateJobs from './pages/Candidate/CandidateJobs';
-import MyApplications from './pages/Candidate/MyApplications';
 import AIChatbot from './components/AIChatbot';
 
 function AppRoutes() {
@@ -226,19 +224,11 @@ function AppRoutes() {
         />
         <Route
           path="/candidate/jobs"
-          element={
-            <ProtectedRoute>
-              <CandidateJobs />
-            </ProtectedRoute>
-          }
+          element={<Navigate to="/candidate/dashboard" replace />}
         />
         <Route
           path="/candidate/applications"
-          element={
-            <ProtectedRoute>
-              <MyApplications />
-            </ProtectedRoute>
-          }
+          element={<Navigate to="/candidate/dashboard" replace />}
         />
         {/* ATS Resume Checker Route */}
         <Route

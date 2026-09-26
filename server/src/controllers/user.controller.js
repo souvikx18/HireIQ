@@ -90,7 +90,7 @@ export const userController = {
               icon: 'fa-solid fa-briefcase',
               color: '#2563eb',
               bg: '#eff6ff',
-              link: '/candidate/applications',
+              link: '/candidate/dashboard',
             });
           }
         }
