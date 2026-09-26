@@ -6,7 +6,7 @@ import '../css/signup.css';
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { login } = useAuth();
   const [loginEmail, setLoginEmail] = useState('admin@hireiq.com');
   const [loginPassword, setLoginPassword] = useState('Admin@123456');
@@ -47,23 +47,33 @@ export default function Login() {
         password: loginPassword,
       });
 
-      const redirectTarget =
+      const rawRedirect =
         searchParams.get('redirect') ||
         location.state?.from?.pathname ||
         (location.state?.from && typeof location.state?.from === 'string'
           ? location.state.from
           : null);
 
+      let targetDestination = '/dashboard';
+      if (loggedUser?.role === 'CANDIDATE') {
+        if (rawRedirect && (rawRedirect.startsWith('/candidate') || rawRedirect === '/setting')) {
+          targetDestination = rawRedirect;
+        } else {
+          targetDestination = '/candidate/dashboard';
+        }
+      } else {
+        // Recruiter / Admin: strictly avoid candidate portal pages
+        if (rawRedirect && !rawRedirect.startsWith('/candidate')) {
+          targetDestination = rawRedirect;
+        } else {
+          targetDestination = '/dashboard';
+        }
+      }
+
       document.body.classList.add('page-leaving');
       setTimeout(() => {
         document.body.classList.remove('page-leaving');
-        if (redirectTarget) {
-          navigate(redirectTarget);
-        } else if (loggedUser?.role === 'CANDIDATE') {
-          navigate('/candidate/dashboard');
-        } else {
-          navigate('/dashboard');
-        }
+        navigate(targetDestination);
       }, 350);
     } catch (err) {
       setErrorMessage(err.message || 'Login failed. Please check your credentials.');
@@ -121,6 +131,9 @@ export default function Login() {
               onClick={() => {
                 setLoginEmail('admin@hireiq.com');
                 setLoginPassword('Admin@123456');
+                if (searchParams.get('redirect')?.startsWith('/candidate')) {
+                  setSearchParams({});
+                }
               }}
             >
               <i className="fa-solid fa-user-shield"></i>
@@ -148,6 +161,9 @@ export default function Login() {
               onClick={() => {
                 setLoginEmail('candidate@hireiq.com');
                 setLoginPassword('Candidate@123456');
+                if (searchParams.get('redirect') && !searchParams.get('redirect').startsWith('/candidate')) {
+                  setSearchParams({});
+                }
               }}
             >
               <i className="fa-solid fa-user-graduate"></i>

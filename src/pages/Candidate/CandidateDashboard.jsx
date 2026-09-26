@@ -14,6 +14,13 @@ export default function CandidateDashboard() {
   const [profile, setProfile] = useState(null);
 
   useEffect(() => {
+    if (user && user.role !== 'CANDIDATE') {
+      navigate('/dashboard', { replace: true });
+      return;
+    }
+  }, [user, navigate]);
+
+  useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);

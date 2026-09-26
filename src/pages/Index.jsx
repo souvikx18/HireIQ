@@ -2,12 +2,20 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
+import { useAuth } from '../context/AuthContext';
 import { analyticsApi } from '../api/analytics';
 import { resumesApi } from '../api/resumes';
 import '../css/style.css';
 
 export default function Index() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user && user.role === 'CANDIDATE') {
+      navigate('/candidate/dashboard', { replace: true });
+    }
+  }, [user, navigate]);
 
   const [periodOpen, setPeriodOpen] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('This Month');
