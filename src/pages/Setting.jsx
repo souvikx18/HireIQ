@@ -358,32 +358,11 @@ export default function Setting() {
 
           {/* TAB NAVIGATION (Hidden for Candidates, active for HR/Admin) */}
           {user?.role !== 'CANDIDATE' && (
-            <div
-              style={{
-                display: 'flex',
-                gap: '10px',
-                margin: '18px 0 24px',
-                borderBottom: '1px solid #e1e7ef',
-                paddingBottom: '12px',
-              }}
-            >
+            <div className="setting-tabs-bar">
               <button
                 type="button"
                 onClick={() => setActiveTab('account')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '9px 18px',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  border: 'none',
-                  background: activeTab === 'account' ? '#2869e8' : '#f1f5f9',
-                  color: activeTab === 'account' ? '#ffffff' : '#64748b',
-                  transition: 'all .2s ease',
-                }}
+                className={`setting-tab-btn ${activeTab === 'account' ? 'active' : ''}`}
               >
                 <i className="fa-solid fa-user-gear"></i> Account & Preferences
               </button>
@@ -391,20 +370,7 @@ export default function Setting() {
               <button
                 type="button"
                 onClick={() => setActiveTab('criteria')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '9px 18px',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  border: 'none',
-                  background: activeTab === 'criteria' ? '#2869e8' : '#f1f5f9',
-                  color: activeTab === 'criteria' ? '#ffffff' : '#64748b',
-                  transition: 'all .2s ease',
-                }}
+                className={`setting-tab-btn ${activeTab === 'criteria' ? 'active' : ''}`}
               >
                 <i className="fa-solid fa-sliders"></i> Company Hiring Criteria & Benchmarks
               </button>
@@ -412,20 +378,7 @@ export default function Setting() {
               <button
                 type="button"
                 onClick={() => setActiveTab('admin')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '9px 18px',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  border: 'none',
-                  background: activeTab === 'admin' ? '#2869e8' : '#f1f5f9',
-                  color: activeTab === 'admin' ? '#ffffff' : '#64748b',
-                  transition: 'all .2s ease',
-                }}
+                className={`setting-tab-btn ${activeTab === 'admin' ? 'active' : ''}`}
               >
                 <i className="fa-solid fa-shield-halved"></i> Admin Security & Audit Center
               </button>
@@ -713,84 +666,63 @@ export default function Setting() {
           {activeTab === 'criteria' && (
             <div className="criteria-console-view">
               {/* BENCHMARK OVERVIEW KPI CARDS */}
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(4, 1fr)',
-                  gap: '16px',
-                  marginBottom: '24px',
-                }}
-              >
-                <div style={{ background: '#ffffff', padding: '18px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 2px 6px rgba(0,0,0,.03)' }}>
-                  <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>Tracked Skills</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <i className="fa-solid fa-layer-group" style={{ color: '#2869e8', fontSize: '16px' }}></i>
-                    <strong style={{ fontSize: '20px', color: '#0f172a' }}>{skillStats.totalSkills}</strong>
+              <div className="setting-kpi-grid">
+                <div className="setting-kpi-card">
+                  <span className="kpi-label">Tracked Skills</span>
+                  <div className="kpi-val-row">
+                    <i className="fa-solid fa-layer-group" style={{ color: '#2869e8', fontSize: '15px' }}></i>
+                    <strong className="kpi-val">{skillStats.totalSkills}</strong>
                   </div>
-                  <small style={{ color: '#64748b', fontSize: '11px' }}>Company criteria library</small>
+                  <small className="kpi-sub">Company criteria library</small>
                 </div>
 
-                <div style={{ background: '#ffffff', padding: '18px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 2px 6px rgba(0,0,0,.03)' }}>
-                  <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>Mandatory For Hire</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <i className="fa-solid fa-circle-check" style={{ color: '#10b981', fontSize: '16px' }}></i>
-                    <strong style={{ fontSize: '20px', color: '#10b981' }}>{skillStats.mandatoryCount}</strong>
+                <div className="setting-kpi-card">
+                  <span className="kpi-label">Mandatory For Hire</span>
+                  <div className="kpi-val-row">
+                    <i className="fa-solid fa-circle-check" style={{ color: '#10b981', fontSize: '15px' }}></i>
+                    <strong className="kpi-val" style={{ color: '#10b981' }}>{skillStats.mandatoryCount}</strong>
                   </div>
-                  <small style={{ color: '#64748b', fontSize: '11px' }}>Must-have competencies</small>
+                  <small className="kpi-sub">Must-have competencies</small>
                 </div>
 
-                <div style={{ background: '#ffffff', padding: '18px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 2px 6px rgba(0,0,0,.03)' }}>
-                  <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>Avg Benchmark Target</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <i className="fa-solid fa-chart-line" style={{ color: '#8b5cf6', fontSize: '16px' }}></i>
-                    <strong style={{ fontSize: '20px', color: '#8b5cf6' }}>{skillStats.avgBenchmark}%</strong>
+                <div className="setting-kpi-card">
+                  <span className="kpi-label">Avg Benchmark Target</span>
+                  <div className="kpi-val-row">
+                    <i className="fa-solid fa-chart-line" style={{ color: '#8b5cf6', fontSize: '15px' }}></i>
+                    <strong className="kpi-val" style={{ color: '#8b5cf6' }}>{skillStats.avgBenchmark}%</strong>
                   </div>
-                  <small style={{ color: '#64748b', fontSize: '11px' }}>Company passing threshold</small>
+                  <small className="kpi-sub">Company passing threshold</small>
                 </div>
 
-                <div style={{ background: '#ffffff', padding: '18px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 2px 6px rgba(0,0,0,.03)' }}>
-                  <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '6px' }}>Quick Actions</span>
+                <div className="setting-kpi-card">
+                  <span className="kpi-label">Quick Actions</span>
                   <button
                     type="button"
                     onClick={handleSeedDefaults}
-                    style={{
-                      width: '100%',
-                      padding: '7px 10px',
-                      fontSize: '11px',
-                      fontWeight: '600',
-                      background: '#f8fafc',
-                      color: '#2869e8',
-                      border: '1px solid #cbd5e1',
-                      borderRadius: '6px',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px',
-                    }}
+                    className="kpi-action-btn"
                   >
                     <i className="fa-solid fa-sparkles"></i> Seed Defaults
                   </button>
-                  <small style={{ color: '#94a3b8', fontSize: '10px', display: 'block', marginTop: '4px', textAlign: 'center' }}>Reset to tech industry standards</small>
+                  <small className="kpi-sub" style={{ textAlign: 'center' }}>Reset to tech industry standards</small>
                 </div>
               </div>
 
               {/* ADD NEW SKILL CRITERION CARD */}
-              <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '22px', marginBottom: '24px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-                  <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: '#edf3ff', color: '#2869e8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className="setting-section-card">
+                <div className="setting-section-header">
+                  <div className="setting-icon-badge">
                     <i className="fa-solid fa-bullseye"></i>
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '16px', color: '#0f172a', margin: 0 }}>Add Company Skill Benchmark & Hiring Requirement</h3>
-                    <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0' }}>Define what skills are required for hiring and how much proficiency is expected.</p>
+                    <h3>Add Company Skill Benchmark & Hiring Requirement</h3>
+                    <p>Define what skills are required for hiring and how much proficiency is expected.</p>
                   </div>
                 </div>
 
                 <form onSubmit={handleCreateSkill}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+                  <div className="setting-form-row-3">
                     <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
+                      <label className="setting-label">
                         Skill Name *
                       </label>
                       <input
@@ -799,18 +731,18 @@ export default function Setting() {
                         value={newSkill.name}
                         onChange={(e) => setNewSkill({ ...newSkill, name: e.target.value })}
                         required
-                        style={{ width: '100%', padding: '9px 12px', fontSize: '13px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }}
+                        className="setting-control"
                       />
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
+                      <label className="setting-label">
                         Category
                       </label>
                       <select
                         value={newSkill.category}
                         onChange={(e) => setNewSkill({ ...newSkill, category: e.target.value })}
-                        style={{ width: '100%', padding: '9px 12px', fontSize: '13px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff', boxSizing: 'border-box' }}
+                        className="setting-control"
                       >
                         <option value="TECHNICAL">Technical Skills</option>
                         <option value="TOOLS">Tools & Frameworks</option>
@@ -820,13 +752,13 @@ export default function Setting() {
                     </div>
 
                     <div>
-                      <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
+                      <label className="setting-label">
                         Importance Level
                       </label>
                       <select
                         value={newSkill.importance}
                         onChange={(e) => setNewSkill({ ...newSkill, importance: e.target.value })}
-                        style={{ width: '100%', padding: '9px 12px', fontSize: '13px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff', boxSizing: 'border-box' }}
+                        className="setting-control"
                       >
                         <option value="CRITICAL">Critical (Must-Have)</option>
                         <option value="HIGH">High Priority</option>
@@ -836,11 +768,11 @@ export default function Setting() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '14px', marginBottom: '14px', alignItems: 'center' }}>
-                    <div style={{ background: '#f8fafc', padding: '12px 16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                        <span style={{ fontSize: '12px', fontWeight: '600', color: '#334155' }}>Required Benchmark Threshold (%):</span>
-                        <strong style={{ fontSize: '14px', color: '#2869e8', background: '#edf3ff', padding: '2px 8px', borderRadius: '4px' }}>
+                  <div className="setting-form-row-2">
+                    <div className="setting-box">
+                      <div className="setting-box-header">
+                        <span style={{ fontSize: '11.5px', fontWeight: '600' }}>Required Benchmark Threshold (%):</span>
+                        <strong className="setting-benchmark-badge">
                           {newSkill.requiredBenchmark}% Required
                         </strong>
                       </div>
@@ -853,28 +785,28 @@ export default function Setting() {
                         onChange={(e) => setNewSkill({ ...newSkill, requiredBenchmark: parseInt(e.target.value, 10) })}
                         style={{ width: '100%', cursor: 'pointer' }}
                       />
-                      <small style={{ color: '#64748b', fontSize: '11px', display: 'block', marginTop: '2px' }}>
+                      <small>
                         Candidates scoring below this proficiency will trigger an evaluation gap.
                       </small>
                     </div>
 
-                    <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div className="setting-checkbox-box">
                       <input
                         type="checkbox"
                         id="isCompanyRequired"
                         checked={newSkill.isCompanyRequired}
                         onChange={(e) => setNewSkill({ ...newSkill, isCompanyRequired: e.target.checked })}
-                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                        style={{ width: '16px', height: '16px', cursor: 'pointer' }}
                       />
-                      <label htmlFor="isCompanyRequired" style={{ fontSize: '12px', fontWeight: '600', color: '#1e293b', cursor: 'pointer' }}>
+                      <label htmlFor="isCompanyRequired" className="setting-checkbox-label">
                         Mandatory For Hiring
-                        <span style={{ display: 'block', fontSize: '11px', fontWeight: 'normal', color: '#64748b' }}>Candidates without this skill are flagged as unqualified</span>
+                        <span>Candidates without this skill are flagged as unqualified</span>
                       </label>
                     </div>
                   </div>
 
-                  <div style={{ marginBottom: '16px' }}>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#334155', marginBottom: '6px' }}>
+                  <div style={{ marginBottom: '14px' }}>
+                    <label className="setting-label">
                       Evaluation Criteria & Minimum Expectations (Optional)
                     </label>
                     <input
@@ -882,26 +814,13 @@ export default function Setting() {
                       placeholder="e.g. Must have hands-on production experience designing scalable APIs and optimizing SQL queries"
                       value={newSkill.description}
                       onChange={(e) => setNewSkill({ ...newSkill, description: e.target.value })}
-                      style={{ width: '100%', padding: '9px 12px', fontSize: '13px', borderRadius: '6px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }}
+                      className="setting-control"
                     />
                   </div>
 
                   <button
                     type="submit"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      padding: '10px 22px',
-                      background: '#2869e8',
-                      color: '#ffffff',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontSize: '13px',
-                      fontWeight: '600',
-                      cursor: 'pointer',
-                      transition: 'background .2s ease',
-                    }}
+                    className="setting-submit-btn"
                   >
                     <i className="fa-solid fa-plus"></i> Add Skill Benchmark Requirement
                   </button>
@@ -909,30 +828,31 @@ export default function Setting() {
               </div>
 
               {/* COMPANY CRITERIA LIST & INLINE BENCHMARK EDITOR */}
-              <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '22px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+              <div className="setting-section-card">
+                <div className="setting-section-header between">
                   <div>
-                    <h3 style={{ fontSize: '16px', color: '#0f172a', margin: 0 }}>Company Skill Benchmarks & Thresholds</h3>
-                    <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0' }}>
+                    <h3>Company Skill Benchmarks & Thresholds</h3>
+                    <p>
                       Directly edit how much proficiency is required per skill. Changes immediately impact candidate scoring and gap analysis.
                     </p>
                   </div>
 
                   {/* SEARCH & FILTER */}
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <div className="setting-filter-bar">
                     <input
                       type="text"
                       placeholder="Search company skills..."
                       value={skillSearch}
                       onChange={(e) => setSkillSearch(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && loadSkills()}
-                      style={{ padding: '7px 12px', fontSize: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', width: '180px' }}
+                      className="setting-filter-input"
+                      style={{ width: '180px' }}
                     />
 
                     <select
                       value={skillFilter}
                       onChange={(e) => setSkillFilter(e.target.value)}
-                      style={{ padding: '7px 10px', fontSize: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#ffffff' }}
+                      className="setting-filter-select"
                     >
                       <option value="all">All Categories</option>
                       <option value="TECHNICAL">Technical Skills</option>
@@ -944,7 +864,7 @@ export default function Setting() {
                     <button
                       type="button"
                       onClick={loadSkills}
-                      style={{ padding: '7px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', background: '#f8fafc', fontSize: '12px', cursor: 'pointer' }}
+                      className="setting-refresh-btn"
                     >
                       <i className="fa-solid fa-rotate-right"></i>
                     </button>
@@ -952,15 +872,15 @@ export default function Setting() {
                 </div>
 
                 {/* SKILLS TABLE WITH INLINE BENCHMARK SLIDERS */}
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                <div className="setting-table-wrap">
+                  <table className="setting-table">
                     <thead>
-                      <tr style={{ borderBottom: '2px solid #e2e8f0', textAlign: 'left', color: '#64748b' }}>
-                        <th style={{ padding: '12px 10px', width: '22%' }}>Skill Name</th>
-                        <th style={{ padding: '12px 10px', width: '16%' }}>Category</th>
-                        <th style={{ padding: '12px 10px', width: '14%' }}>Status</th>
-                        <th style={{ padding: '12px 10px', width: '32%' }}>Required Benchmark (%)</th>
-                        <th style={{ padding: '12px 10px', width: '16%', textAlign: 'right' }}>Actions</th>
+                      <tr>
+                        <th style={{ width: '22%' }}>Skill Name</th>
+                        <th style={{ width: '16%' }}>Category</th>
+                        <th style={{ width: '14%' }}>Status</th>
+                        <th style={{ width: '32%' }}>Required Benchmark (%)</th>
+                        <th style={{ width: '16%', textAlign: 'right' }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -975,62 +895,39 @@ export default function Setting() {
                             tempBenchmark[skill.id] !== skill.requiredBenchmark;
 
                           return (
-                            <tr key={skill.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                              <td style={{ padding: '12px 10px' }}>
+                            <tr key={skill.id}>
+                              <td>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                  <strong style={{ color: '#0f172a' }}>{skill.name}</strong>
+                                  <strong>{skill.name}</strong>
                                   <span
-                                    style={{
-                                      fontSize: '10px',
-                                      fontWeight: '600',
-                                      padding: '2px 6px',
-                                      borderRadius: '4px',
-                                      background:
-                                        skill.importance === 'CRITICAL'
-                                          ? '#fee2e2'
-                                          : skill.importance === 'HIGH'
-                                          ? '#fef3c7'
-                                          : '#f1f5f9',
-                                      color:
-                                        skill.importance === 'CRITICAL'
-                                          ? '#991b1b'
-                                          : skill.importance === 'HIGH'
-                                          ? '#92400e'
-                                          : '#475569',
-                                    }}
+                                    className={`setting-importance-badge ${
+                                      skill.importance === 'CRITICAL'
+                                        ? 'critical'
+                                        : skill.importance === 'HIGH'
+                                        ? 'high'
+                                        : 'medium'
+                                    }`}
                                   >
                                     {skill.importance || 'HIGH'}
                                   </span>
                                 </div>
                                 {skill.description && (
-                                  <small style={{ color: '#64748b', display: 'block', fontSize: '11px', marginTop: '2px' }}>
+                                  <small style={{ display: 'block', marginTop: '2px' }}>
                                     {skill.description}
                                   </small>
                                 )}
                               </td>
 
-                              <td style={{ padding: '12px 10px', color: '#475569', fontSize: '12px' }}>
+                              <td style={{ fontSize: '11px' }}>
                                 {skill.category}
                               </td>
 
-                              <td style={{ padding: '12px 10px' }}>
+                              <td>
                                 <button
                                   type="button"
                                   onClick={() => handleToggleRequired(skill)}
                                   title="Click to toggle Mandatory status"
-                                  style={{
-                                    border: 'none',
-                                    padding: '4px 10px',
-                                    borderRadius: '20px',
-                                    fontSize: '11px',
-                                    fontWeight: '700',
-                                    cursor: 'pointer',
-                                    background: skill.isCompanyRequired ? '#dbeafe' : '#f1f5f9',
-                                    color: skill.isCompanyRequired ? '#1e40af' : '#64748b',
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '5px',
-                                  }}
+                                  className={`setting-toggle-btn ${skill.isCompanyRequired ? 'mandatory' : 'preferred'}`}
                                 >
                                   <i className={`fa-solid fa-${skill.isCompanyRequired ? 'circle-check' : 'circle-dot'}`}></i>
                                   {skill.isCompanyRequired ? 'MANDATORY' : 'PREFERRED'}
@@ -1038,8 +935,8 @@ export default function Setting() {
                               </td>
 
                               {/* INLINE EDITABLE BENCHMARK SLIDER */}
-                              <td style={{ padding: '12px 10px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                              <td>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                   <input
                                     type="range"
                                     min="10"
@@ -1051,11 +948,10 @@ export default function Setting() {
                                   />
                                   <span
                                     style={{
-                                      minWidth: '46px',
+                                      minWidth: '42px',
                                       textAlign: 'right',
-                                      fontSize: '13px',
+                                      fontSize: '11.5px',
                                       fontWeight: '700',
-                                      color: currentVal >= 80 ? '#1e40af' : '#0f172a',
                                     }}
                                   >
                                     {currentVal}%
@@ -1064,16 +960,7 @@ export default function Setting() {
                                     <button
                                       type="button"
                                       onClick={() => handleSaveSkillBenchmark(skill)}
-                                      style={{
-                                        padding: '4px 8px',
-                                        fontSize: '11px',
-                                        fontWeight: '600',
-                                        background: '#2869e8',
-                                        color: '#ffffff',
-                                        border: 'none',
-                                        borderRadius: '4px',
-                                        cursor: 'pointer',
-                                      }}
+                                      className="setting-save-row-btn"
                                     >
                                       Save
                                     </button>
@@ -1081,21 +968,13 @@ export default function Setting() {
                                 </div>
                               </td>
 
-                              <td style={{ padding: '12px 10px', textAlign: 'right' }}>
-                                <div style={{ display: 'inline-flex', gap: '8px' }}>
+                              <td style={{ textAlign: 'right' }}>
+                                <div style={{ display: 'inline-flex', gap: '6px' }}>
                                   <button
                                     type="button"
                                     onClick={() => handleSaveSkillBenchmark(skill)}
                                     title="Save Benchmark"
-                                    style={{
-                                      padding: '6px 10px',
-                                      border: '1px solid #cbd5e1',
-                                      background: '#f8fafc',
-                                      color: '#2869e8',
-                                      borderRadius: '6px',
-                                      cursor: 'pointer',
-                                      fontSize: '12px',
-                                    }}
+                                    className="setting-row-btn save"
                                   >
                                     <i className="fa-solid fa-floppy-disk"></i>
                                   </button>
@@ -1103,15 +982,7 @@ export default function Setting() {
                                     type="button"
                                     onClick={() => handleDeleteSkill(skill.id, skill.name)}
                                     title="Delete Skill"
-                                    style={{
-                                      padding: '6px 10px',
-                                      border: '1px solid #fee2e2',
-                                      background: '#fff1f2',
-                                      color: '#e11d48',
-                                      borderRadius: '6px',
-                                      cursor: 'pointer',
-                                      fontSize: '12px',
-                                    }}
+                                    className="setting-row-btn delete"
                                   >
                                     <i className="fa-regular fa-trash-can"></i>
                                   </button>
@@ -1122,7 +993,7 @@ export default function Setting() {
                         })
                       ) : (
                         <tr>
-                          <td colSpan="5" style={{ padding: '24px', textAlign: 'center', color: '#94a3b8' }}>
+                          <td colSpan="5" style={{ padding: '20px', textAlign: 'center', color: '#94a3b8' }}>
                             {skillsLoading ? 'Loading skills...' : 'No skill criteria found matching your filters.'}
                           </td>
                         </tr>
@@ -1137,98 +1008,96 @@ export default function Setting() {
           {activeTab === 'admin' && (
             <div className="admin-console-view">
               {/* SYSTEM HEALTH CARDS */}
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(4, 1fr)',
-                  gap: '16px',
-                  marginBottom: '24px',
-                }}
-              >
-                <div style={{ background: '#ffffff', padding: '18px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 2px 6px rgba(0,0,0,.03)' }}>
-                  <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>System Status</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#10b981' }}></span>
-                    <strong style={{ fontSize: '18px', color: '#0f172a' }}>{healthData?.status || 'OPERATIONAL'}</strong>
+              <div className="setting-kpi-grid">
+                <div className="setting-kpi-card">
+                  <span className="kpi-label">System Status</span>
+                  <div className="kpi-val-row">
+                    <span className="setting-status-dot"></span>
+                    <strong className="kpi-val" style={{ fontSize: '16px' }}>{healthData?.status || 'OPERATIONAL'}</strong>
                   </div>
-                  <small style={{ color: '#64748b', fontSize: '11px' }}>Uptime: {healthData?.uptimeSeconds || 120}s</small>
+                  <small className="kpi-sub">Uptime: {healthData?.uptimeSeconds || 120}s</small>
                 </div>
 
-                <div style={{ background: '#ffffff', padding: '18px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 2px 6px rgba(0,0,0,.03)' }}>
-                  <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>Supabase PostgreSQL</span>
-                  <strong style={{ fontSize: '18px', color: '#1769ff' }}>{healthData?.database?.latencyMs ? `${healthData.database.latencyMs}ms` : 'Connected'}</strong>
-                  <small style={{ color: '#10b981', display: 'block', fontSize: '11px' }}>Status: {healthData?.database?.status || 'Active'}</small>
+                <div className="setting-kpi-card">
+                  <span className="kpi-label">Supabase PostgreSQL</span>
+                  <strong className="kpi-val" style={{ fontSize: '16px', color: '#1769ff' }}>
+                    {healthData?.database?.latencyMs ? `${healthData.database.latencyMs}ms` : 'Connected'}
+                  </strong>
+                  <small className="kpi-sub" style={{ color: '#10b981' }}>Status: {healthData?.database?.status || 'Active'}</small>
                 </div>
 
-                <div style={{ background: '#ffffff', padding: '18px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 2px 6px rgba(0,0,0,.03)' }}>
-                  <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>Total Records</span>
-                  <strong style={{ fontSize: '18px', color: '#0f172a' }}>
+                <div className="setting-kpi-card">
+                  <span className="kpi-label">Total Records</span>
+                  <strong className="kpi-val" style={{ fontSize: '16px' }}>
                     {(healthData?.counts?.totalCandidates || 0) + (healthData?.counts?.totalJobs || 0)}
                   </strong>
-                  <small style={{ color: '#64748b', fontSize: '11px' }}>
+                  <small className="kpi-sub">
                     {healthData?.counts?.totalCandidates || 0} Cand. • {healthData?.counts?.totalJobs || 0} Roles
                   </small>
                 </div>
 
-                <div style={{ background: '#ffffff', padding: '18px', borderRadius: '10px', border: '1px solid #e2e8f0', boxShadow: '0 2px 6px rgba(0,0,0,.03)' }}>
-                  <span style={{ fontSize: '11px', color: '#64748b', display: 'block', marginBottom: '4px' }}>Server Memory (RSS)</span>
-                  <strong style={{ fontSize: '18px', color: '#8b5cf6' }}>{healthData?.memory?.rssMb || 110} MB</strong>
-                  <small style={{ color: '#64748b', fontSize: '11px' }}>Heap: {healthData?.memory?.heapUsedMb || 45} MB</small>
+                <div className="setting-kpi-card">
+                  <span className="kpi-label">Server Memory (RSS)</span>
+                  <strong className="kpi-val" style={{ fontSize: '16px', color: '#8b5cf6' }}>
+                    {healthData?.memory?.rssMb || 110} MB
+                  </strong>
+                  <small className="kpi-sub">Heap: {healthData?.memory?.heapUsedMb || 45} MB</small>
                 </div>
               </div>
 
               {/* AUDIT LOGS SECTION */}
-              <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '22px', marginBottom: '24px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div className="setting-section-card">
+                <div className="setting-section-header between">
                   <div>
-                    <h3 style={{ fontSize: '16px', color: '#0f172a', margin: 0 }}>Security & Activity Audit Logs</h3>
-                    <p style={{ fontSize: '12px', color: '#64748b', margin: '3px 0 0' }}>Immutable audit trail of recruiter and administrator events</p>
+                    <h3>Security & Activity Audit Logs</h3>
+                    <p>Immutable audit trail of recruiter and administrator events</p>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '10px' }}>
+                  <div className="setting-filter-bar">
                     <input
                       type="text"
                       placeholder="Search audit trail..."
                       value={logSearch}
                       onChange={(e) => setLogSearch(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && loadAdminData()}
-                      style={{ padding: '6px 12px', fontSize: '12px', borderRadius: '6px', border: '1px solid #d9e2ef', width: '220px' }}
+                      className="setting-filter-input"
+                      style={{ width: '200px' }}
                     />
                     <button
                       type="button"
                       onClick={loadAdminData}
-                      style={{ padding: '6px 14px', borderRadius: '6px', border: '1px solid #d9e2ef', background: '#f8fafc', fontSize: '12px', cursor: 'pointer' }}
+                      className="setting-refresh-btn"
                     >
                       <i className="fa-solid fa-rotate-right"></i> Refresh
                     </button>
                   </div>
                 </div>
 
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                <div className="setting-table-wrap">
+                  <table className="setting-table">
                     <thead>
-                      <tr style={{ borderBottom: '1px solid #e2e8f0', textAlign: 'left', color: '#64748b' }}>
-                        <th style={{ padding: '10px 8px' }}>Timestamp</th>
-                        <th style={{ padding: '10px 8px' }}>Actor</th>
-                        <th style={{ padding: '10px 8px' }}>Action</th>
-                        <th style={{ padding: '10px 8px' }}>Resource</th>
-                        <th style={{ padding: '10px 8px' }}>Status</th>
+                      <tr>
+                        <th>Timestamp</th>
+                        <th>Actor</th>
+                        <th>Action</th>
+                        <th>Resource</th>
+                        <th>Status</th>
                       </tr>
                     </thead>
                     <tbody>
                       {auditLogs.length > 0 ? (
                         auditLogs.slice(0, 10).map((log) => (
-                          <tr key={log.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                            <td style={{ padding: '10px 8px', color: '#64748b' }}>{new Date(log.createdAt).toLocaleString()}</td>
-                            <td style={{ padding: '10px 8px', fontWeight: '500' }}>{log.actorEmail || log.user?.email || 'system'}</td>
-                            <td style={{ padding: '10px 8px' }}>
-                              <span style={{ padding: '2px 8px', borderRadius: '4px', background: '#e0e7ff', color: '#3730a3', fontSize: '11px', fontWeight: '600' }}>
+                          <tr key={log.id}>
+                            <td className="setting-cell-subtext">{new Date(log.createdAt).toLocaleString()}</td>
+                            <td style={{ fontWeight: '500' }}>{log.actorEmail || log.user?.email || 'system'}</td>
+                            <td>
+                              <span className="setting-audit-action">
                                 {log.action}
                               </span>
                             </td>
-                            <td style={{ padding: '10px 8px', color: '#475569' }}>{log.resource}</td>
-                            <td style={{ padding: '10px 8px' }}>
-                              <span style={{ padding: '2px 8px', borderRadius: '4px', background: '#dcfce7', color: '#166534', fontSize: '11px', fontWeight: '600' }}>
+                            <td>{log.resource}</td>
+                            <td>
+                              <span className="setting-audit-status">
                                 {log.status || 'SUCCESS'}
                               </span>
                             </td>
@@ -1247,49 +1116,55 @@ export default function Setting() {
               </div>
 
               {/* USER ROLE MANAGEMENT SECTION */}
-              <div style={{ background: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '22px' }}>
-                <h3 style={{ fontSize: '16px', color: '#0f172a', margin: '0 0 4px' }}>User Access & Role-Based Access Control (RBAC)</h3>
-                <p style={{ fontSize: '12px', color: '#64748b', margin: '0 0 16px' }}>Manage user permissions across Administrator, HR Manager, Recruiter, and Interviewer</p>
+              <div className="setting-section-card">
+                <div className="setting-section-header">
+                  <div>
+                    <h3>User Access & Role-Based Access Control (RBAC)</h3>
+                    <p>Manage user permissions across Administrator, HR Manager, Recruiter, and Interviewer</p>
+                  </div>
+                </div>
 
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid #e2e8f0', textAlign: 'left', color: '#64748b' }}>
-                      <th style={{ padding: '10px 8px' }}>Name</th>
-                      <th style={{ padding: '10px 8px' }}>Email</th>
-                      <th style={{ padding: '10px 8px' }}>Assigned Role</th>
-                      <th style={{ padding: '10px 8px' }}>Created</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {usersList.length > 0 ? (
-                      usersList.map((u) => (
-                        <tr key={u.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                          <td style={{ padding: '10px 8px', fontWeight: '600' }}>{u.firstName} {u.lastName}</td>
-                          <td style={{ padding: '10px 8px', color: '#64748b' }}>{u.email}</td>
-                          <td style={{ padding: '10px 8px' }}>
-                            <select
-                              value={u.role}
-                              onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                              style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '11px', fontWeight: '600' }}
-                            >
-                              <option value="ADMIN">ADMIN</option>
-                              <option value="HR_MANAGER">HR_MANAGER</option>
-                              <option value="RECRUITER">RECRUITER</option>
-                              <option value="INTERVIEWER">INTERVIEWER</option>
-                            </select>
-                          </td>
-                          <td style={{ padding: '10px 8px', color: '#94a3b8' }}>{new Date(u.createdAt).toLocaleDateString()}</td>
-                        </tr>
-                      ))
-                    ) : (
+                <div className="setting-table-wrap">
+                  <table className="setting-table">
+                    <thead>
                       <tr>
-                        <td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: '#94a3b8' }}>
-                          {loadingAdmin ? 'Loading users...' : 'No users loaded.'}
-                        </td>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Assigned Role</th>
+                        <th>Created</th>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {usersList.length > 0 ? (
+                        usersList.map((u) => (
+                          <tr key={u.id}>
+                            <td style={{ fontWeight: '600' }}>{u.firstName} {u.lastName}</td>
+                            <td className="setting-cell-subtext">{u.email}</td>
+                            <td>
+                              <select
+                                value={u.role}
+                                onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                                className="setting-role-select"
+                              >
+                                <option value="ADMIN">ADMIN</option>
+                                <option value="HR_MANAGER">HR_MANAGER</option>
+                                <option value="RECRUITER">RECRUITER</option>
+                                <option value="INTERVIEWER">INTERVIEWER</option>
+                              </select>
+                            </td>
+                            <td className="setting-cell-subtext">{new Date(u.createdAt).toLocaleDateString()}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: '#94a3b8' }}>
+                            {loadingAdmin ? 'Loading users...' : 'No users loaded.'}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
