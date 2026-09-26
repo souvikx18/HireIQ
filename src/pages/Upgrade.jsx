@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import '../css/upgrade.css';
 import '../css/upgrade-polish.css';
 import '../css/upgrade-plans.css';
 
 export default function Upgrade() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isCandidate = user?.role === 'CANDIDATE';
+  const targetDashboard = isCandidate ? '/candidate/dashboard' : '/dashboard';
   const [toastMessage, setToastMessage] = useState(
     'Pro plan selected. Our team will contact you shortly.'
   );
@@ -61,7 +65,7 @@ export default function Upgrade() {
     document.body.classList.add('page-leaving');
     setTimeout(() => {
       document.body.classList.remove('page-leaving');
-      navigate('/dashboard');
+      navigate(targetDashboard);
     }, 420);
   };
 
@@ -73,10 +77,10 @@ export default function Upgrade() {
             type="button"
             className="back-link"
             onClick={handleBackNav}
-            aria-label="Back to Dashboard"
+            aria-label={isCandidate ? 'Back to Overview' : 'Back to Dashboard'}
           >
             <i className="fa-solid fa-arrow-left"></i>
-            <span>Back to Dashboard</span>
+            <span>{isCandidate ? 'Back to Overview' : 'Back to Dashboard'}</span>
           </button>
           <div className="upgrade-title-block">
             <h1>Upgrade to Pro</h1>

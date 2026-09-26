@@ -380,7 +380,7 @@ export default function AIChatbot() {
               </button>
               <button
                 type="button"
-                className="chatbot-hdr-btn close"
+                className="chatbot-hdr-btn chatbot-close-btn"
                 aria-label="Close chat"
                 title="Close chat"
                 onClick={() => setIsOpen(false)}

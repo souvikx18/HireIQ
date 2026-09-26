@@ -164,12 +164,12 @@ export default function ResumeChecker() {
                 )}
 
                 {/* Audit Tips */}
-                <div style={{ background: '#f8fafc', borderRadius: '10px', padding: '16px', border: '1px solid #e2e8f0' }}>
-                  <h4 style={{ margin: '0 0 8px 0', fontSize: '13.5px', fontWeight: 600, color: '#334155' }}>
+                <div className="audit-tips-box">
+                  <h4>
                     <i className="fa-regular fa-lightbulb" style={{ color: '#eab308', marginRight: '6px' }}></i>
                     ATS Scoring Criteria
                   </h4>
-                  <ul style={{ margin: 0, paddingLeft: '18px', fontSize: '12px', color: '#64748b', lineHeight: 1.6 }}>
+                  <ul>
                     <li>Clear section headers (Experience, Education, Skills)</li>
                     <li>Quantifiable metrics and strong action verbs</li>
                     <li>Standard single-column, parseable typography</li>
@@ -380,7 +380,7 @@ export default function ResumeChecker() {
                       </p>
 
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 14px' }}>
+                        <div className="bullet-compare-box">
                           <div style={{ fontSize: '12px', color: '#ef4444', textDecoration: 'line-through', marginBottom: '4px' }}>
                             ❌ "Worked on building React frontend interfaces."
                           </div>
@@ -389,7 +389,7 @@ export default function ResumeChecker() {
                           </div>
                         </div>
 
-                        <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '12px 14px' }}>
+                        <div className="bullet-compare-box">
                           <div style={{ fontSize: '12px', color: '#ef4444', textDecoration: 'line-through', marginBottom: '4px' }}>
                             ❌ "Responsible for writing tests."
                           </div>

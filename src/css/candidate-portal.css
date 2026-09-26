@@ -745,6 +745,228 @@ body.dark-mode .diagnostic-item {
 }
 
 /* =========================================
+   PORTAL CARDS & AUDIT MODULES (LIGHT & DARK)
+========================================= */
+
+.portal-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.portal-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.portal-card-title {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: #0f172a;
+}
+
+.portal-card-subtitle {
+    margin: 0;
+    font-size: 11.5px;
+    color: #64748b;
+}
+
+.portal-resume-highlight {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 20px;
+}
+
+.portal-resume-filename {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.portal-metric-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.portal-metric-top {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #334155;
+}
+
+.portal-progress-track {
+    height: 7px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.portal-skill-chip {
+    background: #f1f5f9;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    padding: 5px 11px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-weight: 500;
+}
+
+.portal-checklist-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 11.5px;
+    color: #334155;
+}
+
+.portal-copilot-box {
+    background: linear-gradient(135deg, #f8fafc, #edf2f7);
+    border-radius: 12px;
+    border: 1px solid #cbd5e1;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.portal-copilot-action-btn {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 11.5px;
+    color: #1e293b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.15s ease;
+    width: 100%;
+}
+
+.portal-copilot-action-btn:hover {
+    background: #f1f5f9;
+}
+
+.audit-tips-box {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #e2e8f0;
+}
+
+.audit-tips-box h4 {
+    margin: 0 0 8px 0;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.audit-tips-box ul {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 12px;
+    color: #475569;
+    line-height: 1.6;
+}
+
+.bullet-compare-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 14px;
+}
+
+/* Dark Mode Overrides for Portal Modules */
+body.dark-mode .portal-card {
+    background: #131d33 !important;
+    border-color: #1e293b !important;
+    color: #e2e8f0 !important;
+}
+
+body.dark-mode .portal-card-title,
+body.dark-mode .portal-resume-filename,
+body.dark-mode .portal-card h2,
+body.dark-mode .portal-card h3,
+body.dark-mode .portal-card h4 {
+    color: #f8fafc !important;
+}
+
+body.dark-mode .portal-card-subtitle {
+    color: #94a3b8 !important;
+}
+
+body.dark-mode .portal-resume-highlight {
+    background: #0f172a !important;
+    border-color: #1e293b !important;
+}
+
+body.dark-mode .portal-metric-top {
+    color: #e2e8f0 !important;
+}
+
+body.dark-mode .portal-progress-track {
+    background: #1e293b !important;
+}
+
+body.dark-mode .portal-skill-chip {
+    background: #0f172a !important;
+    color: #e2e8f0 !important;
+    border-color: #334155 !important;
+}
+
+body.dark-mode .portal-checklist-row {
+    color: #cbd5e1 !important;
+}
+
+body.dark-mode .portal-copilot-box {
+    background: linear-gradient(135deg, #131d33, #0f172a) !important;
+    border-color: #1e293b !important;
+}
+
+body.dark-mode .portal-copilot-action-btn {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .portal-copilot-action-btn:hover {
+    background: #243550 !important;
+}
+
+body.dark-mode .audit-tips-box {
+    background: #0f172a !important;
+    border-color: #1e293b !important;
+}
+
+body.dark-mode .audit-tips-box h4 {
+    color: #f8fafc !important;
+}
+
+body.dark-mode .audit-tips-box ul,
+body.dark-mode .audit-tips-box li {
+    color: #cbd5e1 !important;
+}
+
+body.dark-mode .bullet-compare-box {
+    background: #0f172a !important;
+    border-color: #1e293b !important;
+}
+
+/* =========================================
    PORTAL MODAL DIALOGS
 ========================================= */
 

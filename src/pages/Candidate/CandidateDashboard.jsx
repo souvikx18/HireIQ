@@ -183,21 +183,13 @@ export default function CandidateDashboard() {
             {/* Left Column */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               {/* ATS Audit Summary Card */}
-              <div
-                style={{
-                  background: '#ffffff',
-                  borderRadius: '12px',
-                  border: '1px solid #e2e8f0',
-                  padding: '24px',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+              <div className="portal-card">
+                <div className="portal-card-header">
                   <div>
-                    <h2 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 4px 0', color: '#0f172a' }}>
+                    <h2 className="portal-card-title">
                       ATS Resume Audit Status
                     </h2>
-                    <p style={{ margin: 0, fontSize: '11.5px', color: '#64748b' }}>
+                    <p className="portal-card-subtitle">
                       Automated diagnostics on readability, keyword indexing, and format integrity
                     </p>
                   </div>
@@ -219,25 +211,14 @@ export default function CandidateDashboard() {
 
                 {candidateAtsScore ? (
                   <div>
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '14px 18px',
-                        background: '#f8fafc',
-                        borderRadius: '8px',
-                        border: '1px solid #e2e8f0',
-                        marginBottom: '20px',
-                      }}
-                    >
+                    <div className="portal-resume-highlight">
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         <i className="fa-solid fa-file-pdf" style={{ fontSize: '24px', color: '#ef4444' }}></i>
                         <div>
-                          <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
+                          <div className="portal-resume-filename">
                             {latestResume?.originalFileName || 'Uploaded Resume'}
                           </div>
-                          <div style={{ fontSize: '11px', color: '#64748b' }}>
+                          <div className="portal-card-subtitle">
                             Scanned and indexed by HireIQ ATS Engine
                           </div>
                         </div>
@@ -256,37 +237,37 @@ export default function CandidateDashboard() {
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                      <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', marginBottom: '6px', fontWeight: 500 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                      <div className="portal-metric-row">
+                        <div className="portal-metric-top">
                           <span>Machine Readability & Text Extraction</span>
-                          <span style={{ color: '#059669', fontWeight: 600 }}>Pass (100%)</span>
+                          <span style={{ color: '#10b981', fontWeight: 600 }}>Pass (100%)</span>
                         </div>
-                        <div style={{ height: '7px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
-                          <div style={{ width: '100%', height: '100%', background: '#059669', borderRadius: '4px' }}></div>
+                        <div className="portal-progress-track">
+                          <div style={{ width: '100%', height: '100%', background: '#10b981', borderRadius: '4px' }}></div>
                         </div>
                       </div>
 
-                      <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', marginBottom: '6px', fontWeight: 500 }}>
+                      <div className="portal-metric-row">
+                        <div className="portal-metric-top">
                           <span>Keyword Density & Technical Terms</span>
-                          <span style={{ color: candidateAtsScore >= 70 ? '#059669' : '#d97706', fontWeight: 600 }}>
+                          <span style={{ color: candidateAtsScore >= 70 ? '#10b981' : '#f59e0b', fontWeight: 600 }}>
                             {candidateAtsScore >= 70 ? 'Strong (85%)' : 'Moderate (65%)'}
                           </span>
                         </div>
-                        <div style={{ height: '7px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+                        <div className="portal-progress-track">
                           <div style={{ width: `${Math.min(candidateAtsScore + 5, 95)}%`, height: '100%', background: '#2563eb', borderRadius: '4px' }}></div>
                         </div>
                       </div>
 
-                      <div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', marginBottom: '6px', fontWeight: 500 }}>
+                      <div className="portal-metric-row">
+                        <div className="portal-metric-top">
                           <span>Action Verbs & Measurable Metrics</span>
-                          <span style={{ color: candidateAtsScore >= 80 ? '#059669' : '#d97706', fontWeight: 600 }}>
+                          <span style={{ color: candidateAtsScore >= 80 ? '#10b981' : '#f59e0b', fontWeight: 600 }}>
                             {candidateAtsScore >= 80 ? 'Optimal (88%)' : 'Needs Quantified Impact'}
                           </span>
                         </div>
-                        <div style={{ height: '7px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+                        <div className="portal-progress-track">
                           <div style={{ width: `${Math.max(candidateAtsScore - 10, 50)}%`, height: '100%', background: '#8b5cf6', borderRadius: '4px' }}></div>
                         </div>
                       </div>
@@ -322,21 +303,13 @@ export default function CandidateDashboard() {
               </div>
 
               {/* Identified Skills Card */}
-              <div
-                style={{
-                  background: '#ffffff',
-                  borderRadius: '12px',
-                  border: '1px solid #e2e8f0',
-                  padding: '24px',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-                }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <div className="portal-card">
+                <div className="portal-card-header">
                   <div>
-                    <h2 style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 4px 0', color: '#0f172a' }}>
+                    <h2 className="portal-card-title">
                       Extracted Technical Skills & Keywords
                     </h2>
-                    <p style={{ margin: 0, fontSize: '11.5px', color: '#64748b' }}>
+                    <p className="portal-card-subtitle">
                       Recognized technical proficiencies parsed by the HireIQ semantic parser
                     </p>
                   </div>
@@ -348,18 +321,7 @@ export default function CandidateDashboard() {
                 {skillsList.length > 0 ? (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                     {skillsList.map((skill, idx) => (
-                      <span
-                        key={idx}
-                        style={{
-                          background: '#f1f5f9',
-                          color: '#1e293b',
-                          border: '1px solid #cbd5e1',
-                          padding: '5px 11px',
-                          borderRadius: '6px',
-                          fontSize: '11.5px',
-                          fontWeight: 500,
-                        }}
-                      >
+                      <span key={idx} className="portal-skill-chip">
                         {skill}
                       </span>
                     ))}
@@ -376,47 +338,39 @@ export default function CandidateDashboard() {
             {/* Right Column */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
               {/* ATS Best Practices Checklist */}
-              <div
-                style={{
-                  background: '#ffffff',
-                  borderRadius: '12px',
-                  border: '1px solid #e2e8f0',
-                  padding: '24px',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-                }}
-              >
+              <div className="portal-card">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
                   <i className="fa-solid fa-list-check" style={{ color: '#2563eb', fontSize: '16px' }}></i>
-                  <h2 style={{ fontSize: '15px', fontWeight: 700, margin: 0, color: '#0f172a' }}>
+                  <h2 className="portal-card-title" style={{ margin: 0 }}>
                     ATS Compliance Checklist
                   </h2>
                 </div>
-                <p style={{ margin: '0 0 16px 0', fontSize: '11.5px', color: '#64748b', lineHeight: 1.5 }}>
+                <p className="portal-card-subtitle" style={{ margin: '0 0 16px 0', lineHeight: 1.5 }}>
                   Key standards modern Applicant Tracking Systems look for when parsing candidates:
                 </p>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                    <i className="fa-solid fa-circle-check" style={{ color: '#059669', fontSize: '13px', marginTop: '2px' }}></i>
-                    <div style={{ fontSize: '11.5px', color: '#334155' }}>
+                  <div className="portal-checklist-row">
+                    <i className="fa-solid fa-circle-check" style={{ color: '#10b981', fontSize: '13px', marginTop: '2px' }}></i>
+                    <div>
                       <strong>Single-Column Layout:</strong> Multi-column tables confuse ATS text ordering.
                     </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                    <i className="fa-solid fa-circle-check" style={{ color: '#059669', fontSize: '13px', marginTop: '2px' }}></i>
-                    <div style={{ fontSize: '11.5px', color: '#334155' }}>
+                  <div className="portal-checklist-row">
+                    <i className="fa-solid fa-circle-check" style={{ color: '#10b981', fontSize: '13px', marginTop: '2px' }}></i>
+                    <div>
                       <strong>Quantified Business Impact:</strong> Include %, $, or time saved in bullet points.
                     </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                    <i className="fa-solid fa-circle-check" style={{ color: '#059669', fontSize: '13px', marginTop: '2px' }}></i>
-                    <div style={{ fontSize: '11.5px', color: '#334155' }}>
+                  <div className="portal-checklist-row">
+                    <i className="fa-solid fa-circle-check" style={{ color: '#10b981', fontSize: '13px', marginTop: '2px' }}></i>
+                    <div>
                       <strong>Standard Section Headings:</strong> Use standard labels like "Work Experience", "Education".
                     </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                    <i className="fa-solid fa-circle-check" style={{ color: '#059669', fontSize: '13px', marginTop: '2px' }}></i>
-                    <div style={{ fontSize: '11.5px', color: '#334155' }}>
+                  <div className="portal-checklist-row">
+                    <i className="fa-solid fa-circle-check" style={{ color: '#10b981', fontSize: '13px', marginTop: '2px' }}></i>
+                    <div>
                       <strong>Searchable Machine Text:</strong> Ensure text is selectable, not an image/scanned PDF.
                     </div>
                   </div>
@@ -424,43 +378,22 @@ export default function CandidateDashboard() {
               </div>
 
               {/* AI Resume & Career Copilot Card */}
-              <div
-                style={{
-                  background: 'linear-gradient(135deg, #f8fafc, #edf2f7)',
-                  borderRadius: '12px',
-                  border: '1px solid #cbd5e1',
-                  padding: '24px',
-                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-                }}
-              >
+              <div className="portal-copilot-box">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                   <i className="fa-solid fa-robot" style={{ color: '#4f46e5', fontSize: '16px' }}></i>
-                  <h2 style={{ fontSize: '15px', fontWeight: 700, margin: 0, color: '#0f172a' }}>
+                  <h2 className="portal-card-title" style={{ margin: 0 }}>
                     AI Resume Copilot
                   </h2>
                 </div>
-                <p style={{ margin: '0 0 16px 0', fontSize: '11.5px', color: '#64748b', lineHeight: 1.5 }}>
+                <p className="portal-card-subtitle" style={{ margin: '0 0 16px 0', lineHeight: 1.5 }}>
                   Get real-time feedback and intelligent resume improvements from your HireIQ AI Copilot.
                 </p>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <button
                     type="button"
+                    className="portal-copilot-action-btn"
                     onClick={() => handleAskCopilot('How do I apply the Google XYZ formula (Accomplished [X] as measured by [Y] by doing [Z]) to my resume?')}
-                    style={{
-                      background: '#ffffff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      padding: '10px 12px',
-                      textAlign: 'left',
-                      fontSize: '11.5px',
-                      color: '#1e293b',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      transition: 'all 0.15s ease',
-                    }}
                   >
                     <span>💡 Learn the Google XYZ bullet formula</span>
                     <i className="fa-solid fa-chevron-right" style={{ fontSize: '10px', color: '#94a3b8' }}></i>
@@ -468,21 +401,8 @@ export default function CandidateDashboard() {
 
                   <button
                     type="button"
+                    className="portal-copilot-action-btn"
                     onClick={() => handleAskCopilot('What are the top 10 keywords required for Full Stack and Backend engineering roles?')}
-                    style={{
-                      background: '#ffffff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      padding: '10px 12px',
-                      textAlign: 'left',
-                      fontSize: '11.5px',
-                      color: '#1e293b',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      transition: 'all 0.15s ease',
-                    }}
                   >
                     <span>🎯 Top keywords for tech roles</span>
                     <i className="fa-solid fa-chevron-right" style={{ fontSize: '10px', color: '#94a3b8' }}></i>
@@ -490,21 +410,8 @@ export default function CandidateDashboard() {
 
                   <button
                     type="button"
+                    className="portal-copilot-action-btn"
                     onClick={() => handleAskCopilot('How can I prepare for technical system design interviews?')}
-                    style={{
-                      background: '#ffffff',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      padding: '10px 12px',
-                      textAlign: 'left',
-                      fontSize: '11.5px',
-                      color: '#1e293b',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      transition: 'all 0.15s ease',
-                    }}
                   >
                     <span>⚙️ System design interview tips</span>
                     <i className="fa-solid fa-chevron-right" style={{ fontSize: '10px', color: '#94a3b8' }}></i>
