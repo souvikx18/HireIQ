@@ -4,12 +4,15 @@ import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App.jsx';
 import ErrorBoundary from './components/ErrorBoundary';
+import SmoothScroll from './components/SmoothScroll';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>
       <BrowserRouter>
-        <App />
+        <SmoothScroll>
+          <App />
+        </SmoothScroll>
       </BrowserRouter>
     </ErrorBoundary>
   </StrictMode>

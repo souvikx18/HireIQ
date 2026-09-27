@@ -181,6 +181,31 @@ export default function Header({
           {/* Page specific right controls */}
           {children}
 
+          {/* Quick Spotlight Command Palette Trigger */}
+          <button
+            type="button"
+            className="header-cmd-trigger"
+            onClick={() => window.dispatchEvent(new CustomEvent('hireiq-open-command-palette'))}
+            title="Search & Commands (Ctrl+K or ⌘K)"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 11px',
+              borderRadius: '6px',
+              background: 'var(--border, #f1f5f9)',
+              border: '1px solid var(--border, #e2e8f0)',
+              fontSize: '11px',
+              color: '#64748b',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <i className="fa-solid fa-magnifying-glass" style={{ fontSize: '11px', color: '#2563eb' }}></i>
+            <span style={{ fontWeight: 500 }}>Search</span>
+            <kbd style={{ fontSize: '9.5px', padding: '1px 4px', background: 'rgba(0,0,0,0.06)', borderRadius: '3px', fontFamily: 'var(--font-mono, monospace)', fontWeight: 600 }}>⌘K</kbd>
+          </button>
+
           {/* Theme Toggle Button */}
           {showThemeToggle && (
             <button

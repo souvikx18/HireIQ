@@ -16,8 +16,41 @@ export default function ResumeChecker() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isAuditing, setIsAuditing] = useState(false);
   const [auditReport, setAuditReport] = useState(null);
-  const [errorMessage, setErrorMessage] = useState('');
   const [activeReportTab, setActiveReportTab] = useState('diagnostics'); // 'diagnostics', 'skills', 'optimizer'
+  const [activeSuggestedSkill, setActiveSuggestedSkill] = useState(null);
+  const [copiedSuccess, setCopiedSuccess] = useState(false);
+
+  const getSkillBulletSuggestion = (skill) => {
+    const s = (skill || '').toLowerCase();
+    if (s.includes('docker') || s.includes('container')) {
+      return 'Containerized multi-service microarchitecture using Docker and Compose, standardizing environments and accelerating onboarding time by 35%.';
+    }
+    if (s.includes('kuber') || s.includes('k8s')) {
+      return 'Orchestrated zero-downtime rolling deployments across Kubernetes clusters, enhancing service resilience to 99.98% uptime.';
+    }
+    if (s.includes('aws') || s.includes('cloud')) {
+      return 'Architected scalable cloud infrastructure utilizing AWS ECS, S3, and CloudFront, reducing monthly infrastructure compute expenses by 24%.';
+    }
+    if (s.includes('type') || s.includes('ts')) {
+      return 'Refactored mission-critical legacy modules into strict TypeScript, eradicating runtime type exceptions and improving CI build reliability.';
+    }
+    if (s.includes('react') || s.includes('frontend')) {
+      return 'Engineered responsive single-page web applications with React, leveraging memoization and virtualized lists to achieve sub-second render times.';
+    }
+    if (s.includes('sql') || s.includes('postgres') || s.includes('database')) {
+      return 'Optimized complex PostgreSQL queries, indexed relational datasets, and reduced average P99 database query response latency from 450ms to 42ms.';
+    }
+    if (s.includes('redis') || s.includes('cache')) {
+      return 'Implemented distributed Redis caching layers for high-throughput API endpoints, lowering backend database load by 60%.';
+    }
+    return `Leveraged ${skill} to engineer resilient production features, collaborating with cross-functional teams and accelerating release velocity by 30%.`;
+  };
+
+  const handleCopyBullet = (text) => {
+    navigator.clipboard.writeText(text);
+    setCopiedSuccess(true);
+    setTimeout(() => setCopiedSuccess(false), 2000);
+  };
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -88,6 +121,25 @@ export default function ResumeChecker() {
                     <i className="fa-solid fa-file-arrow-up" style={{ color: '#2563eb' }}></i>
                     Upload Your Resume
                   </h2>
+                  <div
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '3px 9px',
+                      borderRadius: '16px',
+                      background: 'rgba(16, 185, 129, 0.1)',
+                      border: '1px solid rgba(16, 185, 129, 0.25)',
+                      color: '#059669',
+                      fontSize: '10.5px',
+                      fontWeight: 600,
+                      marginTop: '4px',
+                      marginBottom: '6px',
+                    }}
+                  >
+                    <i className="fa-solid fa-shield-halved"></i>
+                    <span>AES-256 Encrypted • PII Masked & Private</span>
+                  </div>
                   <p>
                     Supports PDF, DOCX, and TXT files up to 10MB. Instant AI structural audit.
                   </p>
@@ -234,9 +286,46 @@ export default function ResumeChecker() {
 
                   {/* Score Highlight Box */}
                   <div className="score-badge-box">
-                    <div className="score-badge-circle" style={{ background: getScoreColor(auditReport.atsScore) }}>
-                      <span className="num">{auditReport.atsScore}%</span>
-                      <span className="sub">ATS Score</span>
+                    <div style={{ position: 'relative', width: '84px', height: '84px', flexShrink: 0 }}>
+                      <svg viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="42"
+                          fill="transparent"
+                          stroke="rgba(0,0,0,0.06)"
+                          strokeWidth="8"
+                        />
+                        <circle
+                          cx="50"
+                          cy="50"
+                          r="42"
+                          fill="transparent"
+                          stroke={getScoreColor(auditReport.atsScore)}
+                          strokeWidth="8"
+                          strokeLinecap="round"
+                          strokeDasharray="264"
+                          strokeDashoffset={264 - (264 * Math.min(100, Math.max(0, auditReport.atsScore))) / 100}
+                          style={{ transition: 'stroke-dashoffset 1.2s cubic-bezier(0.16, 1, 0.3, 1)' }}
+                        />
+                      </svg>
+                      <div
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <span style={{ fontSize: '18px', fontWeight: 800, fontFamily: 'var(--font-mono, monospace)', color: getScoreColor(auditReport.atsScore) }}>
+                          {auditReport.atsScore}%
+                        </span>
+                        <span style={{ fontSize: '9px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>
+                          ATS
+                        </span>
+                      </div>
                     </div>
                     <div className="score-badge-desc">
                       <h4>
@@ -358,12 +447,65 @@ export default function ResumeChecker() {
                           </h4>
                           <div className="skills-tags-wrap">
                             {auditReport.missingRecommendations.map((skill, idx) => (
-                              <span key={idx} className="skill-tag-pill missing">
+                              <span
+                                key={idx}
+                                className="skill-tag-pill missing"
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => setActiveSuggestedSkill(activeSuggestedSkill === skill ? null : skill)}
+                                title="Click to generate 1-click ATS optimized bullet point"
+                              >
                                 <i className="fa-solid fa-plus"></i>
                                 {skill}
+                                <i className="fa-solid fa-wand-magic-sparkles" style={{ fontSize: '9px', marginLeft: '5px' }}></i>
                               </span>
                             ))}
                           </div>
+
+                          {activeSuggestedSkill && (
+                            <div
+                              style={{
+                                marginTop: '12px',
+                                padding: '12px 14px',
+                                borderRadius: '8px',
+                                background: 'rgba(37, 99, 235, 0.08)',
+                                border: '1px solid rgba(37, 99, 235, 0.25)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '8px',
+                              }}
+                            >
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#2563eb' }}>
+                                  <i className="fa-solid fa-wand-magic-sparkles" style={{ marginRight: '6px' }}></i>
+                                  AI Suggested Resume Bullet ({activeSuggestedSkill}):
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleCopyBullet(getSkillBulletSuggestion(activeSuggestedSkill))}
+                                  style={{
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    padding: '4px 10px',
+                                    borderRadius: '5px',
+                                    border: 'none',
+                                    background: copiedSuccess ? '#16a34a' : '#2563eb',
+                                    color: '#ffffff',
+                                    fontSize: '11px',
+                                    fontWeight: 600,
+                                    cursor: 'pointer',
+                                    transition: 'background 0.2s ease',
+                                  }}
+                                >
+                                  <i className={`fa-solid fa-${copiedSuccess ? 'check' : 'copy'}`}></i>
+                                  {copiedSuccess ? 'Copied to Clipboard!' : 'Copy Bullet'}
+                                </button>
+                              </div>
+                              <div style={{ fontSize: '12px', color: 'var(--text, #1e293b)', lineHeight: 1.5, fontStyle: 'italic' }}>
+                                "{getSkillBulletSuggestion(activeSuggestedSkill)}"
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

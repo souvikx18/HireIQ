@@ -435,6 +435,24 @@ body.dark-mode .notification-dropdown-footer {
   border-color: #1e293b;
 }
 
+.header-cmd-trigger:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  color: #1e293b;
+}
+
+body.dark-mode .header-cmd-trigger {
+  background: #142740 !important;
+  border-color: #263f60 !important;
+  color: #94a3b8 !important;
+}
+
+body.dark-mode .header-cmd-trigger:hover {
+  background: #1a3252 !important;
+  border-color: #3b82f6 !important;
+  color: #ffffff !important;
+}
+
 /* ================= PROFILE BUTTON ================= */
 
 .profile {

@@ -391,31 +391,31 @@ export default function Index() {
               </span>
             </div>
             <div className="overview-metrics">
-              <div className="metric-card metric-blue">
+              <div className="metric-card metric-blue gpu-card">
                 <div className="metric-icon">
                   <i className="fa-solid fa-users"></i>
                 </div>
                 <div>
                   <span>Avg. Applications / Day</span>
-                  <strong>8.5</strong>
+                  <strong className="mono-metric">8.5</strong>
                 </div>
               </div>
-              <div className="metric-card metric-green">
+              <div className="metric-card metric-green gpu-card">
                 <div className="metric-icon">
                   <i className="fa-solid fa-circle-check"></i>
                 </div>
                 <div>
                   <span>Shortlist Rate</span>
-                  <strong>30.5%</strong>
+                  <strong className="mono-metric">{stats.shortlistRate || '30.5%'}</strong>
                 </div>
               </div>
-              <div className="metric-card metric-purple">
+              <div className="metric-card metric-purple gpu-card">
                 <div className="metric-icon">
                   <i className="fa-solid fa-chart-pie"></i>
                 </div>
                 <div>
                   <span>Interview Rate</span>
-                  <strong>18.2%</strong>
+                  <strong className="mono-metric">{stats.interviewRate || '18.2%'}</strong>
                 </div>
               </div>
             </div>
@@ -491,52 +491,52 @@ export default function Index() {
 
         {/* Statistics */}
         <section className="stats">
-          <div className="stat-card">
+          <div className="stat-card gpu-card hireiq-glass-card">
             <div className="stat-icon blue">
               <i className="fa-solid fa-users"></i>
             </div>
             <div>
               <p>Total Candidates</p>
-              <h2>{stats.totalCandidates}</h2>
+              <h2 className="mono-metric">{stats.totalCandidates}</h2>
               <span className="positive">
                 ↑ 12% <small>this month</small>
               </span>
             </div>
           </div>
 
-          <div className="stat-card">
+          <div className="stat-card gpu-card hireiq-glass-card">
             <div className="stat-icon green">
               <i className="fa-solid fa-user-check"></i>
             </div>
             <div>
               <p>Resumes Uploaded</p>
-              <h2>{stats.resumesUploaded}</h2>
+              <h2 className="mono-metric">{stats.resumesUploaded}</h2>
               <span className="positive">
                 ↑ 8% <small>this month</small>
               </span>
             </div>
           </div>
 
-          <div className="stat-card">
+          <div className="stat-card gpu-card hireiq-glass-card">
             <div className="stat-icon purple">
               <i className="fa-solid fa-bullseye"></i>
             </div>
             <div>
               <p>Shortlisted</p>
-              <h2>{stats.shortlisted}</h2>
+              <h2 className="mono-metric">{stats.shortlisted}</h2>
               <span className="positive">
                 ↑ 15% <small>this month</small>
               </span>
             </div>
           </div>
 
-          <div className="stat-card">
+          <div className="stat-card gpu-card hireiq-glass-card">
             <div className="stat-icon orange">
               <i className="fa-solid fa-chart-simple"></i>
             </div>
             <div>
               <p>Skill Gaps Found</p>
-              <h2>{stats.skillGapsFound}</h2>
+              <h2 className="mono-metric">{stats.skillGapsFound}</h2>
               <span className="negative">
                 ↑ 10% <small>this month</small>
               </span>

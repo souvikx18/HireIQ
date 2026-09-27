@@ -16,6 +16,7 @@ import Upgrade from './pages/Upgrade';
 import CandidateDashboard from './pages/Candidate/CandidateDashboard';
 import ResumeChecker from './pages/Candidate/ResumeChecker';
 import AIChatbot from './components/AIChatbot';
+import CommandPalette from './components/CommandPalette';
 
 function AppRoutes() {
   const location = useLocation();
@@ -263,6 +264,7 @@ function AppRoutes() {
           }
         />
       </Routes>
+      <CommandPalette />
       {!hideChatbot && <AIChatbot />}
     </>
   );

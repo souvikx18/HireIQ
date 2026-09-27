@@ -4,6 +4,7 @@ import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
 import { useAuth } from '../../context/AuthContext';
 import { candidatePortalApi } from '../../api/candidatePortal';
+import { Skeleton } from '../../components/common/Skeleton';
 import '../../css/candidate-portal.css';
 
 export default function CandidateDashboard() {
@@ -142,47 +143,61 @@ export default function CandidateDashboard() {
             </div>
           </div>
 
-          {/* Overview Stats Cards */}
+          {/* Overview Stats Bento Cards */}
           <div className="portal-stats-grid">
-            <div className="stat-card-portal">
-              <div className="stat-card-icon emerald">
-                <i className="fa-solid fa-shield-heart"></i>
-              </div>
-              <div className="stat-card-info">
-                <span>ATS Resume Score</span>
-                <h3>{candidateAtsScore ? `${candidateAtsScore}%` : 'Scan Needed'}</h3>
-              </div>
-            </div>
+            {loading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={`skel-card-${i}`} className="hireiq-skeleton-card" style={{ padding: '18px', display: 'flex', gap: '14px', alignItems: 'center' }}>
+                  <Skeleton width="48px" height="48px" borderRadius="12px" />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+                    <Skeleton width="90px" height="12px" />
+                    <Skeleton width="110px" height="22px" />
+                  </div>
+                </div>
+              ))
+            ) : (
+              <>
+                <div className="stat-card-portal hireiq-glass-card gpu-card">
+                  <div className="stat-card-icon emerald">
+                    <i className="fa-solid fa-shield-heart"></i>
+                  </div>
+                  <div className="stat-card-info">
+                    <span>ATS Resume Score</span>
+                    <h3 className="mono-metric">{candidateAtsScore ? `${candidateAtsScore}%` : 'Scan Needed'}</h3>
+                  </div>
+                </div>
 
-            <div className="stat-card-portal">
-              <div className="stat-card-icon purple">
-                <i className="fa-solid fa-bolt"></i>
-              </div>
-              <div className="stat-card-info">
-                <span>Identified Skills</span>
-                <h3>{skillsList.length} Skills</h3>
-              </div>
-            </div>
+                <div className="stat-card-portal hireiq-glass-card gpu-card">
+                  <div className="stat-card-icon purple">
+                    <i className="fa-solid fa-bolt"></i>
+                  </div>
+                  <div className="stat-card-info">
+                    <span>Identified Skills</span>
+                    <h3 className="mono-metric">{skillsList.length} Skills</h3>
+                  </div>
+                </div>
 
-            <div className="stat-card-portal">
-              <div className="stat-card-icon blue">
-                <i className="fa-solid fa-circle-check"></i>
-              </div>
-              <div className="stat-card-info">
-                <span>ATS Structure Health</span>
-                <h3>{candidateAtsScore >= 75 ? 'Optimized' : candidateAtsScore > 0 ? 'Fix Suggested' : 'Audit Ready'}</h3>
-              </div>
-            </div>
+                <div className="stat-card-portal hireiq-glass-card gpu-card">
+                  <div className="stat-card-icon blue">
+                    <i className="fa-solid fa-circle-check"></i>
+                  </div>
+                  <div className="stat-card-info">
+                    <span>ATS Structure Health</span>
+                    <h3 className="mono-metric">{candidateAtsScore >= 75 ? 'Optimized' : candidateAtsScore > 0 ? 'Fix Suggested' : 'Audit Ready'}</h3>
+                  </div>
+                </div>
 
-            <div className="stat-card-portal">
-              <div className="stat-card-icon amber">
-                <i className="fa-solid fa-layer-group"></i>
-              </div>
-              <div className="stat-card-info">
-                <span>Experience Profile</span>
-                <h3>{profile?.experienceYears ? `${profile.experienceYears}+ Yrs` : 'Tech Professional'}</h3>
-              </div>
-            </div>
+                <div className="stat-card-portal hireiq-glass-card gpu-card">
+                  <div className="stat-card-icon amber">
+                    <i className="fa-solid fa-layer-group"></i>
+                  </div>
+                  <div className="stat-card-info">
+                    <span>Experience Profile</span>
+                    <h3 className="mono-metric">{profile?.experienceYears ? `${profile.experienceYears}+ Yrs` : 'Tech Professional'}</h3>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Main Dashboard Two-Column Grid */}

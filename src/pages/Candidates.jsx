@@ -3,6 +3,7 @@ import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { candidatesApi } from '../api/candidates';
 import { jobsApi } from '../api/jobs';
+import { Skeleton } from '../components/common/Skeleton';
 import '../css/candidates.css';
 
 export default function Candidates() {
@@ -212,6 +213,65 @@ export default function Candidates() {
       left: Math.min(rect.left, window.innerWidth - 190),
     });
   };
+
+  const [focusedCandidateIndex, setFocusedCandidateIndex] = useState(-1);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      const activeTag = document.activeElement?.tagName?.toLowerCase();
+      if (
+        activeTag === 'input' ||
+        activeTag === 'textarea' ||
+        activeTag === 'select' ||
+        selectedCandidateModal ||
+        addCandidateModalOpen ||
+        reassignModalCandidate ||
+        compareModalData
+      ) {
+        return;
+      }
+
+      if (e.key === 'j' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        setFocusedCandidateIndex((prev) =>
+          prev < filteredCandidates.length - 1 ? prev + 1 : 0
+        );
+      } else if (e.key === 'k' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        setFocusedCandidateIndex((prev) =>
+          prev > 0 ? prev - 1 : filteredCandidates.length - 1
+        );
+      } else if ((e.key === 's' || e.key === 'S') && focusedCandidateIndex >= 0) {
+        const cand = filteredCandidates[focusedCandidateIndex];
+        if (cand) {
+          e.preventDefault();
+          handleStageChange(cand.id, 'SHORTLISTED');
+        }
+      } else if ((e.key === 'r' || e.key === 'R') && focusedCandidateIndex >= 0) {
+        const cand = filteredCandidates[focusedCandidateIndex];
+        if (cand) {
+          e.preventDefault();
+          handleStageChange(cand.id, 'REJECTED');
+        }
+      } else if (e.key === ' ' && focusedCandidateIndex >= 0) {
+        const cand = filteredCandidates[focusedCandidateIndex];
+        if (cand) {
+          e.preventDefault();
+          setSelectedCandidateModal(cand);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [
+    filteredCandidates,
+    focusedCandidateIndex,
+    selectedCandidateModal,
+    addCandidateModalOpen,
+    reassignModalCandidate,
+    compareModalData,
+  ]);
 
   useEffect(() => {
     const handleDocumentClick = () => {
@@ -462,7 +522,29 @@ export default function Candidates() {
                 </thead>
 
                 <tbody>
-                  {filteredCandidates.length === 0 ? (
+                  {loading ? (
+                    Array.from({ length: 7 }).map((_, i) => (
+                      <tr key={`skel-${i}`}>
+                        <td style={{ textAlign: 'center' }}><Skeleton width="16px" height="16px" borderRadius="4px" /></td>
+                        <td>
+                          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                            <Skeleton width="34px" height="34px" borderRadius="50%" />
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                              <Skeleton width="120px" height="13px" borderRadius="4px" />
+                              <Skeleton width="160px" height="11px" borderRadius="4px" />
+                            </div>
+                          </div>
+                        </td>
+                        <td><Skeleton width="110px" height="13px" borderRadius="4px" /></td>
+                        <td><Skeleton width="70px" height="13px" borderRadius="4px" /></td>
+                        <td><Skeleton width="48px" height="18px" borderRadius="12px" /></td>
+                        <td><Skeleton width="75px" height="13px" borderRadius="4px" /></td>
+                        <td><Skeleton width="85px" height="20px" borderRadius="12px" /></td>
+                        <td><Skeleton width="90px" height="13px" borderRadius="4px" /></td>
+                        <td style={{ textAlign: 'right' }}><Skeleton width="75px" height="26px" borderRadius="6px" /></td>
+                      </tr>
+                    ))
+                  ) : filteredCandidates.length === 0 ? (
                     <tr>
                       <td colSpan="9" style={{ textAlign: 'center', padding: '48px 20px', color: '#64748b' }}>
                         <div
@@ -509,8 +591,12 @@ export default function Candidates() {
                       </td>
                     </tr>
                   ) : (
-                    filteredCandidates.map((c) => (
-                    <tr key={c.id}>
+                    filteredCandidates.map((c, idx) => (
+                    <tr
+                      key={c.id}
+                      className={focusedCandidateIndex === idx ? 'candidate-row-focused' : ''}
+                      onClick={() => setFocusedCandidateIndex(idx)}
+                    >
                       <td style={{ textAlign: 'center' }}>
                         <input
                           type="checkbox"
@@ -647,6 +733,17 @@ export default function Candidates() {
             </div>
           </div>
         </div>
+
+        {/* Speed-Screening Keyboard Hotkeys Floating Pill */}
+        {filteredCandidates.length > 0 && (
+          <div className="speed-screen-pill">
+            <span><kbd>J</kbd> / <kbd>K</kbd> Navigate</span>
+            <span><kbd>S</kbd> Shortlist</span>
+            <span><kbd>R</kbd> Reject</span>
+            <span><kbd>Space</kbd> Preview</span>
+            <span><kbd>⌘K</kbd> Search</span>
+          </div>
+        )}
       </main>
 
       {/* Action Menu dropdown */}
