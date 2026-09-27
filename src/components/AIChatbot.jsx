@@ -49,7 +49,10 @@ export default function AIChatbot() {
   // Auto-scroll to bottom when messages update
   useEffect(() => {
     if (isOpen) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      const timer = setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 80);
+      return () => clearTimeout(timer);
     }
   }, [messages, isTyping, isOpen, isExpanded]);
 
@@ -345,6 +348,7 @@ export default function AIChatbot() {
           className={`chatbot-panel ${isExpanded ? 'expanded' : ''}`}
           role="dialog"
           aria-label={isCandidate ? 'Career AI Copilot' : 'HireIQ AI Chatbot'}
+          data-lenis-prevent
         >
           {/* Header */}
           <div className="chatbot-header">
@@ -391,7 +395,12 @@ export default function AIChatbot() {
           </div>
 
           {/* Messages Body */}
-          <div className="chatbot-messages">
+          <div
+            className="chatbot-messages"
+            data-lenis-prevent
+            onWheel={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
+          >
             {messages.map((msg) => (
               <div key={msg.id} className={`chatbot-msg-row ${msg.sender}`}>
                 {msg.sender === 'bot' && (

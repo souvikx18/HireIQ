@@ -235,13 +235,38 @@ body.dark-mode .chatbot-toggle-btn.open {
 
 /* Chat Messages Area */
 .chatbot-messages {
-  flex: 1;
+  flex: 1 1 0%;
+  min-height: 0;
+  max-height: 100%;
   padding: 18px 16px;
-  overflow-y: auto;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   display: flex;
   flex-direction: column;
   gap: 14px;
   background: #f8fafc;
+}
+
+.chatbot-messages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chatbot-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chatbot-messages::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+  border-radius: 4px;
+}
+
+.chatbot-messages::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.6);
+}
+
+body.dark-mode .chatbot-messages::-webkit-scrollbar-thumb {
+  background: rgba(38, 63, 96, 0.8);
 }
 
 .chatbot-msg-row {
