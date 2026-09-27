@@ -16,6 +16,7 @@ export default function ResumeChecker() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isAuditing, setIsAuditing] = useState(false);
   const [auditReport, setAuditReport] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
   const [activeReportTab, setActiveReportTab] = useState('diagnostics'); // 'diagnostics', 'skills', 'optimizer'
   const [activeSuggestedSkill, setActiveSuggestedSkill] = useState(null);
   const [copiedSuccess, setCopiedSuccess] = useState(false);
