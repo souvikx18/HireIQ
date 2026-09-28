@@ -1281,3 +1281,110 @@ body.dark-mode tr.candidate-row-focused {
     color: #60a5fa;
     margin-right: 3px;
 }
+
+/* =========================================================
+   DARK MODE — ALL MODALS (View Details, Compare, Add, Reassign)
+========================================================= */
+body.dark-mode .candidate-modal-overlay {
+    background: rgba(0, 0, 0, 0.75) !important;
+}
+
+/* Main modal card */
+body.dark-mode .candidate-modal {
+    background: #1e2535 !important;
+    border-color: #2d3748 !important;
+    color: #e2e8f0 !important;
+}
+
+/* Close button */
+body.dark-mode .candidate-modal .modal-close {
+    background: #263044 !important;
+    border-color: #3a4a5e !important;
+    color: #94a3b8 !important;
+}
+body.dark-mode .candidate-modal .modal-close:hover {
+    background: #334155 !important;
+    color: #e2e8f0 !important;
+}
+
+/* Candidate name heading inside modal */
+body.dark-mode .candidate-modal h2 {
+    color: #f1f5f9 !important;
+}
+
+/* Candidate email / sub-text */
+body.dark-mode .candidate-modal p {
+    color: #94a3b8 !important;
+}
+
+/* All the 2x2 metric boxes (Applied Role, Total Views, etc.) */
+body.dark-mode .candidate-modal .modal-details > div,
+body.dark-mode .candidate-modal [style*="background: '#ffffff'"],
+body.dark-mode .candidate-modal [style*='background: "#ffffff"'] {
+    background: #263044 !important;
+    border-color: #3a4a5e !important;
+}
+
+/* Label spans inside metric boxes */
+body.dark-mode .candidate-modal .modal-details span {
+    color: #94a3b8 !important;
+}
+
+/* Value strongs inside metric boxes */
+body.dark-mode .candidate-modal .modal-details strong {
+    color: #e2e8f0 !important;
+}
+
+/* Assigned Job Role section */
+body.dark-mode .candidate-modal .modal-details ~ div,
+body.dark-mode .candidate-modal > div > div:not(.modal-profile):not(.modal-details):not(.modal-rating):not(.modal-actions) {
+    background: #263044 !important;
+    border-color: #3a4a5e !important;
+}
+
+/* "Assigned Job Role & Field" label */
+body.dark-mode .candidate-modal span[style] {
+    color: #94a3b8 !important;
+}
+
+/* Job Role select dropdown */
+body.dark-mode .candidate-modal select {
+    background: #1a2336 !important;
+    border-color: #3a4a5e !important;
+    color: #e2e8f0 !important;
+}
+
+/* Candidate Rating box */
+body.dark-mode .candidate-modal .modal-rating {
+    background: #263044 !important;
+    border-color: #3a4a5e !important;
+}
+
+/* View Reviews button (the secondary / outline button) */
+body.dark-mode .candidate-modal .modal-review-btn {
+    background: #263044 !important;
+    border-color: #3a4a5e !important;
+    color: #94a3b8 !important;
+}
+body.dark-mode .candidate-modal .modal-review-btn:hover {
+    background: #334155 !important;
+    color: #e2e8f0 !important;
+}
+
+/* Comparison modal columns */
+body.dark-mode .candidate-modal > div[style*="grid"] > div {
+    background: #263044 !important;
+    border-color: #3a4a5e !important;
+}
+
+/* Any inputs inside modals */
+body.dark-mode .candidate-modal input {
+    background: #1a2336 !important;
+    border-color: #3a4a5e !important;
+    color: #e2e8f0 !important;
+}
+
+/* Dividers / HR lines */
+body.dark-mode .candidate-modal hr {
+    border-color: #2d3748 !important;
+}
