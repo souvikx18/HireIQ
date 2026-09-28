@@ -9,6 +9,7 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.js",
+    "db:clean": "node scripts/clean-test-data.js",
     "db:use-postgres": "node scripts/switch-db.js postgres && prisma generate",
     "db:use-sqlite": "node scripts/switch-db.js sqlite && prisma generate",
     "test": "vitest run"
