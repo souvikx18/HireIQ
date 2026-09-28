@@ -101,6 +101,14 @@ export default function ResumeChecker() {
     setTimeout(() => setCopiedTextSuccess(false), 2000);
   };
 
+  const handleWheelScroll = (e) => {
+    const el = e.currentTarget;
+    if (el) {
+      el.scrollTop += e.deltaY;
+      e.stopPropagation();
+    }
+  };
+
   const handleDragOver = (e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -418,7 +426,7 @@ export default function ResumeChecker() {
               </div>
 
               {/* Canvas Body */}
-              <div className="audit-canvas-body">
+              <div className="audit-canvas-body" onWheel={handleWheelScroll}>
                 {activeViewerTab === 'preview' ? (
                   fileUrl && selectedFile?.name?.endsWith('.pdf') ? (
                     <iframe
@@ -534,7 +542,7 @@ export default function ResumeChecker() {
               </div>
 
               {/* Independent Smooth-Scrollable Diagnostic Column */}
-              <div className="audit-inspector-scroll">
+              <div className="audit-inspector-scroll" onWheel={handleWheelScroll}>
                 {/* OVERVIEW SUMMARY STRIP (Shown when "All" is active) */}
                 {activeFilter === 'all' && (
                   <div className="audit-quick-stats-strip">
