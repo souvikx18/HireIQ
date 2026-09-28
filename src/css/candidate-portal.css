@@ -2336,11 +2336,12 @@ body.dark-mode .portal-copilot-action-btn:hover {
 /* DUAL-PANE SPLIT-VIEW WORKSPACE */
 .audit-split-workspace {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.22fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
     gap: 22px;
     align-items: stretch;
-    height: calc(100vh - 230px);
+    height: calc(100vh - 210px);
     min-height: 600px;
+    box-sizing: border-box;
 }
 
 /* Left Pane: Document Canvas */
@@ -2350,6 +2351,8 @@ body.dark-mode .portal-copilot-action-btn:hover {
     border-radius: 14px;
     display: flex;
     flex-direction: column;
+    height: 100%;
+    min-height: 0;
     overflow: hidden;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
@@ -2361,6 +2364,7 @@ body.dark-mode .portal-copilot-action-btn:hover {
     align-items: center;
     justify-content: space-between;
     background: #f8fafc;
+    flex-shrink: 0;
 }
 
 .audit-segmented-tabs {
@@ -2395,11 +2399,26 @@ body.dark-mode .portal-copilot-action-btn:hover {
 .canvas-status-tag {
     font-size: 11px;
     font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.canvas-status-tag.success {
     color: #059669;
+    background: #ecfdf5;
+}
+
+.canvas-status-tag.warning {
+    color: #b45309;
+    background: #fef3c7;
 }
 
 .audit-canvas-body {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
     position: relative;
     background: #525659;
@@ -2454,24 +2473,85 @@ body.dark-mode .portal-copilot-action-btn:hover {
     min-height: 100%;
 }
 
+.audit-ocr-explainer-banner {
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    font-size: 11.5px;
+    color: #fde68a;
+    line-height: 1.45;
+}
+
+.audit-ocr-explainer-banner p {
+    margin: 0 0 6px;
+}
+.audit-ocr-explainer-banner p:last-child {
+    margin: 0;
+}
+
+.explainer-tag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
+    font-size: 10px;
+    color: #f59e0b;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+}
+
 .raw-stream-header {
-    font-size: 11px;
-    font-weight: 600;
-    color: #94a3b8;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 12px;
     padding-bottom: 8px;
     border-bottom: 1px solid #1e293b;
-    text-transform: uppercase;
+}
+
+.raw-stream-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 7px;
     letter-spacing: 0.5px;
+}
+
+.raw-copy-btn {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #38bdf8;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.15s ease;
+}
+
+.raw-copy-btn:hover {
+    background: #27354f;
+    border-color: #38bdf8;
 }
 
 .raw-stream-code {
     font-family: var(--font-mono, monospace);
     font-size: 11.5px;
-    line-height: 1.55;
+    line-height: 1.6;
     white-space: pre-wrap;
     margin: 0;
     color: #38bdf8;
+    background: #090e1a;
+    padding: 14px;
+    border-radius: 8px;
+    border: 1px solid #1e293b;
 }
 
 .audit-canvas-footer {
@@ -2483,6 +2563,7 @@ body.dark-mode .portal-copilot-action-btn:hover {
     font-size: 11px;
     color: #64748b;
     font-weight: 500;
+    flex-shrink: 0;
 }
 
 /* Right Pane: Diagnostic Inspector */
@@ -2492,12 +2573,14 @@ body.dark-mode .portal-copilot-action-btn:hover {
     border-radius: 14px;
     display: flex;
     flex-direction: column;
+    height: 100%;
+    min-height: 0;
     overflow: hidden;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 .audit-filter-bar {
-    padding: 12px 18px;
+    padding: 10px 16px;
     border-bottom: 1px solid #e2e8f0;
     background: #f8fafc;
     display: flex;
@@ -2507,17 +2590,17 @@ body.dark-mode .portal-copilot-action-btn:hover {
 }
 
 .audit-filter-pill {
-    padding: 6px 14px;
+    padding: 5px 12px;
     border-radius: 6px;
     border: 1px solid #cbd5e1;
     background: #ffffff;
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 600;
     color: #475569;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     white-space: nowrap;
     transition: all 0.15s ease;
 }
@@ -2551,14 +2634,85 @@ body.dark-mode .portal-copilot-action-btn:hover {
     color: #ffffff;
 }
 
+.audit-filter-pill.passed.active {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #ffffff;
+}
+
+/* Scrollable Container with Custom Sleek Scrollbars */
 .audit-inspector-scroll {
     flex: 1;
-    overflow-y: auto;
-    padding: 20px;
+    min-height: 0;
+    overflow-y: auto !important;
+    padding: 18px 20px 24px;
     display: flex;
     flex-direction: column;
-    gap: 22px;
+    gap: 20px;
 }
+
+.audit-inspector-scroll::-webkit-scrollbar,
+.audit-canvas-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.audit-inspector-scroll::-webkit-scrollbar-track,
+.audit-canvas-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.audit-inspector-scroll::-webkit-scrollbar-thumb,
+.audit-canvas-body::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.audit-inspector-scroll::-webkit-scrollbar-thumb:hover,
+.audit-canvas-body::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Quick Stats Overview Strip */
+.audit-quick-stats-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.quick-stat-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 6px;
+    border-radius: 6px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+}
+
+.quick-stat-box .stat-num {
+    font-size: 17px;
+    font-weight: 800;
+    line-height: 1.1;
+    font-family: var(--font-mono, monospace);
+}
+
+.quick-stat-box .stat-lbl {
+    font-size: 10px;
+    font-weight: 600;
+    color: #64748b;
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.quick-stat-box.red .stat-num { color: #ef4444; }
+.quick-stat-box.amber .stat-num { color: #d97706; }
+.quick-stat-box.emerald .stat-num { color: #059669; }
+.quick-stat-box.blue .stat-num { color: #2563eb; }
 
 /* Sections */
 .inspector-section-block {
@@ -2654,7 +2808,20 @@ body.dark-mode .portal-copilot-action-btn:hover {
 }
 
 .audit-diagnostic-card.info-card {
-    border-left: 3.5px solid #3b82f6;
+    border-left: 3.5px solid #f59e0b;
+}
+
+.audit-diagnostic-card.passed-card {
+    border-left: 3.5px solid #10b981;
+}
+
+.section-badge.blue {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.section-count-tag.blue {
+    color: #2563eb;
 }
 
 .diagnostic-card-header {
@@ -2679,6 +2846,10 @@ body.dark-mode .portal-copilot-action-btn:hover {
 
 .card-status-icon.green {
     color: #10b981;
+}
+
+.card-status-icon.amber {
+    color: #f59e0b;
 }
 
 .diagnostic-card-header h4 {
@@ -2917,6 +3088,19 @@ body.dark-mode .portal-copilot-action-btn:hover {
     background: #ecfdf5;
     border: 1px solid #a7f3d0;
     color: #065f46;
+    cursor: pointer;
+}
+
+.tech-keyword-pill.found:hover {
+    background: #d1fae5;
+    border-color: #6ee7b7;
+}
+
+.tech-keyword-pill.found.active {
+    background: #059669;
+    border-color: #059669;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);
 }
 
 .tech-keyword-pill.missing {
@@ -3057,10 +3241,39 @@ body.dark-mode .formula-copy-btn {
     color: #93c5fd !important;
 }
 
+body.dark-mode .audit-diagnostic-card.passed-card {
+    border-left-color: #10b981 !important;
+}
+
+body.dark-mode .audit-quick-stats-strip {
+    background: #101726 !important;
+    border-color: #1f2a40 !important;
+}
+
+body.dark-mode .quick-stat-box {
+    background: #162035 !important;
+    border-color: #24324f !important;
+}
+
+body.dark-mode .quick-stat-box .stat-lbl {
+    color: #94a3b8 !important;
+}
+
 body.dark-mode .tech-keyword-pill.found {
     background: #064e3b !important;
     border-color: #065f46 !important;
     color: #6ee7b7 !important;
+}
+
+body.dark-mode .tech-keyword-pill.found:hover {
+    background: #047857 !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .tech-keyword-pill.found.active {
+    background: #10b981 !important;
+    border-color: #10b981 !important;
+    color: #ffffff !important;
 }
 
 body.dark-mode .tech-keyword-pill.missing {
@@ -3082,6 +3295,12 @@ body.dark-mode .audit-action-btn.secondary {
 body.dark-mode .audit-text-document-view {
     background: #151d2f !important;
     color: #cbd5e1 !important;
+}
+
+body.dark-mode .audit-ocr-explainer-banner {
+    background: rgba(245, 158, 11, 0.15) !important;
+    border-color: rgba(245, 158, 11, 0.4) !important;
+    color: #fef08a !important;
 }
 
 @media (max-width: 1024px) {

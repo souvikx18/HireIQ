@@ -28,7 +28,7 @@ const SKILL_DICTIONARY = [
 export const resumeParserService = {
   async parseWithGemini(filePath, originalFileName, mimeType = 'application/pdf') {
     if (!config.ai.geminiApiKey) return null;
-    const models = ['gemini-flash-latest', 'gemini-2.5-flash-lite', 'gemini-pro-latest'];
+    const models = ['gemini-flash-lite-latest', 'gemini-3.8-flash', 'gemini-flash-latest'];
 
     try {
       const buf = fs.readFileSync(filePath);
@@ -47,7 +47,7 @@ export const resumeParserService = {
                   parts: [
                     { inlineData: { mimeType, data: base64 } },
                     {
-                      text: 'You are an enterprise ATS resume parser. Extract candidate details from this resume document. Output strictly a JSON object with keys: "name" (string), "email" (string), "phone" (string or null), "experienceYears" (string e.g. "0+", "2+"), "skills" (array of strings, all technical, framework, database, tool, core cs and soft skills found on the document), "fullText" (plain text transcript of the resume). Do not include markdown code block formatting, just the raw JSON object.'
+                      text: 'You are an enterprise ATS resume parser. Extract candidate details from this resume document accurately. Output strictly a JSON object with keys: "name" (string), "email" (string), "phone" (string or null), "experienceYears" (string e.g. "0+", "1+", "3+"), "education" (string describing degree, university/board, year e.g. "B.Tech in Computer Science, Brainware University"), "skills" (array of strings: all programming languages, web technologies, databases, frameworks, CS fundamentals, soft skills detected on the document), "fullText" (complete plain text transcription of the resume). Do not include markdown code block formatting, just the raw JSON object.'
                     }
                   ]
                 }
@@ -57,17 +57,26 @@ export const resumeParserService = {
 
           if (!res.ok) {
             logger.warn(`Gemini model ${model} parse returned status ${res.status}, trying next model...`);
+            await new Promise((r) => setTimeout(r, 400));
             continue;
           }
 
           const data = await res.json();
-          const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (!rawText) continue;
+          const rawResponseText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!rawResponseText) continue;
 
-          const cleanedJson = rawText.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
+          const cleanedJson = rawResponseText.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
           const parsed = JSON.parse(cleanedJson);
           if (parsed && (parsed.name || (Array.isArray(parsed.skills) && parsed.skills.length > 0))) {
-            return parsed;
+            let eduStr = parsed.education;
+            if (Array.isArray(eduStr)) {
+              eduStr = eduStr.join(' | ');
+            }
+            return {
+              ...parsed,
+              education: eduStr || null,
+              skills: Array.isArray(parsed.skills) ? [...new Set(parsed.skills.map((s) => String(s).trim()).filter(Boolean))] : [],
+            };
           }
         } catch (mErr) {
           logger.warn(`Model ${model} parse error:`, mErr.message);
@@ -101,7 +110,6 @@ export const resumeParserService = {
       }
     } catch (err) {
       logger.error(`Error reading resume file ${filePath}:`, err);
-      // If parsing failed or corrupted file, generate descriptive placeholder
       text = `Candidate resume document: ${originalFileName}. Content could not be parsed as text.`;
     }
 
@@ -159,12 +167,20 @@ export const resumeParserService = {
       }
     }
 
-    // 5. Experience estimate
-    let experienceYears = '3+';
+    // 5. Experience estimate (Do not assume 3+ for students/freshers)
+    let experienceYears = '0+';
     const expRegex = /(\d{1,2})\+?\s*(?:years|yrs)/i;
     const expMatch = text.match(expRegex);
     if (expMatch) {
       experienceYears = `${expMatch[1]}+`;
+    }
+
+    // 6. Education extraction heuristic
+    let education = null;
+    const eduRegex = /(?:B\.?\s*Tech|B\.?\s*E\.?|B\.?\s*Sc|Bachelor|Master|M\.?\s*Tech|M\.?\s*Sc|MCA|BCA|Degree)[^\n.]{0,80}/i;
+    const eduMatch = text.match(eduRegex);
+    if (eduMatch) {
+      education = eduMatch[0].trim();
     }
 
     return {
@@ -172,6 +188,7 @@ export const resumeParserService = {
       email,
       phone,
       experienceYears,
+      education,
       skills: Array.from(foundSkills),
     };
   },

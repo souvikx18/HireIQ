@@ -20,6 +20,8 @@ export const candidatePortalController = {
 
       // Extract raw text and candidate details
       let rawText = await resumeParserService.extractText(filePath, originalFileName);
+      const directTextWordCount = rawText.split(/\s+/).filter(Boolean).length;
+      const isScannedOrImage = directTextWordCount < 15;
       let extracted = null;
 
       if ((!rawText || rawText.length < 40) && config.ai.geminiApiKey) {
@@ -32,6 +34,7 @@ export const candidatePortalController = {
             email: aiParsed.email || req.user?.email || `candidate.${Date.now()}@applicant.hireiq.internal`,
             phone: aiParsed.phone || null,
             experienceYears: String(aiParsed.experienceYears ?? '0+'),
+            education: aiParsed.education || null,
             skills: Array.isArray(aiParsed.skills) ? aiParsed.skills : [],
           };
         }
@@ -43,103 +46,115 @@ export const candidatePortalController = {
         const detInfo = resumeParserService.extractCandidateInfo(rawText, originalFileName);
         const combined = new Set([...extracted.skills, ...detInfo.skills]);
         extracted.skills = Array.from(combined);
+        if (!extracted.education && detInfo.education) {
+          extracted.education = detInfo.education;
+        }
       }
-
 
       // Analyze structure & ATS metrics
       const wordCount = rawText.split(/\s+/).filter(Boolean).length;
-      const isUnreadablePdf = wordCount < 15;
       const expNumber = parseFloat(String(extracted.experienceYears)) || 0;
-      const hasContact = Boolean(extracted.email && extracted.phone);
+      const hasContact = Boolean(extracted.email && extracted.phone && !extracted.email.includes('hireiq.internal'));
       const hasSkills = extracted.skills && extracted.skills.length >= 3;
       const hasEducation = Boolean(extracted.education && extracted.education !== 'Not specified');
-      const hasExperience = expNumber > 0;
+      const hasProjects = /project|booking|website|system|developed|built|created|engineered/i.test(rawText);
+      const isFresherOrStudent = expNumber === 0 || /student|b\.?tech|bachelor|fresher|intern/i.test(rawText);
+      const hasExperience = expNumber > 0 || (isFresherOrStudent && hasProjects);
 
       // Detect strong action verbs in bullet points
       const actionVerbsList = [
         'spearheaded', 'architected', 'developed', 'engineered', 'led', 'designed',
         'optimized', 'implemented', 'reduced', 'increased', 'boosted', 'automated',
-        'delivered', 'refactored', 'managed', 'created', 'built', 'resolved',
+        'delivered', 'refactored', 'managed', 'created', 'built', 'resolved', 'tested',
       ];
       const foundActionVerbs = actionVerbsList.filter((v) =>
         new RegExp(`\\b${v}\\b`, 'i').test(rawText)
       );
 
       // Calculate ATS Structural Score (0-100)
-      let atsScore = 35;
-      if (!isUnreadablePdf) {
-        atsScore = 55;
-        if (hasContact) atsScore += 10;
-        if (hasSkills) atsScore += 10;
-        if (hasEducation) atsScore += 10;
-        if (hasExperience) atsScore += 5;
-        if (foundActionVerbs.length >= 3) atsScore += 5;
-        if (wordCount >= 200 && wordCount <= 1000) atsScore += 5;
+      let atsScore = 40;
+      if (!isScannedOrImage) {
+        atsScore += 20; // Native selectable text layer bonus
+      } else {
+        atsScore += 5; // AI OCR recovered, but still warned
       }
+      if (hasContact) atsScore += 10;
+      if (hasSkills) atsScore += 10;
+      if (hasEducation) atsScore += 10;
+      if (hasExperience) atsScore += 10;
+      if (foundActionVerbs.length >= 2) atsScore += 5;
+      if (wordCount >= 150 && wordCount <= 1000) atsScore += 5;
       atsScore = Math.min(Math.max(atsScore, 25), 98);
 
       // Formatting diagnostics
       const formattingChecks = [
-        ...(isUnreadablePdf
+        ...(isScannedOrImage
           ? [
               {
-                name: 'Document Text Readability (Machine Layer)',
+                name: 'Document Text Layer (Machine OCR vs. Native Stream)',
                 status: 'WARNING',
-                detail: `Only ${wordCount} words detected. This resume appears to be an image-only or flattened scanned document. Applicant Tracking Systems (ATS) require machine-readable text layers and cannot read scanned images. Please export your resume directly as a standard text PDF or DOCX.`,
+                detail: `Native text layer missing (only ${directTextWordCount} words readable directly). While HireIQ AI recovered your text via OCR, enterprise ATS systems (Workday, Taleo, Greenhouse) cannot read image scans. Export your resume directly as a standard text PDF or DOCX to prevent automatic parsing rejections.`,
               },
             ]
           : []),
         {
           name: 'Contact Information',
-          status: hasContact ? 'PASSED' : 'WARNING',
+          status: hasContact ? 'PASSED' : (extracted.email ? 'REVIEW' : 'WARNING'),
           detail: hasContact
-            ? `Email (${extracted.email}) and phone detected.`
-            : 'Add a clear phone number and professional email.',
+            ? `Email (${extracted.email}) and phone (${extracted.phone}) verified.`
+            : extracted.email
+            ? `Email (${extracted.email}) found, but phone number is missing or unformatted.`
+            : 'Add a clear phone number and professional email at the top.',
         },
         {
           name: 'Skills Section',
-          status: hasSkills ? 'PASSED' : 'WARNING',
+          status: hasSkills ? 'PASSED' : (extracted.skills?.length > 0 ? 'REVIEW' : 'WARNING'),
           detail: hasSkills
-            ? `${extracted.skills.length} technical skills identified.`
-            : 'Include a dedicated Skills section with relevant tools & technologies.',
+            ? `${extracted.skills.length} technical & core competencies identified.`
+            : extracted.skills?.length > 0
+            ? `Only ${extracted.skills.length} skills detected. Expand your dedicated Skills section with industry-standard technologies.`
+            : 'Include a dedicated Skills section with relevant tools, programming languages, and databases.',
         },
         {
-          name: 'Work Experience Structure',
+          name: 'Work Experience & Projects',
           status: hasExperience ? 'PASSED' : 'REVIEW',
-          detail: hasExperience
-            ? `${expNumber}+ years experience detected.`
-            : 'Ensure your roles have clear start/end dates and company names.',
+          detail: expNumber > 0
+            ? `${expNumber}+ years industry experience detected.`
+            : isFresherOrStudent
+            ? hasProjects
+              ? 'Academic & technical project work identified. Quantify impact with metrics (e.g. users, latency, throughput).'
+              : 'Entry-level candidate profile. Add portfolio projects, internships, or open-source contributions.'
+            : 'Ensure your work history has clear role titles, organizations, and start/end dates.',
         },
         {
           name: 'Education Section',
           status: hasEducation ? 'PASSED' : 'INFO',
           detail: hasEducation
-            ? `Degree found: ${extracted.education}`
-            : 'Specify your highest degree or relevant certifications.',
+            ? `Academic credentials identified: ${extracted.education}`
+            : 'Specify your highest degree, institution, and graduation year in an Education section.',
         },
         {
           name: 'Action Verbs & Impact',
-          status: foundActionVerbs.length >= 3 ? 'PASSED' : 'WARNING',
-          detail: foundActionVerbs.length >= 3
-            ? `Good action verbs found: ${foundActionVerbs.slice(0, 4).join(', ')}.`
-            : 'Begin bullet points with strong action verbs (e.g. Engineered, Spearheaded, Optimized).',
+          status: foundActionVerbs.length >= 2 ? 'PASSED' : 'REVIEW',
+          detail: foundActionVerbs.length >= 2
+            ? `Strong action verbs found: ${foundActionVerbs.slice(0, 5).join(', ')}.`
+            : 'Begin bullet points with strong action verbs (e.g. Developed, Engineered, Optimized, Spearheaded).',
         },
         {
-          name: 'Length & Readability',
-          status: wordCount >= 200 && wordCount <= 900 ? 'PASSED' : (isUnreadablePdf ? 'WARNING' : 'INFO'),
-          detail: isUnreadablePdf
-            ? `${wordCount} words parsed. Standard ATS recommendation is 350 - 800 words with selectable text.`
-            : `${wordCount} words. Standard recommended length is 350 - 800 words (1-2 pages).`,
+          name: 'Length & Word Count',
+          status: wordCount >= 180 && wordCount <= 900 ? 'PASSED' : 'INFO',
+          detail: `${wordCount} words detected. Standard single-page ATS benchmark is 250 - 750 words.`,
         },
       ];
 
       // Missing keywords recommendations for industry standard
       const popularIndustrySkills = [
-        'TypeScript', 'React', 'Node.js', 'PostgreSQL', 'Docker', 'AWS', 'System Design', 'CI/CD',
+        'Git & GitHub', 'REST APIs', 'Docker', 'React', 'Node.js', 'PostgreSQL',
+        'TypeScript', 'AWS', 'Linux', 'CI/CD', 'MongoDB', 'Redis',
       ];
       const missingRecommendations = popularIndustrySkills.filter(
-        (s) => !extracted.skills.some((c) => c.toLowerCase() === s.toLowerCase())
-      ).slice(0, 4);
+        (s) => !extracted.skills.some((c) => c.toLowerCase() === s.toLowerCase() || c.toLowerCase().includes(s.toLowerCase()))
+      ).slice(0, 5);
 
       // Link with authenticated user if logged in
       let candidateRecord = null;
@@ -235,6 +250,8 @@ export const candidatePortalController = {
         candidateName: extracted.name || (req.user ? `${req.user.firstName} ${req.user.lastName}` : 'Candidate'),
         atsScore,
         wordCount,
+        isScannedOrImage,
+        directTextWordCount,
         extractedSkills: extracted.skills,
         missingRecommendations,
         actionVerbsFound: foundActionVerbs,

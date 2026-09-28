@@ -20,9 +20,10 @@ export default function ResumeChecker() {
 
   // Split-View Workspace state
   const [activeViewerTab, setActiveViewerTab] = useState('preview'); // 'preview' | 'parsed_text'
-  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'critical' | 'improvements' | 'keywords'
+  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'critical' | 'improvements' | 'keywords' | 'passed'
   const [activeSuggestedSkill, setActiveSuggestedSkill] = useState(null);
   const [copiedSuccess, setCopiedSuccess] = useState(false);
+  const [copiedTextSuccess, setCopiedTextSuccess] = useState(false);
 
   // Managed blob URL for PDF/Document iframe preview
   const fileUrl = useMemo(() => {
@@ -40,31 +41,50 @@ export default function ResumeChecker() {
     };
   }, [fileUrl]);
 
+  // Set default formula skill when auditReport loads
+  useEffect(() => {
+    if (auditReport?.extractedSkills && auditReport.extractedSkills.length > 0) {
+      setActiveSuggestedSkill(auditReport.extractedSkills[0]);
+    }
+  }, [auditReport]);
+
   const getSkillBulletSuggestion = (skill) => {
     const s = (skill || '').toLowerCase();
-    if (s.includes('docker') || s.includes('container')) {
-      return 'Containerized multi-service microarchitecture using Docker and Compose, standardizing environments and accelerating onboarding time by 35%.';
+    if (s.includes('python')) {
+      return 'Engineered automated data processing pipelines and backend APIs with Python, increasing processing throughput by 3.5x and cutting manual reconciliation time by 40%.';
     }
-    if (s.includes('kuber') || s.includes('k8s')) {
-      return 'Orchestrated zero-downtime rolling deployments across Kubernetes clusters, enhancing service resilience to 99.98% uptime.';
+    if (s.includes('java')) {
+      return 'Developed modular object-oriented backend microservices using Java, implementing robust error-handling protocols and supporting 10,000+ daily transactions.';
     }
-    if (s.includes('aws') || s.includes('cloud')) {
-      return 'Architected scalable cloud infrastructure utilizing AWS ECS, S3, and CloudFront, reducing monthly infrastructure compute expenses by 24%.';
+    if (s.includes('html') || s.includes('css')) {
+      return 'Constructed responsive, accessible front-end interfaces using HTML5 and CSS3, achieving sub-second load times and 100% cross-device compatibility.';
+    }
+    if (s.includes('javascript') || s.includes('js')) {
+      return 'Engineered interactive client-side web features with modern JavaScript, optimizing DOM tree re-renders and accelerating page interactivity by 35%.';
+    }
+    if (s.includes('sql') || s.includes('dbms') || s.includes('database') || s.includes('postgres')) {
+      return 'Architected normalized relational database schemas and indexed SQL queries in DBMS, reducing average query execution latency from 380ms to 32ms.';
+    }
+    if (s.includes('data structure') || s.includes('algorithm') || s.includes('dsa')) {
+      return 'Implemented high-efficiency data structures and algorithmic workflows, optimizing memory footprint by 28% and decreasing algorithmic execution time from O(N²) to O(N log N).';
+    }
+    if (s.includes('operating system') || s.includes('os') || s.includes('linux')) {
+      return 'Leveraged core operating system concurrency and multithreading primitives to build non-blocking services, achieving zero deadlocks and 99.9% uptime.';
+    }
+    if (s.includes('react')) {
+      return 'Engineered scalable single-page application modules with React and Hooks, reducing state re-render bottlenecks and delivering a 98+ Google Lighthouse performance score.';
     }
     if (s.includes('type') || s.includes('ts')) {
-      return 'Refactored mission-critical legacy modules into strict TypeScript, eradicating runtime type exceptions and improving CI build reliability.';
+      return 'Migrated legacy codebases to strict TypeScript, eliminating 90%+ runtime type exceptions and strengthening CI build pipeline integrity.';
     }
-    if (s.includes('react') || s.includes('frontend')) {
-      return 'Engineered responsive single-page web applications with React, leveraging memoization and virtualized lists to achieve sub-second render times.';
+    if (s.includes('docker') || s.includes('container')) {
+      return 'Containerized application environments using Docker and Compose, standardizing local-to-production workflows and reducing developer onboarding time by 45%.';
     }
-    if (s.includes('sql') || s.includes('postgres') || s.includes('database')) {
-      return 'Optimized complex PostgreSQL queries, indexed relational datasets, and reduced average P99 database query response latency from 450ms to 42ms.';
+    if (s.includes('git') || s.includes('github')) {
+      return 'Managed collaborative version control workflows via Git and GitHub PR reviews, ensuring clean commit trees and reducing merge conflict incidents by 60%.';
     }
-    if (s.includes('redis') || s.includes('cache')) {
-      return 'Implemented distributed Redis caching layers for high-throughput API endpoints, lowering backend database load by 60%.';
-    }
-    if (s.includes('python')) {
-      return 'Engineered asynchronous data processing pipelines with Python and FastAPI, increasing throughput by 4x and reducing server memory footprint.';
+    if (s.includes('team') || s.includes('communication') || s.includes('problem')) {
+      return 'Collaborated in fast-paced cross-functional agile sprints, translating ambiguous technical requirements into production-ready software features delivered ahead of deadline.';
     }
     return `Leveraged ${skill} to engineer resilient production features, collaborating with cross-functional teams and accelerating release velocity by 30%.`;
   };
@@ -73,6 +93,12 @@ export default function ResumeChecker() {
     navigator.clipboard.writeText(text);
     setCopiedSuccess(true);
     setTimeout(() => setCopiedSuccess(false), 2000);
+  };
+
+  const handleCopyRawText = (text) => {
+    navigator.clipboard.writeText(text);
+    setCopiedTextSuccess(true);
+    setTimeout(() => setCopiedTextSuccess(false), 2000);
   };
 
   const handleDragOver = (e) => {
@@ -134,7 +160,7 @@ export default function ResumeChecker() {
     return '#ef4444';
   };
 
-  // Group checks into Critical Blockers vs. Actionable Improvements
+  // Group checks cleanly
   const criticalChecks = useMemo(() => {
     if (!auditReport?.formattingChecks) return [];
     return auditReport.formattingChecks.filter(
@@ -145,8 +171,13 @@ export default function ResumeChecker() {
   const improvementChecks = useMemo(() => {
     if (!auditReport?.formattingChecks) return [];
     return auditReport.formattingChecks.filter(
-      (c) => c.status === 'REVIEW' || c.status === 'INFO' || c.status === 'PASSED'
+      (c) => c.status === 'REVIEW' || c.status === 'INFO'
     );
+  }, [auditReport]);
+
+  const passedChecks = useMemo(() => {
+    if (!auditReport?.formattingChecks) return [];
+    return auditReport.formattingChecks.filter((c) => c.status === 'PASSED');
   }, [auditReport]);
 
   const checkerContent = (
@@ -249,7 +280,7 @@ export default function ResumeChecker() {
             <div className="audit-spinner-inner"></div>
             <i className="fa-solid fa-brain audit-pulse-icon"></i>
           </div>
-          <h3>Simulating ATS Parsing & Health Check...</h3>
+          <h3>Simulating ATS Parsing & Ingestion...</h3>
           <p>Extracting text layers, checking keyword alignment, and auditing bullet formulas against enterprise hiring standards.</p>
         </div>
       )}
@@ -268,9 +299,11 @@ export default function ResumeChecker() {
                 </span>
               </div>
               <div className="audit-profile-target">
-                <span>Profile: <strong>{auditReport.candidateName}</strong></span>
+                <span>Candidate: <strong>{auditReport.candidateName}</strong></span>
                 <span className="audit-dot-sep">•</span>
                 <span>{auditReport.wordCount} Words Ingested</span>
+                <span className="audit-dot-sep">•</span>
+                <span>{auditReport.extractedSkills?.length || 0} Skills Detected</span>
                 <span className="audit-dot-sep">•</span>
                 <span className="audit-engine-badge">ATS Engine v2.4</span>
               </div>
@@ -304,17 +337,17 @@ export default function ResumeChecker() {
                 <div className={`audit-verdict-pill ${auditReport.atsScore >= 80 ? 'pass' : auditReport.atsScore >= 65 ? 'warning' : 'critical'}`}>
                   <span className="verdict-dot"></span>
                   {auditReport.atsScore >= 80
-                    ? 'Pass • Highly Compatible'
+                    ? 'Pass • Enterprise Ready'
                     : auditReport.atsScore >= 65
-                    ? 'Moderate Risk • Optimization Advised'
+                    ? 'Moderate • Optimization Advised'
                     : 'Critical Blocker • High Rejection Risk'}
                 </div>
                 <p className="audit-verdict-desc">
-                  {auditReport.wordCount < 15
-                    ? 'Document lacks selectable machine text layer. Export as text PDF or Word DOCX.'
+                  {criticalChecks.length > 0
+                    ? `${criticalChecks.length} parsing blockers detected that prevent standard ATS indexing.`
                     : auditReport.atsScore >= 80
                     ? 'Structured text layer verified. Strong keyword alignment and standard formatting.'
-                    : `${criticalChecks.length} formatting blockers detected that risk automated rejection.`}
+                    : `${improvementChecks.length} actionable optimization opportunities identified.`}
                 </p>
               </div>
             </div>
@@ -372,9 +405,15 @@ export default function ResumeChecker() {
                 </div>
 
                 <div className="audit-canvas-meta">
-                  <span className="canvas-status-tag">
-                    {auditReport.wordCount < 15 ? '⚠️ Image Layer' : '✅ 100% Machine Selectable'}
-                  </span>
+                  {auditReport.isScannedOrImage ? (
+                    <span className="canvas-status-tag warning" title="Scanned or flattened image without native selectable text">
+                      <i className="fa-solid fa-triangle-exclamation"></i> Scanned Image (AI OCR Recovered)
+                    </span>
+                  ) : (
+                    <span className="canvas-status-tag success">
+                      <i className="fa-solid fa-circle-check"></i> 100% Machine Selectable
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -404,12 +443,38 @@ export default function ResumeChecker() {
                   )
                 ) : (
                   <div className="audit-raw-stream-view">
+                    {auditReport.isScannedOrImage && (
+                      <div className="audit-ocr-explainer-banner">
+                        <div className="explainer-tag">
+                          <i className="fa-solid fa-circle-info"></i>
+                          <span>ATS INGESTION EXPLANATION</span>
+                        </div>
+                        <p>
+                          <strong>Why is this here?</strong> Applicant Tracking Systems (Workday, Greenhouse, Taleo) read the document's native character stream. Scanned or image-only PDFs have <em>0 selectable characters</em> and get auto-rejected.
+                        </p>
+                        <p>
+                          HireIQ utilized deep AI OCR to reconstruct your text layer below. To pass real-world ATS filters, re-export your resume directly as a text-based PDF or DOCX.
+                        </p>
+                      </div>
+                    )}
+
                     <div className="raw-stream-header">
-                      <i className="fa-solid fa-terminal" style={{ marginRight: '6px', color: '#38bdf8' }}></i>
-                      <span>Raw Text Ingestion Stream (Exact ATS Parser Output)</span>
+                      <div className="raw-stream-title">
+                        <i className="fa-solid fa-terminal" style={{ color: '#38bdf8' }}></i>
+                        <span>RAW TEXT STREAM INGESTED BY ATS PARSER</span>
+                      </div>
+                      <button
+                        type="button"
+                        className="raw-copy-btn"
+                        onClick={() => handleCopyRawText(auditReport.rawText || '')}
+                      >
+                        <i className={`fa-solid fa-${copiedTextSuccess ? 'check' : 'copy'}`}></i>
+                        {copiedTextSuccess ? 'Copied' : 'Copy Raw Stream'}
+                      </button>
                     </div>
+
                     <pre className="raw-stream-code">
-                      {auditReport.rawText || 'No raw text stream available for this file format.'}
+                      {auditReport.rawText || 'No text stream available. Document appears to be empty or unparseable.'}
                     </pre>
                   </div>
                 )}
@@ -418,7 +483,7 @@ export default function ResumeChecker() {
               {/* Canvas Footer */}
               <div className="audit-canvas-footer">
                 <span>{auditReport.fileName}</span>
-                <span>{auditReport.wordCount} Words Ingested</span>
+                <span>{auditReport.wordCount} Words Ingested • {auditReport.extractedSkills?.length || 0} Skills</span>
               </div>
             </div>
 
@@ -431,7 +496,8 @@ export default function ResumeChecker() {
                   className={`audit-filter-pill ${activeFilter === 'all' ? 'active' : ''}`}
                   onClick={() => setActiveFilter('all')}
                 >
-                  All Diagnostics ({auditReport.formattingChecks?.length || 0})
+                  <i className="fa-solid fa-list-check"></i>
+                  All Overview
                 </button>
                 <button
                   type="button"
@@ -447,7 +513,7 @@ export default function ResumeChecker() {
                   onClick={() => setActiveFilter('improvements')}
                 >
                   <i className="fa-solid fa-wand-magic-sparkles"></i>
-                  Where to Improve
+                  Where to Improve ({improvementChecks.length})
                 </button>
                 <button
                   type="button"
@@ -457,9 +523,40 @@ export default function ResumeChecker() {
                   <i className="fa-solid fa-bolt"></i>
                   Keywords ({auditReport.extractedSkills?.length || 0})
                 </button>
+                <button
+                  type="button"
+                  className={`audit-filter-pill passed ${activeFilter === 'passed' ? 'active' : ''}`}
+                  onClick={() => setActiveFilter('passed')}
+                >
+                  <i className="fa-solid fa-circle-check"></i>
+                  Passed Standards ({passedChecks.length})
+                </button>
               </div>
 
+              {/* Independent Smooth-Scrollable Diagnostic Column */}
               <div className="audit-inspector-scroll">
+                {/* OVERVIEW SUMMARY STRIP (Shown when "All" is active) */}
+                {activeFilter === 'all' && (
+                  <div className="audit-quick-stats-strip">
+                    <div className="quick-stat-box red">
+                      <span className="stat-num">{criticalChecks.length}</span>
+                      <span className="stat-lbl">Critical Blockers</span>
+                    </div>
+                    <div className="quick-stat-box amber">
+                      <span className="stat-num">{improvementChecks.length}</span>
+                      <span className="stat-lbl">Improvements</span>
+                    </div>
+                    <div className="quick-stat-box emerald">
+                      <span className="stat-num">{auditReport.extractedSkills?.length || 0}</span>
+                      <span className="stat-lbl">Verified Skills</span>
+                    </div>
+                    <div className="quick-stat-box blue">
+                      <span className="stat-num">{passedChecks.length}</span>
+                      <span className="stat-lbl">Standards Passed</span>
+                    </div>
+                  </div>
+                )}
+
                 {/* SECTION 1: "WHAT'S WRONG" (CRITICAL BLOCKERS) */}
                 {(activeFilter === 'all' || activeFilter === 'critical') && (
                   <div className="inspector-section-block critical-block">
@@ -468,10 +565,10 @@ export default function ResumeChecker() {
                         <span className="section-badge red">HIGH REJECTION RISK</span>
                         <h3>Critical Parsing Blockers ("What's Wrong")</h3>
                       </div>
-                      <span className="section-count-tag red">{criticalChecks.length} Immediate Issues</span>
+                      <span className="section-count-tag red">{criticalChecks.length} Issues</span>
                     </div>
                     <p className="inspector-section-desc">
-                      Issues that trigger automated rejection or prevent text from indexing into enterprise databases.
+                      Critical errors that trigger automated applicant rejection or prevent machine indexing in enterprise databases.
                     </p>
 
                     {criticalChecks.length > 0 ? (
@@ -488,7 +585,7 @@ export default function ResumeChecker() {
                             <p className="diagnostic-card-detail">{item.detail}</p>
                             <div className="diagnostic-action-hint">
                               <i className="fa-solid fa-wrench"></i>
-                              <strong>Remediation:</strong> Convert to linear single-column structure and verify contact fields.
+                              <strong>Remediation:</strong> {item.name.includes('Text Layer') ? 'Export as native text PDF from Google Docs or Word.' : 'Update this section to follow standard single-column ATS conventions.'}
                             </div>
                           </div>
                         ))}
@@ -498,7 +595,7 @@ export default function ResumeChecker() {
                         <i className="fa-solid fa-circle-check reassurance-icon"></i>
                         <div>
                           <strong>Zero Critical Blockers Identified</strong>
-                          <p>Your resume satisfies baseline ATS formatting rules: readable text layer, parseable headers, and contact info.</p>
+                          <p>Your resume satisfies all primary ATS baseline rules: machine readable layer, standard headers, and contact info.</p>
                         </div>
                       </div>
                     )}
@@ -513,10 +610,10 @@ export default function ResumeChecker() {
                         <span className="section-badge amber">IMPACT & FORMULAS</span>
                         <h3>Actionable Optimization ("Where to Improve")</h3>
                       </div>
-                      <span className="section-count-tag amber">Formula & Metric Boost</span>
+                      <span className="section-count-tag amber">{improvementChecks.length} Recommendations</span>
                     </div>
                     <p className="inspector-section-desc">
-                      Enhancements that lift candidate ranking and increase human recruiter callback rates.
+                      Targeted enhancements that lift candidate ranking and increase human recruiter callback rates.
                     </p>
 
                     {/* Google XYZ Formula Builder */}
@@ -530,11 +627,14 @@ export default function ResumeChecker() {
                       </div>
 
                       <p className="formula-desc">
-                        Replace generic duty lists with quantifiable output. Select any skill to generate an enterprise-grade bullet point:
+                        Replace passive duty descriptions with quantified business impact. Select any verified skill from your resume to generate an enterprise-grade bullet point:
                       </p>
 
                       <div className="formula-chips-row">
-                        {['Docker', 'React', 'SQL', 'TypeScript', 'AWS', 'Python', 'Kubernetes'].map((sk) => (
+                        {(auditReport.extractedSkills && auditReport.extractedSkills.length > 0
+                          ? auditReport.extractedSkills.slice(0, 8)
+                          : ['Python', 'Java', 'SQL', 'HTML', 'JavaScript', 'Data Structures']
+                        ).map((sk) => (
                           <button
                             key={sk}
                             type="button"
@@ -566,23 +666,31 @@ export default function ResumeChecker() {
                       )}
                     </div>
 
-                    {/* Additional Formatting Diagnostic Checks */}
-                    <div className="diagnostic-cards-stack">
-                      {improvementChecks.map((item, idx) => (
-                        <div key={`imp-${idx}`} className="audit-diagnostic-card info-card">
-                          <div className="diagnostic-card-header">
-                            <i className={`fa-solid ${item.status === 'PASSED' ? 'fa-circle-check' : 'fa-circle-info'} card-status-icon ${item.status === 'PASSED' ? 'green' : 'blue'}`}></i>
-                            <div>
-                              <h4>{item.name}</h4>
-                              <span className={`card-severity-tag ${item.status === 'PASSED' ? 'green' : 'blue'}`}>
-                                {item.status === 'PASSED' ? 'Meets Enterprise Standard' : 'Enhancement Opportunity'}
-                              </span>
+                    {/* Actionable Improvement Checks */}
+                    {improvementChecks.length > 0 ? (
+                      <div className="diagnostic-cards-stack">
+                        {improvementChecks.map((item, idx) => (
+                          <div key={`imp-${idx}`} className="audit-diagnostic-card info-card">
+                            <div className="diagnostic-card-header">
+                              <i className="fa-solid fa-triangle-exclamation card-status-icon amber"></i>
+                              <div>
+                                <h4>{item.name}</h4>
+                                <span className="card-severity-tag amber">Optimization Opportunity</span>
+                              </div>
                             </div>
+                            <p className="diagnostic-card-detail">{item.detail}</p>
                           </div>
-                          <p className="diagnostic-card-detail">{item.detail}</p>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="audit-reassurance-banner">
+                        <i className="fa-solid fa-check reassurance-icon"></i>
+                        <div>
+                          <strong>Content Structure Optimized</strong>
+                          <p>No immediate structural weaknesses detected in your work history or impact verbs.</p>
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -596,6 +704,9 @@ export default function ResumeChecker() {
                       </div>
                       <span className="section-count-tag emerald">{auditReport.extractedSkills?.length || 0} Identified</span>
                     </div>
+                    <p className="inspector-section-desc">
+                      Applicant Tracking Systems scan for exact keyword tokens to match candidate profiles with job requisitions.
+                    </p>
 
                     {/* Verified Present Skills */}
                     <div className="keywords-group">
@@ -603,14 +714,28 @@ export default function ResumeChecker() {
                         <i className="fa-solid fa-check" style={{ color: '#10b981', marginRight: '6px' }}></i>
                         Verified Skills Detected on Resume ({auditReport.extractedSkills?.length || 0})
                       </span>
-                      <div className="keywords-chip-wrap">
-                        {auditReport.extractedSkills?.map((skill, idx) => (
-                          <span key={`sk-${idx}`} className="tech-keyword-pill found">
-                            <i className="fa-solid fa-check"></i>
-                            {skill}
-                          </span>
-                        ))}
-                      </div>
+                      {auditReport.extractedSkills && auditReport.extractedSkills.length > 0 ? (
+                        <div className="keywords-chip-wrap">
+                          {auditReport.extractedSkills.map((skill, idx) => (
+                            <span
+                              key={`sk-${idx}`}
+                              className={`tech-keyword-pill found ${activeSuggestedSkill === skill ? 'active' : ''}`}
+                              onClick={() => {
+                                setActiveSuggestedSkill(skill);
+                                setActiveFilter('improvements');
+                              }}
+                              title="Click to generate Google XYZ bullet"
+                            >
+                              <i className="fa-solid fa-check"></i>
+                              {skill}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p style={{ fontSize: '12px', color: '#94a3b8', margin: '4px 0' }}>
+                          No technical skills detected. Please add a dedicated Skills section.
+                        </p>
+                      )}
                     </div>
 
                     {/* Missing Target Skills */}
@@ -625,8 +750,11 @@ export default function ResumeChecker() {
                             <span
                               key={`miss-${idx}`}
                               className="tech-keyword-pill missing"
-                              onClick={() => setActiveSuggestedSkill(skill)}
-                              title="Click to generate bullet point"
+                              onClick={() => {
+                                setActiveSuggestedSkill(skill);
+                                setActiveFilter('improvements');
+                              }}
+                              title="Click to generate bullet point with this skill"
                             >
                               <i className="fa-solid fa-plus"></i>
                               {skill}
@@ -635,6 +763,37 @@ export default function ResumeChecker() {
                         </div>
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* SECTION 4: PASSED STANDARDS */}
+                {(activeFilter === 'all' || activeFilter === 'passed') && (
+                  <div className="inspector-section-block passed-block">
+                    <div className="inspector-section-header">
+                      <div className="section-title-wrap">
+                        <span className="section-badge blue">VERIFIED STANDARDS</span>
+                        <h3>Passed ATS Criteria</h3>
+                      </div>
+                      <span className="section-count-tag blue">{passedChecks.length} Verified</span>
+                    </div>
+                    <p className="inspector-section-desc">
+                      Sections and formatting conventions that meet or exceed enterprise ATS recruitment standards.
+                    </p>
+
+                    <div className="diagnostic-cards-stack">
+                      {passedChecks.map((item, idx) => (
+                        <div key={`pass-${idx}`} className="audit-diagnostic-card passed-card">
+                          <div className="diagnostic-card-header">
+                            <i className="fa-solid fa-circle-check card-status-icon green"></i>
+                            <div>
+                              <h4>{item.name}</h4>
+                              <span className="card-severity-tag green">Meets Enterprise Standard</span>
+                            </div>
+                          </div>
+                          <p className="diagnostic-card-detail">{item.detail}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
