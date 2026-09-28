@@ -2,18 +2,21 @@ import fs from 'fs';
 import path from 'path';
 import pdfParse from 'pdf-parse';
 import mammoth from 'mammoth';
+import { config } from '../config/index.js';
 import { logger } from '../utils/logger.js';
 
 // Comprehensive Skills dictionary for deterministic extraction
 const SKILL_DICTIONARY = [
   // Languages & Core
-  'JavaScript', 'TypeScript', 'Python', 'Java', 'C++', 'C#', 'Go', 'Golang', 'Rust', 'Ruby', 'PHP', 'Swift', 'Kotlin', 'SQL', 'HTML', 'HTML5', 'CSS', 'CSS3', 'Sass',
+  'JavaScript', 'TypeScript', 'Python', 'Java', 'C++', 'C#', 'C', 'Go', 'Golang', 'Rust', 'Ruby', 'PHP', 'Swift', 'Kotlin', 'SQL', 'DBMS', 'HTML', 'HTML5', 'CSS', 'CSS3', 'Sass',
   // Frameworks & Libraries
   'React', 'React.js', 'Next.js', 'Vue', 'Vue.js', 'Angular', 'Node.js', 'Express', 'Express.js', 'FastAPI', 'Django', 'Flask', 'Spring', 'Spring Boot', 'ASP.NET', 'Redux', 'Tailwind CSS', 'Tailwind', 'Bootstrap', 'GraphQL', 'REST API', 'RESTful APIs', 'WebAssembly', 'WASM',
   // Databases & Caching
   'PostgreSQL', 'Postgres', 'MySQL', 'MongoDB', 'Redis', 'SQLite', 'Elasticsearch', 'DynamoDB', 'Cassandra', 'Oracle',
   // DevOps & Cloud
-  'AWS', 'Amazon Web Services', 'Azure', 'Google Cloud', 'GCP', 'Docker', 'Kubernetes', 'K8s', 'CI/CD', 'GitHub Actions', 'Jenkins', 'Terraform', 'Ansible', 'Linux', 'Microservices', 'System Design',
+  'AWS', 'Amazon Web Services', 'Azure', 'Google Cloud', 'GCP', 'Docker', 'Kubernetes', 'K8s', 'CI/CD', 'GitHub Actions', 'Jenkins', 'Terraform', 'Ansible', 'Linux', 'Microservices', 'System Design', 'Git', 'GitHub',
+  // CS Fundamentals & Architecture
+  'Data Structures & Algorithms', 'Data Structures', 'Algorithms', 'DSA', 'Operating Systems', 'Computer Networks', 'OOP', 'Object Oriented Programming',
   // Design & Product
   'Figma', 'FigJam', 'UI/UX', 'Wireframing', 'Prototyping', 'Design Systems', 'User Research', 'Agile', 'Scrum', 'JIRA',
   // Testing
@@ -23,6 +26,62 @@ const SKILL_DICTIONARY = [
 ];
 
 export const resumeParserService = {
+  async parseWithGemini(filePath, originalFileName, mimeType = 'application/pdf') {
+    if (!config.ai.geminiApiKey) return null;
+    const models = ['gemini-flash-latest', 'gemini-2.5-flash-lite', 'gemini-pro-latest'];
+
+    try {
+      const buf = fs.readFileSync(filePath);
+      const base64 = buf.toString('base64');
+
+      for (const model of models) {
+        try {
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${config.ai.geminiApiKey}`;
+
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [
+                    { inlineData: { mimeType, data: base64 } },
+                    {
+                      text: 'You are an enterprise ATS resume parser. Extract candidate details from this resume document. Output strictly a JSON object with keys: "name" (string), "email" (string), "phone" (string or null), "experienceYears" (string e.g. "0+", "2+"), "skills" (array of strings, all technical, framework, database, tool, core cs and soft skills found on the document), "fullText" (plain text transcript of the resume). Do not include markdown code block formatting, just the raw JSON object.'
+                    }
+                  ]
+                }
+              ]
+            })
+          });
+
+          if (!res.ok) {
+            logger.warn(`Gemini model ${model} parse returned status ${res.status}, trying next model...`);
+            continue;
+          }
+
+          const data = await res.json();
+          const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!rawText) continue;
+
+          const cleanedJson = rawText.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
+          const parsed = JSON.parse(cleanedJson);
+          if (parsed && (parsed.name || (Array.isArray(parsed.skills) && parsed.skills.length > 0))) {
+            return parsed;
+          }
+        } catch (mErr) {
+          logger.warn(`Model ${model} parse error:`, mErr.message);
+        }
+      }
+
+      return null;
+    } catch (err) {
+      logger.warn('Gemini multimodal resume extraction error:', err.message);
+      return null;
+    }
+  },
+
+
   async extractText(filePath, originalFileName) {
     const ext = path.extname(originalFileName).toLowerCase();
     let text = '';
@@ -48,6 +107,7 @@ export const resumeParserService = {
 
     return text.trim();
   },
+
 
   extractCandidateInfo(text, originalFileName) {
     // 1. Email extraction regex

@@ -1,4 +1,6 @@
 import { prisma } from '../config/prisma.js';
+import { config } from '../config/index.js';
+import { logger } from '../utils/logger.js';
 import { resumeParserService } from '../services/resumeParser.service.js';
 import { matchingEngineService } from '../services/matchingEngine.service.js';
 import { auditService } from '../services/audit.service.js';
@@ -18,11 +20,36 @@ export const resumeController = {
       const fileSize = req.file.size;
       const fileType = req.file.mimetype;
 
-      // 1. Extract raw text from resume
-      const rawText = await resumeParserService.extractText(filePath, originalFileName);
+      // 1. Extract raw text from resume using standard parsers
+      let rawText = await resumeParserService.extractText(filePath, originalFileName);
+      let extracted = null;
 
-      // 2. Extract candidate information & skills
-      const extracted = resumeParserService.extractCandidateInfo(rawText, originalFileName);
+      // 2. If text is empty or very short (< 40 chars), or if file is scanned/image PDF, use Gemini AI multimodal
+      if ((!rawText || rawText.length < 40) && config.ai.geminiApiKey) {
+        logger.info(`Text extraction was short or empty (${rawText?.length || 0} chars). Calling Gemini AI multimodal parser for ${originalFileName}...`);
+        const aiParsed = await resumeParserService.parseWithGemini(filePath, originalFileName, fileType);
+        if (aiParsed) {
+          rawText = aiParsed.fullText || rawText || `Candidate resume: ${originalFileName}`;
+          extracted = {
+            name: aiParsed.name || originalFileName.replace(/\.[^/.]+$/, ''),
+            email: aiParsed.email || `candidate.${Date.now()}@applicant.hireiq.internal`,
+            phone: aiParsed.phone || null,
+            experienceYears: String(aiParsed.experienceYears ?? '0+'),
+            skills: Array.isArray(aiParsed.skills) ? aiParsed.skills : [],
+          };
+        }
+      }
+
+      // 3. Fallback / deterministic info extraction if not extracted by AI
+      if (!extracted) {
+        extracted = resumeParserService.extractCandidateInfo(rawText, originalFileName);
+      } else {
+        // Also combine with deterministic regex against rawText to ensure no standard skill is missed
+        const detInfo = resumeParserService.extractCandidateInfo(rawText, originalFileName);
+        const combined = new Set([...extracted.skills, ...detInfo.skills]);
+        extracted.skills = Array.from(combined);
+      }
+
 
       // 3. Find target job role for evaluation
       let targetJobRole = null;

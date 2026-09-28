@@ -106,7 +106,8 @@ export const matchingEngineService = {
     // Extra skills candidate possesses beyond criteria
     const partialSkills = candidateSkills
       .filter((s) => !allMatched.some((m) => m.toLowerCase() === s.toLowerCase()))
-      .slice(0, 3);
+      .slice(0, 8);
+
 
     // Weighted Scoring — required skills 65%, preferred 20%, experience 15%
     const reqRatio = requiredCriteria.length > 0 ? requiredMatched.length / requiredCriteria.length : 1;

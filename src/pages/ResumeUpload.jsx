@@ -3,7 +3,9 @@ import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { resumesApi } from '../api/resumes';
 import { candidatesApi } from '../api/candidates';
+import { jobsApi } from '../api/jobs';
 import '../css/resumeupload.css';
+
 
 function getEvaluationData(candidate) {
   if (!candidate) return null;
@@ -132,6 +134,8 @@ export default function ResumeUpload() {
   const [rejected, setRejected] = useState(false);
   const [dbCandidates, setDbCandidates] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [jobRoles, setJobRoles] = useState([]);
+  const [selectedJobRoleId, setSelectedJobRoleId] = useState('');
 
   // Workflow states: 'idle' | 'uploaded' | 'analyzing' | 'analyzed'
   const [analysisStatus, setAnalysisStatus] = useState('idle');
@@ -244,8 +248,24 @@ export default function ResumeUpload() {
       }
     };
 
+    const loadJobRoles = async () => {
+      try {
+        const res = await jobsApi.getJobs();
+        if (res?.data?.length) {
+          setJobRoles(res.data);
+          const activeRole = res.data.find((r) => r.status === 'Active' || r.status === 'ACTIVE') || res.data[0];
+          if (activeRole) {
+            setSelectedJobRoleId(activeRole.id);
+          }
+        }
+      } catch {
+        // ignore
+      }
+    };
+
     loadHistory();
     loadCandidates();
+    loadJobRoles();
   }, []);
 
   const handleStartAnalysis = async (e) => {
@@ -264,7 +284,7 @@ export default function ResumeUpload() {
     );
 
     try {
-      const res = await resumesApi.uploadResume(uploadedFile.rawFile);
+      const res = await resumesApi.uploadResume(uploadedFile.rawFile, selectedJobRoleId);
       const parsedData = res.data;
 
       setSelectedCandidate(parsedData);
@@ -285,6 +305,7 @@ export default function ResumeUpload() {
       triggerToast(`Analysis error: ${err.message || 'Failed to parse resume'}`);
     }
   };
+
 
   const handleFileInputChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -456,6 +477,46 @@ export default function ResumeUpload() {
             >
               {analysisStatus === 'idle' && (
                 <>
+                  {jobRoles.length > 0 && (
+                    <div
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        marginBottom: '16px',
+                        background: 'rgba(37, 99, 235, 0.08)',
+                        padding: '6px 14px',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                      }}
+                      className="target-role-badge-container"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <i className="fa-solid fa-briefcase" style={{ color: '#2563eb' }}></i>
+                      <span style={{ color: '#475569', fontWeight: 500 }}>Target Role:</span>
+                      <select
+                        value={selectedJobRoleId}
+                        onChange={(e) => setSelectedJobRoleId(e.target.value)}
+                        style={{
+                          border: 'none',
+                          background: 'transparent',
+                          fontWeight: '600',
+                          color: '#1e293b',
+                          fontSize: '12px',
+                          cursor: 'pointer',
+                          outline: 'none',
+                        }}
+                        className="target-role-select-inline"
+                      >
+                        {jobRoles.map((r) => (
+                          <option key={r.id} value={r.id}>
+                            {r.name || r.title} ({r.skills?.length || 0} skills)
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
                   <div className="upload-icon" onClick={handleBrowseClick}>
                     <i className="fa-solid fa-cloud-arrow-up"></i>
                   </div>
@@ -486,6 +547,58 @@ export default function ResumeUpload() {
                     {uploadedFile.size} • {uploadedFile.type.split(' ')[0]} • Uploaded successfully
                   </p>
 
+                  {jobRoles.length > 0 && (
+                    <div
+                      style={{
+                        width: '100%',
+                        maxWidth: '380px',
+                        margin: '12px auto 16px',
+                        textAlign: 'left',
+                        background: '#f8fafc',
+                        padding: '12px 14px',
+                        borderRadius: '8px',
+                        border: '1px solid #e2e8f0',
+                      }}
+                      className="target-role-box"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <label
+                        style={{
+                          display: 'block',
+                          fontSize: '11px',
+                          fontWeight: '600',
+                          color: '#475569',
+                          marginBottom: '6px',
+                        }}
+                      >
+                        <i className="fa-solid fa-briefcase" style={{ marginRight: '6px', color: '#2563eb' }}></i>
+                        Evaluate Against Job Role:
+                      </label>
+                      <select
+                        value={selectedJobRoleId}
+                        onChange={(e) => setSelectedJobRoleId(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '8px 10px',
+                          borderRadius: '6px',
+                          border: '1px solid #cbd5e1',
+                          fontSize: '13px',
+                          background: '#ffffff',
+                          color: '#1e293b',
+                          cursor: 'pointer',
+                          fontWeight: '500',
+                        }}
+                        className="target-role-dropdown"
+                      >
+                        {jobRoles.map((r) => (
+                          <option key={r.id} value={r.id}>
+                            {r.name || r.title} — {r.skills?.length || 0} Required Skills ({r.department})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+
                   <button
                     type="button"
                     className="analyze-main-btn"
@@ -504,6 +617,7 @@ export default function ResumeUpload() {
                   </button>
                 </div>
               )}
+
 
               {analysisStatus === 'analyzing' && (
                 <div className="uploaded-preview-content">
@@ -669,26 +783,58 @@ export default function ResumeUpload() {
                   <div className="eval-details-grid">
                     <div className="eval-details-col">
                       <div className="eval-section-block">
-                        <div className="section-label">Matched Skills</div>
-                        <div className="skill-tags">
-                          {evalData.skills.map((skill, sIdx) => (
-                            <span key={sIdx} className={`skill-tag ${skill.purple ? 'purple' : ''}`}>
-                              <i className="fa-solid fa-check" style={{ fontSize: '9px', marginRight: '5px' }}></i>
-                              {skill.name}
-                            </span>
-                          ))}
-                        </div>
+                        <div className="section-label">Matched Skills ({evalData.matchedSkillsCount})</div>
+                        {evalData.skills.length === 0 ? (
+                          <p style={{ fontSize: '12px', color: '#94a3b8', margin: '6px 0' }}>
+                            No direct role skills matched.
+                          </p>
+                        ) : (
+                          <div className="skill-tags">
+                            {evalData.skills.map((skill, sIdx) => {
+                              const sName = typeof skill === 'string' ? skill : skill.name;
+                              return (
+                                <span key={sIdx} className={`skill-tag ${skill.purple ? 'purple' : ''}`}>
+                                  <i className="fa-solid fa-check" style={{ fontSize: '9px', marginRight: '5px' }}></i>
+                                  {sName}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {/* Additional Verified Skills found in resume */}
+                        {evalData.partialSkills && evalData.partialSkills.length > 0 && (
+                          <div style={{ marginTop: '14px' }}>
+                            <div className="section-label" style={{ fontSize: '11px', color: '#64748b' }}>
+                              Additional Verified Competencies
+                            </div>
+                            <div className="skill-tags" style={{ marginTop: '5px' }}>
+                              {evalData.partialSkills.map((ps, psIdx) => {
+                                const psName = typeof ps === 'string' ? ps : ps.name;
+                                return (
+                                  <span key={psIdx} className="partial-skill-tag">
+                                    <i className="fa-solid fa-circle-check" style={{ fontSize: '9px', marginRight: '5px' }}></i>
+                                    {psName}
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
 
                     <div className="eval-details-col">
                       <div className="eval-section-block skill-gap">
-                        <div className="section-label">Skill Gaps</div>
+                        <div className="section-label">Skill Gaps ({evalData.missingSkillsCount})</div>
                         {evalData.gapPriorities.length === 0 ? (
-                          <p style={{ fontSize: '12px', color: '#64748b', marginTop: '6px' }}>No critical gaps identified.</p>
+                          <p style={{ fontSize: '12px', color: '#16a66e', marginTop: '6px' }}>
+                            <i className="fa-solid fa-circle-check" style={{ marginRight: '6px' }}></i>
+                            All role requirements satisfied!
+                          </p>
                         ) : (
                           <div className="gap-priorities-list">
-                            {evalData.gapPriorities.slice(0, 4).map((gapObj, gIdx) => (
+                            {evalData.gapPriorities.slice(0, 5).map((gapObj, gIdx) => (
                               <div key={gIdx} className="gap-priority-item">
                                 <span className="gap-name">
                                   <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: '6px' }}></i>
@@ -702,6 +848,7 @@ export default function ResumeUpload() {
                       </div>
                     </div>
                   </div>
+
 
 
                   {/* ACTION BUTTONS */}

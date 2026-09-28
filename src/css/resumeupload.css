@@ -2201,3 +2201,48 @@
                 flex-shrink: 0;
             }
         }
+
+/* =========================================================
+   TARGET JOB ROLE SELECTOR STYLES & DARK MODE
+========================================================= */
+.target-role-box {
+    transition: all 0.2s ease;
+}
+
+body.dark-mode .target-role-badge-container {
+    background: rgba(59, 130, 246, 0.15) !important;
+}
+
+body.dark-mode .target-role-badge-container span {
+    color: #94a3b8 !important;
+}
+
+body.dark-mode .target-role-select-inline {
+    color: #93c5fd !important;
+    background: #1e293b !important;
+}
+
+body.dark-mode .target-role-select-inline option {
+    background: #1e293b !important;
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .target-role-box {
+    background: #1e2535 !important;
+    border-color: #2d3748 !important;
+}
+
+body.dark-mode .target-role-box label {
+    color: #94a3b8 !important;
+}
+
+body.dark-mode .target-role-dropdown {
+    background: #161e2e !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .target-role-dropdown option {
+    background: #161e2e !important;
+    color: #f1f5f9 !important;
+}
