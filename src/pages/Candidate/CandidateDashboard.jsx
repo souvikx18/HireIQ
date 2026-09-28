@@ -13,9 +13,6 @@ export default function CandidateDashboard() {
 
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
-  const [jobs, setJobs] = useState([]);
-  const [applyingJobId, setApplyingJobId] = useState(null);
-  const [appliedSuccessId, setAppliedSuccessId] = useState(null);
   const [activeSkillCategory, setActiveSkillCategory] = useState('all');
 
   useEffect(() => {
@@ -29,16 +26,9 @@ export default function CandidateDashboard() {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [profRes, jobsRes] = await Promise.allSettled([
-          candidatePortalApi.getProfile(),
-          candidatePortalApi.getJobs(),
-        ]);
-
-        if (profRes.status === 'fulfilled' && profRes.value?.data) {
-          setProfile(profRes.value.data);
-        }
-        if (jobsRes.status === 'fulfilled' && jobsRes.value?.data) {
-          setJobs(jobsRes.value.data);
+        const profRes = await candidatePortalApi.getProfile();
+        if (profRes?.data) {
+          setProfile(profRes.data);
         }
       } catch (err) {
         console.error('Error loading candidate dashboard telemetry:', err);
@@ -52,29 +42,6 @@ export default function CandidateDashboard() {
 
   const handleAskCopilot = (prompt) => {
     window.dispatchEvent(new CustomEvent('hireiq-open-chatbot', { detail: { prompt } }));
-  };
-
-  const handleApply = async (jobId) => {
-    try {
-      setApplyingJobId(jobId);
-      const res = await candidatePortalApi.applyForJob(jobId);
-      if (res?.success) {
-        setAppliedSuccessId(jobId);
-        // Refresh profile to reflect new application
-        const updated = await candidatePortalApi.getProfile();
-        if (updated?.data) {
-          setProfile(updated.data);
-        }
-        // Update job status locally
-        setJobs((prev) =>
-          prev.map((j) => (j.id === jobId ? { ...j, isApplied: true, applicationStatus: 'APPLIED' } : j))
-        );
-      }
-    } catch (err) {
-      console.error('Application failed:', err);
-    } finally {
-      setApplyingJobId(null);
-    }
   };
 
   const candidateAtsScore = profile?.atsScore || profile?.resumes?.[0]?.atsScore || 0;
@@ -478,66 +445,6 @@ export default function CandidateDashboard() {
                         </span>
                       ))}
                     </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Card 3: Live Recommended High-Match Opportunities */}
-              <div className="portal-card enterprise-card">
-                <div className="portal-card-header">
-                  <div>
-                    <h2 className="portal-card-title">
-                      <i className="fa-solid fa-bullseye" style={{ color: '#10b981', marginRight: '8px' }}></i>
-                      Recommended Role Matches
-                    </h2>
-                    <p className="portal-card-subtitle">
-                      Opportunities benchmarked against your verified skill profile
-                    </p>
-                  </div>
-                </div>
-
-                {jobs.length > 0 ? (
-                  <div className="recommended-jobs-stack">
-                    {jobs.slice(0, 3).map((job) => {
-                      const isApplied = job.isApplied || applications.some((a) => a.jobRoleId === job.id);
-                      return (
-                        <div key={job.id} className="recommended-job-row">
-                          <div className="job-row-main">
-                            <h4>{job.title}</h4>
-                            <div className="job-row-meta">
-                              <span><i className="fa-solid fa-building"></i> {job.department || 'Engineering'}</span>
-                              <span>•</span>
-                              <span><i className="fa-solid fa-clock"></i> {job.experienceLevel || 'Full-Time'}</span>
-                              <span>•</span>
-                              <span className="match-tag green">
-                                <i className="fa-solid fa-fire"></i> {job.matchScore || 85}% Match
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="job-row-action">
-                            {isApplied ? (
-                              <span className="applied-pill">
-                                <i className="fa-solid fa-check"></i> Applied
-                              </span>
-                            ) : (
-                              <button
-                                type="button"
-                                className="apply-mini-btn"
-                                disabled={applyingJobId === job.id}
-                                onClick={() => handleApply(job.id)}
-                              >
-                                {applyingJobId === job.id ? 'Applying...' : '1-Click Apply'}
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="empty-jobs-compact">
-                    <p>No active requisitions matching your current filters.</p>
                   </div>
                 )}
               </div>
