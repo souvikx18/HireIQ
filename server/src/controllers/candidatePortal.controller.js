@@ -283,7 +283,7 @@ export const candidatePortalController = {
         },
         include: {
           skills: { include: { skill: true } },
-          resumes: { orderBy: { createdAt: 'desc' }, take: 1 },
+          resumes: { orderBy: { createdAt: 'desc' }, take: 1, include: { analysis: true } },
           applications: {
             include: { jobRole: true },
             orderBy: { appliedAt: 'desc' },
