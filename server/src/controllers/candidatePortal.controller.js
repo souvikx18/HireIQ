@@ -243,9 +243,12 @@ export const candidatePortalController = {
         education: extracted.education,
         candidateId: candidateRecord?.id || null,
         fileName: originalFileName,
+        fileSize,
+        rawText,
       };
 
       return sendSuccess(res, auditReport, 'Resume audit generated successfully');
+
     } catch (err) {
       next(err);
     }

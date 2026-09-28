@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
@@ -17,9 +17,28 @@ export default function ResumeChecker() {
   const [isAuditing, setIsAuditing] = useState(false);
   const [auditReport, setAuditReport] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
-  const [activeReportTab, setActiveReportTab] = useState('diagnostics'); // 'diagnostics', 'skills', 'optimizer'
+
+  // Split-View Workspace state
+  const [activeViewerTab, setActiveViewerTab] = useState('preview'); // 'preview' | 'parsed_text'
+  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'critical' | 'improvements' | 'keywords'
   const [activeSuggestedSkill, setActiveSuggestedSkill] = useState(null);
   const [copiedSuccess, setCopiedSuccess] = useState(false);
+
+  // Managed blob URL for PDF/Document iframe preview
+  const fileUrl = useMemo(() => {
+    if (selectedFile) {
+      return URL.createObjectURL(selectedFile);
+    }
+    return null;
+  }, [selectedFile]);
+
+  useEffect(() => {
+    return () => {
+      if (fileUrl) {
+        URL.revokeObjectURL(fileUrl);
+      }
+    };
+  }, [fileUrl]);
 
   const getSkillBulletSuggestion = (skill) => {
     const s = (skill || '').toLowerCase();
@@ -43,6 +62,9 @@ export default function ResumeChecker() {
     }
     if (s.includes('redis') || s.includes('cache')) {
       return 'Implemented distributed Redis caching layers for high-throughput API endpoints, lowering backend database load by 60%.';
+    }
+    if (s.includes('python')) {
+      return 'Engineered asynchronous data processing pipelines with Python and FastAPI, increasing throughput by 4x and reducing server memory footprint.';
     }
     return `Leveraged ${skill} to engineer resilient production features, collaborating with cross-functional teams and accelerating release velocity by 30%.`;
   };
@@ -107,516 +129,520 @@ export default function ResumeChecker() {
   };
 
   const getScoreColor = (score) => {
-    if (score >= 85) return '#10b981';
-    if (score >= 70) return '#3b82f6';
-    return '#f59e0b';
+    if (score >= 80) return '#10b981';
+    if (score >= 65) return '#f59e0b';
+    return '#ef4444';
   };
 
+  // Group checks into Critical Blockers vs. Actionable Improvements
+  const criticalChecks = useMemo(() => {
+    if (!auditReport?.formattingChecks) return [];
+    return auditReport.formattingChecks.filter(
+      (c) => c.status === 'WARNING' || c.status === 'FAILED'
+    );
+  }, [auditReport]);
+
+  const improvementChecks = useMemo(() => {
+    if (!auditReport?.formattingChecks) return [];
+    return auditReport.formattingChecks.filter(
+      (c) => c.status === 'REVIEW' || c.status === 'INFO' || c.status === 'PASSED'
+    );
+  }, [auditReport]);
+
   const checkerContent = (
-    <div className="checker-container">
-            {/* Left Column: Upload Box & Guidelines */}
-            <div>
-              <div className="checker-card" style={{ marginBottom: '24px' }}>
-                <div className="checker-card-header">
-                  <h2>
-                    <i className="fa-solid fa-file-arrow-up" style={{ color: '#2563eb' }}></i>
-                    Upload Your Resume
-                  </h2>
-                  <div
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '3px 9px',
-                      borderRadius: '16px',
-                      background: 'rgba(16, 185, 129, 0.1)',
-                      border: '1px solid rgba(16, 185, 129, 0.25)',
-                      color: '#059669',
-                      fontSize: '10.5px',
-                      fontWeight: 600,
-                      marginTop: '4px',
-                      marginBottom: '6px',
-                    }}
-                  >
-                    <i className="fa-solid fa-shield-halved"></i>
-                    <span>AES-256 Encrypted • PII Masked & Private</span>
-                  </div>
-                  <p>
-                    Supports PDF, DOCX, and TXT files up to 10MB. Instant AI structural audit.
-                  </p>
-                </div>
+    <div className="audit-executive-wrapper">
+      {/* 1. IDLE STATE: Centered Diagnostic Dropzone */}
+      {!auditReport && !isAuditing && (
+        <div className="audit-idle-container">
+          <div className="audit-idle-card">
+            <div className="audit-idle-header">
+              <span className="audit-console-badge">
+                <i className="fa-solid fa-shield-halved"></i>
+                ENTERPRISE ATS DIAGNOSTIC ENGINE
+              </span>
+              <h2>Simulate Enterprise ATS Ingestion</h2>
+              <p>
+                Analyze machine text extraction, identify unparseable formatting blockers, and benchmark your engineering resume against Workday, Greenhouse, and Lever criteria.
+              </p>
+            </div>
 
-                <div
-                  className={`checker-dropzone ${isDragging ? 'active' : ''}`}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    style={{ display: 'none' }}
-                    accept=".pdf,.docx,.doc,.txt"
-                    onChange={handleFileInputChange}
-                  />
+            <div
+              className={`audit-dropzone ${isDragging ? 'active' : ''}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+                accept=".pdf,.docx,.doc,.txt"
+                onChange={handleFileInputChange}
+              />
 
-                  <div className="dropzone-icon">
-                    <i className="fa-solid fa-cloud-arrow-up"></i>
-                  </div>
+              <div className="audit-dropzone-icon">
+                <i className="fa-solid fa-cloud-arrow-up"></i>
+              </div>
 
-                  {selectedFile ? (
-                    <div>
-                      <h4>{selectedFile.name}</h4>
-                      <p>{(selectedFile.size / 1024).toFixed(1)} KB • Click or drop to replace</p>
-                    </div>
-                  ) : (
-                    <div>
-                      <h4>Drag & Drop your resume here</h4>
-                      <p>Or click to browse from your device</p>
-                    </div>
-                  )}
+              <h3>Drag & Drop your resume here</h3>
+              <p>Supports standard PDF, Word (.docx), and Plain Text (.txt) up to 10MB</p>
 
-                  <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <button
-                      type="button"
-                      className="browse-files-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        fileInputRef.current?.click();
-                      }}
-                      disabled={isAuditing}
-                    >
-                      {isAuditing ? (
-                        <>
-                          <i className="fa-solid fa-spinner fa-spin" style={{ marginRight: '6px' }}></i>
-                          Auditing Structure...
-                        </>
-                      ) : (
-                        'Browse Files'
-                      )}
-                    </button>
-                  </div>
-                </div>
+              <button
+                type="button"
+                className="audit-browse-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+              >
+                <i className="fa-solid fa-folder-open" style={{ marginRight: '6px' }}></i>
+                Select Document
+              </button>
 
-                {errorMessage && (
-                  <div
-                    style={{
-                      background: '#fef2f2',
-                      border: '1px solid #fecaca',
-                      color: '#b91c1c',
-                      padding: '10px 14px',
-                      borderRadius: '8px',
-                      fontSize: '13px',
-                      marginBottom: '16px',
-                    }}
-                  >
-                    <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: '6px' }}></i>
-                    {errorMessage}
-                  </div>
-                )}
-
-                {/* Audit Tips */}
-                <div className="audit-tips-box">
-                  <h4>
-                    <i className="fa-regular fa-lightbulb" style={{ color: '#eab308', marginRight: '6px' }}></i>
-                    ATS Scoring Criteria
-                  </h4>
-                  <ul>
-                    <li>Clear section headers (Experience, Education, Skills)</li>
-                    <li>Quantifiable metrics and strong action verbs</li>
-                    <li>Standard single-column, parseable typography</li>
-                    <li>Direct contact details (verified email and phone)</li>
-                  </ul>
-                </div>
+              <div className="audit-security-row">
+                <span><i className="fa-solid fa-lock"></i> AES-256 Encrypted</span>
+                <span><i className="fa-solid fa-eye-slash"></i> PII Masked & Private</span>
+                <span><i className="fa-solid fa-bolt"></i> Instant Structural Scan</span>
               </div>
             </div>
 
-            {/* Right Column: Audit Results */}
-            <div>
-              {isAuditing ? (
-                <div
-                  className="checker-card"
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '80px 20px',
-                    textAlign: 'center',
-                  }}
-                >
-                  <i className="fa-solid fa-brain fa-fade" style={{ fontSize: '48px', color: '#2563eb', marginBottom: '16px' }}></i>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 6px 0' }}>Analyzing Resume Structure...</h3>
-                  <p style={{ margin: 0, fontSize: '13.5px', color: '#64748b', maxWidth: '360px' }}>
-                    Evaluating formatting headers, bullet point action verbs, and keyword density.
-                  </p>
-                </div>
-              ) : auditReport ? (
-                <div className="checker-card">
-                  <div className="checker-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div>
-                      <h2>
-                        <i className="fa-solid fa-square-poll-vertical" style={{ color: '#10b981' }}></i>
-                        ATS Audit Results
-                      </h2>
-                      <p>Report generated for {auditReport.candidateName}</p>
-                    </div>
-                    <button
-                      type="button"
-                      style={{
-                        padding: '6px 14px',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        background: '#ffffff',
-                        fontSize: '12px',
-                        fontWeight: 600,
-                        color: '#475569',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                      }}
-                      onClick={() => window.print()}
-                      title="Print or Save PDF"
-                    >
-                      <i className="fa-solid fa-print"></i>
-                      Print / Save
-                    </button>
-                  </div>
+            {errorMessage && (
+              <div className="audit-error-banner">
+                <i className="fa-solid fa-triangle-exclamation"></i>
+                <span>{errorMessage}</span>
+              </div>
+            )}
 
-                  {/* Score Highlight Box */}
-                  <div className="score-badge-box">
-                    <div style={{ position: 'relative', width: '84px', height: '84px', flexShrink: 0 }}>
-                      <svg viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="42"
-                          fill="transparent"
-                          stroke="rgba(0,0,0,0.06)"
-                          strokeWidth="8"
-                        />
-                        <circle
-                          cx="50"
-                          cy="50"
-                          r="42"
-                          fill="transparent"
-                          stroke={getScoreColor(auditReport.atsScore)}
-                          strokeWidth="8"
-                          strokeLinecap="round"
-                          strokeDasharray="264"
-                          strokeDashoffset={264 - (264 * Math.min(100, Math.max(0, auditReport.atsScore))) / 100}
-                          style={{ transition: 'stroke-dashoffset 1.2s cubic-bezier(0.16, 1, 0.3, 1)' }}
-                        />
-                      </svg>
-                      <div
-                        style={{
-                          position: 'absolute',
-                          inset: 0,
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <span style={{ fontSize: '18px', fontWeight: 800, fontFamily: 'var(--font-mono, monospace)', color: getScoreColor(auditReport.atsScore) }}>
-                          {auditReport.atsScore}%
-                        </span>
-                        <span style={{ fontSize: '9px', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>
-                          ATS
-                        </span>
+            {/* Criteria checklist */}
+            <div className="audit-criteria-grid">
+              <div className="audit-criteria-item">
+                <i className="fa-solid fa-check"></i>
+                <div>
+                  <strong>Linear Single-Column</strong>
+                  <span>Prevents text fragmentation across ATS parsers</span>
+                </div>
+              </div>
+              <div className="audit-criteria-item">
+                <i className="fa-solid fa-check"></i>
+                <div>
+                  <strong>Quantified Google XYZ Formula</strong>
+                  <span>Measurable metrics demonstrate clear ROI</span>
+                </div>
+              </div>
+              <div className="audit-criteria-item">
+                <i className="fa-solid fa-check"></i>
+                <div>
+                  <strong>Selectable Machine Layer</strong>
+                  <span>Direct text streams ensure high indexing confidence</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 2. LOADING STATE */}
+      {isAuditing && (
+        <div className="audit-loading-card">
+          <div className="audit-spinner-outer">
+            <div className="audit-spinner-inner"></div>
+            <i className="fa-solid fa-brain audit-pulse-icon"></i>
+          </div>
+          <h3>Simulating ATS Parsing & Health Check...</h3>
+          <p>Extracting text layers, checking keyword alignment, and auditing bullet formulas against enterprise hiring standards.</p>
+        </div>
+      )}
+
+      {/* 3. AUDITED STATE: Executive Split-View Workspace */}
+      {auditReport && !isAuditing && (
+        <div className="audit-workspace-container">
+          {/* Executive Header Bar / Score Anchor */}
+          <div className="audit-hero-anchor">
+            <div className="audit-file-meta-col">
+              <div className="audit-file-tag">
+                <i className="fa-solid fa-file-pdf"></i>
+                <span className="audit-file-name">{auditReport.fileName || selectedFile?.name || 'Resume.pdf'}</span>
+                <span className="audit-file-size">
+                  {selectedFile?.size ? `${(selectedFile.size / 1024).toFixed(1)} KB` : '142 KB'}
+                </span>
+              </div>
+              <div className="audit-profile-target">
+                <span>Profile: <strong>{auditReport.candidateName}</strong></span>
+                <span className="audit-dot-sep">•</span>
+                <span>{auditReport.wordCount} Words Ingested</span>
+                <span className="audit-dot-sep">•</span>
+                <span className="audit-engine-badge">ATS Engine v2.4</span>
+              </div>
+            </div>
+
+            {/* Score Ring Visual Anchor */}
+            <div className="audit-score-anchor">
+              <div className="score-ring-wrap">
+                <svg viewBox="0 0 100 100" className="score-ring-svg">
+                  <circle cx="50" cy="50" r="42" className="score-ring-track" />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="42"
+                    className="score-ring-fill"
+                    style={{
+                      stroke: getScoreColor(auditReport.atsScore),
+                      strokeDashoffset: 264 - (264 * Math.min(100, Math.max(0, auditReport.atsScore))) / 100,
+                    }}
+                  />
+                </svg>
+                <div className="score-ring-label">
+                  <span className="score-ring-val" style={{ color: getScoreColor(auditReport.atsScore) }}>
+                    {auditReport.atsScore}%
+                  </span>
+                  <span className="score-ring-sub">ATS SCORE</span>
+                </div>
+              </div>
+
+              <div className="audit-score-summary">
+                <div className={`audit-verdict-pill ${auditReport.atsScore >= 80 ? 'pass' : auditReport.atsScore >= 65 ? 'warning' : 'critical'}`}>
+                  <span className="verdict-dot"></span>
+                  {auditReport.atsScore >= 80
+                    ? 'Pass • Highly Compatible'
+                    : auditReport.atsScore >= 65
+                    ? 'Moderate Risk • Optimization Advised'
+                    : 'Critical Blocker • High Rejection Risk'}
+                </div>
+                <p className="audit-verdict-desc">
+                  {auditReport.wordCount < 15
+                    ? 'Document lacks selectable machine text layer. Export as text PDF or Word DOCX.'
+                    : auditReport.atsScore >= 80
+                    ? 'Structured text layer verified. Strong keyword alignment and standard formatting.'
+                    : `${criticalChecks.length} formatting blockers detected that risk automated rejection.`}
+                </p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="audit-hero-actions">
+              <button
+                type="button"
+                className="audit-action-btn secondary"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <i className="fa-solid fa-arrow-up-from-bracket"></i>
+                <span>Replace Document</span>
+              </button>
+              <button
+                type="button"
+                className="audit-action-btn primary"
+                onClick={() => window.print()}
+              >
+                <i className="fa-solid fa-print"></i>
+                <span>Export Report</span>
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+                accept=".pdf,.docx,.doc,.txt"
+                onChange={handleFileInputChange}
+              />
+            </div>
+          </div>
+
+          {/* DUAL-PANE SPLIT-VIEW WORKSPACE */}
+          <div className="audit-split-workspace">
+            {/* LEFT PANE: Document & Machine Text Layer (45%) */}
+            <div className="audit-canvas-pane">
+              <div className="audit-pane-header">
+                <div className="audit-segmented-tabs">
+                  <button
+                    type="button"
+                    className={`audit-segment-btn ${activeViewerTab === 'preview' ? 'active' : ''}`}
+                    onClick={() => setActiveViewerTab('preview')}
+                  >
+                    <i className="fa-regular fa-file-pdf"></i>
+                    <span>Document View</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={`audit-segment-btn ${activeViewerTab === 'parsed_text' ? 'active' : ''}`}
+                    onClick={() => setActiveViewerTab('parsed_text')}
+                  >
+                    <i className="fa-solid fa-code"></i>
+                    <span>ATS Parsed Text Layer</span>
+                  </button>
+                </div>
+
+                <div className="audit-canvas-meta">
+                  <span className="canvas-status-tag">
+                    {auditReport.wordCount < 15 ? '⚠️ Image Layer' : '✅ 100% Machine Selectable'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Canvas Body */}
+              <div className="audit-canvas-body">
+                {activeViewerTab === 'preview' ? (
+                  fileUrl && selectedFile?.name?.endsWith('.pdf') ? (
+                    <iframe
+                      src={fileUrl}
+                      className="audit-pdf-iframe"
+                      title="Resume Document Preview"
+                    />
+                  ) : (
+                    <div className="audit-text-document-view">
+                      <div className="audit-doc-page-header">
+                        <h4>{auditReport.fileName || selectedFile?.name}</h4>
+                        <span>{auditReport.wordCount} words detected</span>
+                      </div>
+                      <div className="audit-doc-content-stream">
+                        {auditReport.rawText ? (
+                          <pre>{auditReport.rawText}</pre>
+                        ) : (
+                          <p style={{ color: '#94a3b8' }}>Document text preview unavailable. Switch to ATS Parsed Text Layer.</p>
+                        )}
                       </div>
                     </div>
-                    <div className="score-badge-desc">
-                      <h4>
-                        {auditReport.wordCount < 15
-                          ? 'Critical Alert: Unreadable Text Layer'
-                          : auditReport.atsScore >= 85
-                          ? 'Excellent ATS Compatibility'
-                          : auditReport.atsScore >= 70
-                          ? 'Good Foundation with Optimization Areas'
-                          : 'Action Needed: Formatting Gaps Detected'}
-                      </h4>
-                      <p>
-                        {auditReport.wordCount < 15
-                          ? `Only ${auditReport.wordCount} selectable words detected. ATS engines cannot parse text from image-only/scanned files. Please export as a text-based PDF or DOCX.`
-                          : `Your resume contains ${auditReport.wordCount} words and meets key structural ATS benchmarks.`}
-                      </p>
+                  )
+                ) : (
+                  <div className="audit-raw-stream-view">
+                    <div className="raw-stream-header">
+                      <i className="fa-solid fa-terminal" style={{ marginRight: '6px', color: '#38bdf8' }}></i>
+                      <span>Raw Text Ingestion Stream (Exact ATS Parser Output)</span>
                     </div>
+                    <pre className="raw-stream-code">
+                      {auditReport.rawText || 'No raw text stream available for this file format.'}
+                    </pre>
                   </div>
+                )}
+              </div>
 
-                  {/* Navigation Tabs for Audit Details */}
-                  <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px', marginBottom: '18px' }}>
-                    <button
-                      type="button"
-                      style={{
-                        padding: '7px 14px',
-                        borderRadius: '6px',
-                        border: 'none',
-                        fontSize: '12.5px',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        background: activeReportTab === 'diagnostics' ? '#2563eb' : '#f1f5f9',
-                        color: activeReportTab === 'diagnostics' ? '#ffffff' : '#475569',
-                      }}
-                      onClick={() => setActiveReportTab('diagnostics')}
-                    >
-                      <i className="fa-solid fa-list-check" style={{ marginRight: '6px' }}></i>
-                      Diagnostics ({auditReport.formattingChecks?.length || 0})
-                    </button>
+              {/* Canvas Footer */}
+              <div className="audit-canvas-footer">
+                <span>{auditReport.fileName}</span>
+                <span>{auditReport.wordCount} Words Ingested</span>
+              </div>
+            </div>
 
-                    <button
-                      type="button"
-                      style={{
-                        padding: '7px 14px',
-                        borderRadius: '6px',
-                        border: 'none',
-                        fontSize: '12.5px',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        background: activeReportTab === 'skills' ? '#2563eb' : '#f1f5f9',
-                        color: activeReportTab === 'skills' ? '#ffffff' : '#475569',
-                      }}
-                      onClick={() => setActiveReportTab('skills')}
-                    >
-                      <i className="fa-solid fa-bolt" style={{ marginRight: '6px' }}></i>
-                      Skills & Gaps
-                    </button>
+            {/* RIGHT PANE: Diagnostic Inspector (55%) */}
+            <div className="audit-inspector-pane">
+              {/* Section Filter Pills */}
+              <div className="audit-filter-bar">
+                <button
+                  type="button"
+                  className={`audit-filter-pill ${activeFilter === 'all' ? 'active' : ''}`}
+                  onClick={() => setActiveFilter('all')}
+                >
+                  All Diagnostics ({auditReport.formattingChecks?.length || 0})
+                </button>
+                <button
+                  type="button"
+                  className={`audit-filter-pill critical ${activeFilter === 'critical' ? 'active' : ''}`}
+                  onClick={() => setActiveFilter('critical')}
+                >
+                  <i className="fa-solid fa-circle-exclamation"></i>
+                  What's Wrong ({criticalChecks.length})
+                </button>
+                <button
+                  type="button"
+                  className={`audit-filter-pill improve ${activeFilter === 'improvements' ? 'active' : ''}`}
+                  onClick={() => setActiveFilter('improvements')}
+                >
+                  <i className="fa-solid fa-wand-magic-sparkles"></i>
+                  Where to Improve
+                </button>
+                <button
+                  type="button"
+                  className={`audit-filter-pill keywords ${activeFilter === 'keywords' ? 'active' : ''}`}
+                  onClick={() => setActiveFilter('keywords')}
+                >
+                  <i className="fa-solid fa-bolt"></i>
+                  Keywords ({auditReport.extractedSkills?.length || 0})
+                </button>
+              </div>
 
-                    <button
-                      type="button"
-                      style={{
-                        padding: '7px 14px',
-                        borderRadius: '6px',
-                        border: 'none',
-                        fontSize: '12.5px',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        background: activeReportTab === 'optimizer' ? '#2563eb' : '#f1f5f9',
-                        color: activeReportTab === 'optimizer' ? '#ffffff' : '#475569',
-                      }}
-                      onClick={() => setActiveReportTab('optimizer')}
-                    >
-                      <i className="fa-solid fa-wand-magic-sparkles" style={{ marginRight: '6px' }}></i>
-                      Bullet Optimizer
-                    </button>
-                  </div>
+              <div className="audit-inspector-scroll">
+                {/* SECTION 1: "WHAT'S WRONG" (CRITICAL BLOCKERS) */}
+                {(activeFilter === 'all' || activeFilter === 'critical') && (
+                  <div className="inspector-section-block critical-block">
+                    <div className="inspector-section-header">
+                      <div className="section-title-wrap">
+                        <span className="section-badge red">HIGH REJECTION RISK</span>
+                        <h3>Critical Parsing Blockers ("What's Wrong")</h3>
+                      </div>
+                      <span className="section-count-tag red">{criticalChecks.length} Immediate Issues</span>
+                    </div>
+                    <p className="inspector-section-desc">
+                      Issues that trigger automated rejection or prevent text from indexing into enterprise databases.
+                    </p>
 
-                  {/* TAB 1: Structural Diagnostic Checks */}
-                  {activeReportTab === 'diagnostics' && (
-                    <div className="diagnostics-list">
-                      {auditReport.formattingChecks?.map((check, idx) => (
-                        <div key={idx} className="diagnostic-item">
-                          <i
-                            className={`diag-icon ${check.status} ${
-                              check.status === 'PASSED'
-                                ? 'fa-solid fa-circle-check'
-                                : check.status === 'WARNING'
-                                ? 'fa-solid fa-triangle-exclamation'
-                                : 'fa-solid fa-circle-info'
-                            }`}
-                          ></i>
-                          <div className="diag-content">
-                            <strong>{check.name}</strong>
-                            <span>{check.detail}</span>
+                    {criticalChecks.length > 0 ? (
+                      <div className="diagnostic-cards-stack">
+                        {criticalChecks.map((item, idx) => (
+                          <div key={`crit-${idx}`} className="audit-diagnostic-card error-card">
+                            <div className="diagnostic-card-header">
+                              <i className="fa-solid fa-circle-xmark card-status-icon red"></i>
+                              <div>
+                                <h4>{item.name}</h4>
+                                <span className="card-severity-tag red">Blocks Machine Indexing</span>
+                              </div>
+                            </div>
+                            <p className="diagnostic-card-detail">{item.detail}</p>
+                            <div className="diagnostic-action-hint">
+                              <i className="fa-solid fa-wrench"></i>
+                              <strong>Remediation:</strong> Convert to linear single-column structure and verify contact fields.
+                            </div>
                           </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="audit-reassurance-banner">
+                        <i className="fa-solid fa-circle-check reassurance-icon"></i>
+                        <div>
+                          <strong>Zero Critical Blockers Identified</strong>
+                          <p>Your resume satisfies baseline ATS formatting rules: readable text layer, parseable headers, and contact info.</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* SECTION 2: "WHERE TO IMPROVE" (ACTIONABLE OPTIMIZATION) */}
+                {(activeFilter === 'all' || activeFilter === 'improvements') && (
+                  <div className="inspector-section-block improve-block">
+                    <div className="inspector-section-header">
+                      <div className="section-title-wrap">
+                        <span className="section-badge amber">IMPACT & FORMULAS</span>
+                        <h3>Actionable Optimization ("Where to Improve")</h3>
+                      </div>
+                      <span className="section-count-tag amber">Formula & Metric Boost</span>
+                    </div>
+                    <p className="inspector-section-desc">
+                      Enhancements that lift candidate ranking and increase human recruiter callback rates.
+                    </p>
+
+                    {/* Google XYZ Formula Builder */}
+                    <div className="formula-builder-card">
+                      <div className="formula-banner">
+                        <i className="fa-solid fa-lightbulb formula-icon"></i>
+                        <div>
+                          <h4>The Google XYZ Bullet Formula</h4>
+                          <code>Accomplished [X], as measured by [Y], by doing [Z]</code>
+                        </div>
+                      </div>
+
+                      <p className="formula-desc">
+                        Replace generic duty lists with quantifiable output. Select any skill to generate an enterprise-grade bullet point:
+                      </p>
+
+                      <div className="formula-chips-row">
+                        {['Docker', 'React', 'SQL', 'TypeScript', 'AWS', 'Python', 'Kubernetes'].map((sk) => (
+                          <button
+                            key={sk}
+                            type="button"
+                            className={`formula-skill-chip ${activeSuggestedSkill === sk ? 'active' : ''}`}
+                            onClick={() => setActiveSuggestedSkill(sk)}
+                          >
+                            {sk}
+                          </button>
+                        ))}
+                      </div>
+
+                      {activeSuggestedSkill && (
+                        <div className="formula-generated-box">
+                          <div className="formula-box-top">
+                            <span className="formula-tag">Suggested Optimized Bullet:</span>
+                            <button
+                              type="button"
+                              className="formula-copy-btn"
+                              onClick={() => handleCopyBullet(getSkillBulletSuggestion(activeSuggestedSkill))}
+                            >
+                              <i className={`fa-solid fa-${copiedSuccess ? 'check' : 'copy'}`}></i>
+                              {copiedSuccess ? 'Copied to Clipboard!' : 'Copy Formula'}
+                            </button>
+                          </div>
+                          <blockquote className="formula-quote">
+                            "{getSkillBulletSuggestion(activeSuggestedSkill)}"
+                          </blockquote>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Additional Formatting Diagnostic Checks */}
+                    <div className="diagnostic-cards-stack">
+                      {improvementChecks.map((item, idx) => (
+                        <div key={`imp-${idx}`} className="audit-diagnostic-card info-card">
+                          <div className="diagnostic-card-header">
+                            <i className={`fa-solid ${item.status === 'PASSED' ? 'fa-circle-check' : 'fa-circle-info'} card-status-icon ${item.status === 'PASSED' ? 'green' : 'blue'}`}></i>
+                            <div>
+                              <h4>{item.name}</h4>
+                              <span className={`card-severity-tag ${item.status === 'PASSED' ? 'green' : 'blue'}`}>
+                                {item.status === 'PASSED' ? 'Meets Enterprise Standard' : 'Enhancement Opportunity'}
+                              </span>
+                            </div>
+                          </div>
+                          <p className="diagnostic-card-detail">{item.detail}</p>
                         </div>
                       ))}
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  {/* TAB 2: Extracted Skills & Missing High Demand Skills */}
-                  {activeReportTab === 'skills' && (
-                    <div>
-                      <h4 style={{ fontSize: '13.5px', fontWeight: 700, margin: '0 0 10px 0', color: '#1e293b' }}>
-                        Identified Competencies ({auditReport.extractedSkills?.length || 0})
-                      </h4>
-                      <div className="skills-tags-wrap">
+                {/* SECTION 3: KEYWORD ALIGNMENT MATRIX */}
+                {(activeFilter === 'all' || activeFilter === 'keywords') && (
+                  <div className="inspector-section-block keywords-block">
+                    <div className="inspector-section-header">
+                      <div className="section-title-wrap">
+                        <span className="section-badge emerald">COMPETENCY INVENTORY</span>
+                        <h3>Tech Stack Keyword Density</h3>
+                      </div>
+                      <span className="section-count-tag emerald">{auditReport.extractedSkills?.length || 0} Identified</span>
+                    </div>
+
+                    {/* Verified Present Skills */}
+                    <div className="keywords-group">
+                      <span className="keywords-group-label">
+                        <i className="fa-solid fa-check" style={{ color: '#10b981', marginRight: '6px' }}></i>
+                        Verified Skills Detected on Resume ({auditReport.extractedSkills?.length || 0})
+                      </span>
+                      <div className="keywords-chip-wrap">
                         {auditReport.extractedSkills?.map((skill, idx) => (
-                          <span key={idx} className="skill-tag-pill found">
+                          <span key={`sk-${idx}`} className="tech-keyword-pill found">
                             <i className="fa-solid fa-check"></i>
                             {skill}
                           </span>
                         ))}
                       </div>
+                    </div>
 
-                      {auditReport.missingRecommendations?.length > 0 && (
-                        <div style={{ marginTop: '18px' }}>
-                          <h4 style={{ fontSize: '13.5px', fontWeight: 700, margin: '0 0 8px 0', color: '#b91c1c' }}>
-                            Recommended High-Demand Tech to Add:
-                          </h4>
-                          <div className="skills-tags-wrap">
-                            {auditReport.missingRecommendations.map((skill, idx) => (
-                              <span
-                                key={idx}
-                                className="skill-tag-pill missing"
-                                style={{ cursor: 'pointer' }}
-                                onClick={() => setActiveSuggestedSkill(activeSuggestedSkill === skill ? null : skill)}
-                                title="Click to generate 1-click ATS optimized bullet point"
-                              >
-                                <i className="fa-solid fa-plus"></i>
-                                {skill}
-                                <i className="fa-solid fa-wand-magic-sparkles" style={{ fontSize: '9px', marginLeft: '5px' }}></i>
-                              </span>
-                            ))}
-                          </div>
-
-                          {activeSuggestedSkill && (
-                            <div
-                              style={{
-                                marginTop: '12px',
-                                padding: '12px 14px',
-                                borderRadius: '8px',
-                                background: 'rgba(37, 99, 235, 0.08)',
-                                border: '1px solid rgba(37, 99, 235, 0.25)',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                gap: '8px',
-                              }}
+                    {/* Missing Target Skills */}
+                    {auditReport.missingRecommendations?.length > 0 && (
+                      <div className="keywords-group" style={{ marginTop: '16px' }}>
+                        <span className="keywords-group-label" style={{ color: '#d97706' }}>
+                          <i className="fa-solid fa-plus" style={{ marginRight: '6px' }}></i>
+                          Recommended High-Demand Tech to Consider Adding
+                        </span>
+                        <div className="keywords-chip-wrap">
+                          {auditReport.missingRecommendations.map((skill, idx) => (
+                            <span
+                              key={`miss-${idx}`}
+                              className="tech-keyword-pill missing"
+                              onClick={() => setActiveSuggestedSkill(skill)}
+                              title="Click to generate bullet point"
                             >
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontSize: '11.5px', fontWeight: 700, color: '#2563eb' }}>
-                                  <i className="fa-solid fa-wand-magic-sparkles" style={{ marginRight: '6px' }}></i>
-                                  AI Suggested Resume Bullet ({activeSuggestedSkill}):
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => handleCopyBullet(getSkillBulletSuggestion(activeSuggestedSkill))}
-                                  style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '5px',
-                                    padding: '4px 10px',
-                                    borderRadius: '5px',
-                                    border: 'none',
-                                    background: copiedSuccess ? '#16a34a' : '#2563eb',
-                                    color: '#ffffff',
-                                    fontSize: '11px',
-                                    fontWeight: 600,
-                                    cursor: 'pointer',
-                                    transition: 'background 0.2s ease',
-                                  }}
-                                >
-                                  <i className={`fa-solid fa-${copiedSuccess ? 'check' : 'copy'}`}></i>
-                                  {copiedSuccess ? 'Copied to Clipboard!' : 'Copy Bullet'}
-                                </button>
-                              </div>
-                              <div style={{ fontSize: '12px', color: 'var(--text, #1e293b)', lineHeight: 1.5, fontStyle: 'italic' }}>
-                                "{getSkillBulletSuggestion(activeSuggestedSkill)}"
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* TAB 3: Bullet Point Optimizer Examples */}
-                  {activeReportTab === 'optimizer' && (
-                    <div>
-                      <h4 style={{ fontSize: '13.5px', fontWeight: 700, margin: '0 0 10px 0', color: '#1e293b' }}>
-                        Action Verbs & Impact Formula
-                      </h4>
-                      <p style={{ fontSize: '12.5px', color: '#64748b', margin: '0 0 14px 0', lineHeight: 1.5 }}>
-                        Enterprise recruiters look for quantifiable metrics. Replace generic tasks with measurable achievements.
-                      </p>
-
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        <div className="bullet-compare-box">
-                          <div style={{ fontSize: '12px', color: '#ef4444', textDecoration: 'line-through', marginBottom: '4px' }}>
-                            ❌ "Worked on building React frontend interfaces."
-                          </div>
-                          <div style={{ fontSize: '12.5px', color: '#059669', fontWeight: 600 }}>
-                            ✔ "Architected 14+ reusable React component modules, decreasing page render latency by 32%."
-                          </div>
-                        </div>
-
-                        <div className="bullet-compare-box">
-                          <div style={{ fontSize: '12px', color: '#ef4444', textDecoration: 'line-through', marginBottom: '4px' }}>
-                            ❌ "Responsible for writing tests."
-                          </div>
-                          <div style={{ fontSize: '12.5px', color: '#059669', fontWeight: 600 }}>
-                            ✔ "Implemented automated test pipeline with Vitest & Playwright, expanding test coverage to 94%."
-                          </div>
+                              <i className="fa-solid fa-plus"></i>
+                              {skill}
+                            </span>
+                          ))}
                         </div>
                       </div>
-                    </div>
-                  )}
-
-                  {/* Role adaptive CTA */}
-                  {!isAuthenticated ? (
-                    <div className="guest-conversion-card">
-                      <div className="guest-conversion-text">
-                        <h4>🚀 Want to track your resume audit history?</h4>
-                        <p>
-                          Create a free Candidate account to save your ATS score reports, unlock AI bullet-point rewrites, and benchmark your tech skills.
-                        </p>
-                      </div>
-                      <div className="guest-conversion-actions">
-                        <button
-                          type="button"
-                          className="btn-white"
-                          onClick={() => navigate('/signup')}
-                        >
-                          <i className="fa-solid fa-user-plus"></i> Create Free Account
-                        </button>
-                        <button
-                          type="button"
-                          className="btn-translucent"
-                          onClick={() => navigate('/login')}
-                        >
-                          Sign In
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div style={{ marginTop: '24px', paddingTop: '18px', borderTop: '1px solid #e2e8f0', display: 'flex', gap: '12px' }}>
-                      <button
-                        type="button"
-                        className="hero-cta-btn primary"
-                        style={{ flex: 1, justifyContent: 'center' }}
-                        onClick={() => navigate('/candidate/dashboard')}
-                      >
-                        <i className="fa-solid fa-gauge-high"></i>
-                        View Dashboard Overview
-                      </button>
-                      <button
-                        type="button"
-                        className="hero-cta-btn secondary"
-                        style={{ flex: 1, justifyContent: 'center' }}
-                        onClick={() => {
-                          window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }}
-                      >
-                        <i className="fa-solid fa-file-arrow-up"></i>
-                        Scan Another Resume
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div
-                  className="checker-card"
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '80px 20px',
-                    textAlign: 'center',
-                    color: '#64748b',
-                  }}
-                >
-                  <i className="fa-regular fa-file-lines" style={{ fontSize: '48px', color: '#cbd5e1', marginBottom: '16px' }}></i>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#334155', margin: '0 0 6px 0' }}>No Resume Uploaded Yet</h3>
-                  <p style={{ margin: 0, fontSize: '13.5px', maxWidth: '340px' }}>
-                    Upload your resume (PDF, DOCX, or TXT) on the left to test instant AI ATS scoring and keyword analysis.
-                  </p>
-                </div>
-              )}
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
+        </div>
+      )}
+    </div>
   );
 
   if (!isAuthenticated) {
@@ -629,12 +655,12 @@ export default function ResumeChecker() {
               <span style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
                 Hire<span style={{ color: '#2563eb' }}>IQ</span>
               </span>
-              <span className="public-free-badge">FREE ATS TOOL</span>
+              <span className="public-free-badge">ENTERPRISE AUDITOR</span>
             </Link>
 
             <div className="public-nav-right">
               <Link to="/" className="public-nav-link">
-                <i className="fa-solid fa-arrow-left"></i> Back to Home
+                <i className="fa-solid fa-arrow-left"></i> Home
               </Link>
               <Link to="/login" className="public-btn-secondary">
                 Log In
@@ -647,16 +673,6 @@ export default function ResumeChecker() {
         </header>
 
         <main className="public-checker-main">
-          <div className="public-checker-hero">
-            <div className="public-checker-hero-badge">
-              <i className="fa-solid fa-wand-magic-sparkles"></i> 100% Free Instant ATS Audit • No Sign-up Required
-            </div>
-            <h1>Free ATS Resume Checker & Format Auditor</h1>
-            <p>
-              Upload your resume in PDF, DOCX, or TXT format to simulate enterprise applicant tracking system parsing, identify formatting gaps, and detect keyword density.
-            </p>
-          </div>
-
           {checkerContent}
         </main>
       </div>
@@ -670,7 +686,7 @@ export default function ResumeChecker() {
       <div className="portal-main-content">
         <Header
           title="ATS Resume Audit & Health Check"
-          subtitle="Scan your resume structure, keyword density, and formatting against enterprise ATS standards"
+          subtitle="Real-time document inspection, critical rejection blockers, and quantified bullet enhancements"
           eyebrow="AI RESUME AUDITOR"
         />
 
