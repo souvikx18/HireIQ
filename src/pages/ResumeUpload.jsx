@@ -8,42 +8,48 @@ import '../css/resumeupload.css';
 function getEvaluationData(candidate) {
   if (!candidate) return null;
 
-  const matchScore = candidate.matchScore || 91;
-  const atsScore = candidate.atsScore || 93;
-  const skillCoverage = candidate.skillCoverage || 83;
-  const requiredSkillsCount = candidate.requiredSkillsCount || 12;
-  const matchedSkillsCount = candidate.matchedSkillsCount || 10;
-  const partialSkillsCount = candidate.partialSkillsCount || 1;
-  const missingSkillsCount = candidate.missingSkillsCount || 1;
+  // Use ?? (nullish coalescing) for numeric fields so 0 doesn't trigger the fallback
+  const matchScore = candidate.matchScore ?? 0;
+  const atsScore = candidate.atsScore ?? 0;
+  const skillCoverage = candidate.skillCoverage ?? 0;
+  const requiredSkillsCount = candidate.requiredSkillsCount ?? 0;
+  const matchedSkillsCount = candidate.matchedSkillsCount ?? 0;
+  const partialSkillsCount = candidate.partialSkillsCount ?? 0;
+  const missingSkillsCount = candidate.missingSkillsCount ?? 0;
+
+  // Explicitly extract skills so it doesn't get lost in the spread
+  const skills = Array.isArray(candidate.skills) && candidate.skills.length > 0
+    ? candidate.skills
+    : [];
 
   const experienceMatch =
     candidate.experienceMatch ||
     (matchScore >= 85
-      ? '94% (Senior Alignment)'
-      : matchScore >= 75
-      ? '82% (Mid-Level Alignment)'
-      : '68% (Junior Alignment)');
+      ? '5+ Years Experience'
+      : matchScore >= 70
+      ? '3+ Years Experience'
+      : '1-2 Years Experience');
 
   const jdMatch =
     candidate.jdMatch ||
     (matchScore >= 85
       ? '89% Semantic Match'
-      : matchScore >= 75
-      ? '78% Moderate Fit'
-      : '65% Partial Fit');
+      : matchScore >= 70
+      ? '72% Moderate Fit'
+      : '55% Partial Fit');
 
-  const aiConfidence = candidate.aiConfidence || '96%';
+  const aiConfidence = candidate.aiConfidence || '92%';
 
   let aiRecommendation = candidate.aiRecommendation;
   if (!aiRecommendation) {
     if (matchScore >= 85) aiRecommendation = 'HIGHLY RECOMMENDED';
-    else if (matchScore >= 70) aiRecommendation = 'REVIEW REQUIRED';
+    else if (matchScore >= 65) aiRecommendation = 'REVIEW REQUIRED';
     else aiRecommendation = 'NOT RECOMMENDED';
   }
 
   const gapPriorities =
     candidate.gapPriorities ||
-    (candidate.gaps || ['Advanced Domain Frameworks']).map((gap, idx) => {
+    (candidate.gaps || []).map((gap, idx) => {
       let priority = 'High Priority';
       let priorityClass = 'high';
       if (idx === 0) {
@@ -59,11 +65,8 @@ function getEvaluationData(candidate) {
       return { name: gap, priority, priorityClass };
     });
 
-  const partialSkills = candidate.partialSkills || [
-    'Performance Optimization & Profiling',
-  ];
-  const missingSkills =
-    candidate.missingSkills || candidate.gaps || ['Advanced Domain Frameworks'];
+  const partialSkills = candidate.partialSkills || [];
+  const missingSkills = candidate.missingSkills || candidate.gaps || [];
 
   const strengths = candidate.strengths || [
     'Strong command of core architectural concepts and technical competencies',
@@ -71,19 +74,13 @@ function getEvaluationData(candidate) {
     'High semantic synergy with target benchmark role requirements',
   ];
 
-  const recommendedSkills = candidate.recommendedSkills || [
-    'System Architecture Design',
-    'Cloud-Native Deployment',
-    'Automated CI/CD Pipelines',
-  ];
+  const recommendedSkills = candidate.recommendedSkills || [];
 
   const roadmapSteps = candidate.roadmapSteps || [
     {
       step: 'Phase 1',
       title: 'Target Gap Remediation',
-      desc: `Master ${
-        candidate.gaps?.[0] || 'advanced domain frameworks'
-      } (Est. 1-2 weeks)`,
+      desc: `Master ${candidate.gaps?.[0] || 'advanced domain frameworks'} (Est. 1-2 weeks)`,
     },
     {
       step: 'Phase 2',
@@ -99,10 +96,11 @@ function getEvaluationData(candidate) {
 
   const whyScoreExplanation =
     candidate.whyScoreExplanation ||
-    `The candidate achieved an overall match score of ${matchScore}% through multi-factor semantic analysis: 45% core skill verification (${matchedSkillsCount}/${requiredSkillsCount} required skills present), 25% domain experience alignment (${experienceMatch}), 15% job description keyword relevance (${jdMatch}), and 15% ATS structural parsing fidelity (${atsScore}/100 ATS score).`;
+    `Candidate achieved ${matchScore}% match: ${matchedSkillsCount}/${requiredSkillsCount} required skills verified, ${experienceMatch.split(' ')[0]} experience, ${jdMatch.split(' ')[0]} JD relevance.`;
 
   return {
     ...candidate,
+    skills,
     matchScore,
     atsScore,
     skillCoverage,
@@ -123,6 +121,7 @@ function getEvaluationData(candidate) {
     whyScoreExplanation,
   };
 }
+
 
 export default function ResumeUpload() {
   const [toastMessage, setToastMessage] = useState('');
