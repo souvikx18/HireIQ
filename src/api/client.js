@@ -1,7 +1,9 @@
 const BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 export async function apiClient(endpoint, { body, headers = {}, method = 'GET', isFormData = false, ...customConfig } = {}) {
-  const token = localStorage.getItem('hireiq_token');
+  const rawToken = localStorage.getItem('hireiq_token');
+  // Only attach token if it's a real non-null, non-empty string
+  const token = rawToken && rawToken !== 'null' && rawToken !== 'undefined' ? rawToken : null;
 
   const defaultHeaders = {};
   if (!isFormData) {
@@ -28,14 +30,9 @@ export async function apiClient(endpoint, { body, headers = {}, method = 'GET', 
 
   const response = await fetch(url, config);
 
-  if (response.status === 401) {
-    // If unauthorized, clear storage and dispatch logout event if not on login/signup page
-    if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/signup')) {
-      localStorage.removeItem('hireiq_token');
-      localStorage.removeItem('hireiq_user');
-      localStorage.setItem('isAuthenticated', 'false');
-    }
-  }
+  // On 401: do NOT aggressively clear localStorage — one failed API call
+  // (e.g. candidates list timing out) shouldn't break every other request.
+  // Let individual pages/auth flows handle logout explicitly.
 
   const data = await response.json().catch(() => ({}));
 
@@ -48,3 +45,4 @@ export async function apiClient(endpoint, { body, headers = {}, method = 'GET', 
 
   return data;
 }
+
