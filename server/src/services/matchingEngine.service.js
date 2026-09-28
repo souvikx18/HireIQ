@@ -26,9 +26,51 @@ export const matchingEngineService = {
       });
     }
 
+    // When no job role has skills configured, infer required skills
+    // from the candidate's own domain so the evaluation is meaningful
     if (requiredCriteria.length === 0) {
-      requiredCriteria = ['JavaScript', 'React', 'Node.js', 'SQL'];
-      preferredCriteria = ['Docker', 'AWS', 'TypeScript'];
+      const candSkillsLower = new Set(candidateSkills.map((s) => s.toLowerCase()));
+
+      // Detect candidate's primary domain from their skills
+      const isFullStack =
+        (candSkillsLower.has('react') || candSkillsLower.has('vue') || candSkillsLower.has('angular')) &&
+        (candSkillsLower.has('node.js') || candSkillsLower.has('express') || candSkillsLower.has('python'));
+      const isFrontend =
+        (candSkillsLower.has('react') || candSkillsLower.has('vue') || candSkillsLower.has('angular')) &&
+        !candSkillsLower.has('node.js') && !candSkillsLower.has('python');
+      const isBackend =
+        (candSkillsLower.has('node.js') || candSkillsLower.has('python') || candSkillsLower.has('java') || candSkillsLower.has('go')) &&
+        !candSkillsLower.has('react') && !candSkillsLower.has('angular');
+      const isDevOps =
+        candSkillsLower.has('docker') || candSkillsLower.has('kubernetes') || candSkillsLower.has('terraform');
+      const isDataScience =
+        candSkillsLower.has('python') && (candSkillsLower.has('pandas') || candSkillsLower.has('tensorflow') || candSkillsLower.has('machine learning'));
+
+      if (isFullStack) {
+        requiredCriteria = ['JavaScript', 'React', 'Node.js', 'SQL', 'REST API'];
+        preferredCriteria = ['TypeScript', 'Docker', 'PostgreSQL', 'Redis', 'AWS'];
+      } else if (isFrontend) {
+        requiredCriteria = ['JavaScript', 'HTML', 'CSS', 'React'];
+        preferredCriteria = ['TypeScript', 'Tailwind CSS', 'Figma', 'Next.js', 'Testing'];
+      } else if (isBackend) {
+        requiredCriteria = ['Node.js', 'SQL', 'REST API', 'Authentication'];
+        preferredCriteria = ['Docker', 'PostgreSQL', 'Redis', 'AWS', 'Microservices'];
+      } else if (isDevOps) {
+        requiredCriteria = ['Docker', 'Linux', 'CI/CD', 'Kubernetes'];
+        preferredCriteria = ['Terraform', 'AWS', 'Ansible', 'Monitoring', 'Security'];
+      } else if (isDataScience) {
+        requiredCriteria = ['Python', 'SQL', 'Data Analysis', 'Machine Learning'];
+        preferredCriteria = ['TensorFlow', 'PyTorch', 'Pandas', 'Cloud', 'Statistics'];
+      } else if (candidateSkills.length > 0) {
+        // Generic: use top skills candidate already has as required,
+        // and common complementary skills as preferred
+        requiredCriteria = candidateSkills.slice(0, Math.min(4, candidateSkills.length));
+        preferredCriteria = ['Git', 'Agile', 'Communication', 'Problem Solving'];
+      } else {
+        // Truly no skills detected — use generic professional skills
+        requiredCriteria = ['Communication', 'Problem Solving', 'Teamwork'];
+        preferredCriteria = ['Leadership', 'Critical Thinking', 'Collaboration'];
+      }
     }
 
     const candidateSkillSet = new Set(candidateSkills.map((s) => s.toLowerCase().trim()));
@@ -66,7 +108,7 @@ export const matchingEngineService = {
       .filter((s) => !allMatched.some((m) => m.toLowerCase() === s.toLowerCase()))
       .slice(0, 3);
 
-    // Weighted Scoring
+    // Weighted Scoring — required skills 65%, preferred 20%, experience 15%
     const reqRatio = requiredCriteria.length > 0 ? requiredMatched.length / requiredCriteria.length : 1;
     const prefRatio = preferredCriteria.length > 0 ? preferredMatched.length / preferredCriteria.length : 0.5;
 
@@ -75,15 +117,19 @@ export const matchingEngineService = {
     const minExp = Number(jobRole?.minExperience) || 2.0;
     const expScore = candExp >= minExp ? 100 : Math.round((candExp / minExp) * 100);
 
-    const baseScore = Math.round(reqRatio * 60 + prefRatio * 25 + (expScore / 100) * 15);
-    const matchScore = Math.min(99, Math.max(35, baseScore));
+    const baseScore = Math.round(reqRatio * 65 + prefRatio * 20 + (expScore / 100) * 15);
+    // No artificial floor — let the score reflect reality (min 5, max 99)
+    const matchScore = Math.min(99, Math.max(5, baseScore));
 
-    // ATS Document Parse Score
-    let atsScore = 82;
-    if (candidateInfo.email && !candidateInfo.email.includes('internal')) atsScore += 5;
-    if (candidateInfo.phone) atsScore += 5;
-    if (candidateSkills.length >= 6) atsScore += 6;
+    // ATS Document Parse Score — starts at 60 (realistic baseline)
+    let atsScore = 60;
+    if (candidateInfo.email && !candidateInfo.email.includes('internal')) atsScore += 8;
+    if (candidateInfo.phone) atsScore += 7;
+    if (candidateSkills.length >= 3) atsScore += 8;
+    if (candidateSkills.length >= 6) atsScore += 7;
+    if (candidateSkills.length >= 10) atsScore += 7;
     atsScore = Math.min(99, atsScore);
+
 
     // AI Confidence & Recommendation
     let aiRecommendation = 'HIGHLY RECOMMENDED';
@@ -187,6 +233,11 @@ export const matchingEngineService = {
       courseRecommendation,
       aiRecommendation,
       aiConfidence,
+      // Count fields for frontend metric cards
+      requiredSkillsCount: requiredCriteria.length,
+      matchedSkillsCount: requiredMatched.length,
+      partialSkillsCount: partialSkills.length,
+      missingSkillsCount: allMissing.length,
     };
   },
 };
