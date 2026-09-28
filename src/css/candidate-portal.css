@@ -1473,4 +1473,396 @@ body.dark-mode .job-secondary-btn:hover {
     background: rgba(255, 255, 255, 0.25);
 }
 
+/* =========================================================
+   STRUCTURED EXECUTIVE CANDIDATE OVERVIEW STYLES
+========================================================= */
+
+.portal-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    backdrop-filter: blur(4px);
+}
+
+.pulse-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #34d399;
+    box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.3);
+}
+
+.stat-card-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    font-weight: 600;
+    display: block;
+}
+
+.stat-card-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 4px;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.stat-card-tag.success {
+    background: #ecfdf5;
+    color: #065f46;
+}
+
+.stat-card-tag.warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.stat-card-tag.neutral {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+/* Grid Layout */
+.portal-main-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.portal-grid-col {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.portal-action-link {
+    font-size: 12px;
+    font-weight: 600;
+    color: #2563eb;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+}
+
+.portal-action-link:hover {
+    color: #1d4ed8;
+    transform: translateX(2px);
+}
+
+.portal-resume-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.resume-type-icon {
+    font-size: 24px;
+    color: #ef4444;
+}
+
+.portal-score-pill {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 12px;
+}
+
+.portal-score-pill.high {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.portal-score-pill.medium {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+.portal-metrics-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 14px;
+}
+
+/* Empty State Card */
+.portal-empty-audit-card {
+    padding: 28px 24px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px dashed #cbd5e1;
+    text-align: center;
+}
+
+.empty-audit-icon {
+    font-size: 32px;
+    color: #3b82f6;
+    margin-bottom: 10px;
+}
+
+.portal-empty-audit-card h3 {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 6px 0;
+}
+
+.portal-empty-audit-card p {
+    font-size: 12px;
+    color: #64748b;
+    max-width: 420px;
+    margin: 0 auto 16px auto;
+    line-height: 1.5;
+}
+
+.portal-count-badge {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 3px 10px;
+    border-radius: 12px;
+}
+
+/* Skills Wrap */
+.portal-skills-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.portal-skills-empty-compact {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #64748b;
+}
+
+.portal-mini-cta {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #2563eb;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.portal-mini-cta:hover {
+    color: #1d4ed8;
+    text-decoration: underline;
+}
+
+/* Checklist Compact */
+.portal-card-header.compact {
+    margin-bottom: 6px;
+}
+
+.portal-checklist-compact {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.portal-checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
+}
+
+.check-icon {
+    font-size: 14px;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.check-icon.success {
+    color: #10b981;
+}
+
+.check-icon.warning {
+    color: #f59e0b;
+}
+
+.checklist-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.checklist-text strong {
+    font-size: 12.5px;
+    color: #1e293b;
+    font-weight: 600;
+}
+
+.checklist-text span {
+    font-size: 11.5px;
+    color: #64748b;
+    line-height: 1.35;
+}
+
+/* Copilot Actions */
+.copilot-card {
+    background: linear-gradient(180deg, #ffffff, #fafbff);
+}
+
+.portal-copilot-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.arrow-icon {
+    font-size: 10px;
+    color: #94a3b8;
+    transition: transform 0.2s ease;
+}
+
+.portal-copilot-action-btn:hover .arrow-icon {
+    transform: translateX(3px);
+    color: #4f46e5;
+}
+
+/* =========================================================
+   DARK MODE OVERRIDES FOR CANDIDATE OVERVIEW
+========================================================= */
+
+body.dark-mode .portal-hero {
+    background: linear-gradient(135deg, #0f172a, #1e3a8a 70%, #1d4ed8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .portal-card {
+    background: #151d2f !important;
+    border-color: #232f48 !important;
+}
+
+body.dark-mode .portal-card-title {
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .portal-card-subtitle {
+    color: #94a3b8 !important;
+}
+
+body.dark-mode .stat-card-portal {
+    background: #151d2f !important;
+    border-color: #232f48 !important;
+}
+
+body.dark-mode .stat-card-info h3 {
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .stat-card-tag.neutral {
+    background: #1e293b !important;
+    color: #cbd5e1 !important;
+}
+
+body.dark-mode .stat-card-tag.success {
+    background: #064e3b !important;
+    color: #6ee7b7 !important;
+}
+
+body.dark-mode .stat-card-tag.warning {
+    background: #78350f !important;
+    color: #fde68a !important;
+}
+
+body.dark-mode .portal-resume-highlight {
+    background: #1c273e !important;
+    border-color: #2a3854 !important;
+}
+
+body.dark-mode .portal-resume-filename {
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .portal-metric-top {
+    color: #cbd5e1 !important;
+}
+
+body.dark-mode .portal-progress-track {
+    background: #232f48 !important;
+}
+
+body.dark-mode .portal-count-badge {
+    background: #1e293b !important;
+    color: #94a3b8 !important;
+}
+
+body.dark-mode .portal-skill-chip {
+    background: #1a253c !important;
+    border-color: #2e3e60 !important;
+    color: #e2e8f0 !important;
+}
+
+body.dark-mode .portal-skills-empty-compact {
+    background: #161e30 !important;
+    border-color: #243048 !important;
+    color: #94a3b8 !important;
+}
+
+body.dark-mode .portal-checklist-item {
+    background: #1a2336 !important;
+    border-color: #243048 !important;
+}
+
+body.dark-mode .checklist-text strong {
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .checklist-text span {
+    color: #94a3b8 !important;
+}
+
+body.dark-mode .copilot-card {
+    background: #151d2f !important;
+}
+
+body.dark-mode .portal-copilot-action-btn {
+    background: #1b2438 !important;
+    border-color: #293854 !important;
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .portal-copilot-action-btn:hover {
+    background: #222f48 !important;
+    border-color: #3b82f6 !important;
+}
+
+@media (max-width: 1024px) {
+    .portal-main-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
 

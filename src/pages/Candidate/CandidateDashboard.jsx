@@ -59,78 +59,23 @@ export default function CandidateDashboard() {
         />
 
         <div className="portal-body">
-          {/* Hero Welcome Banner */}
+          {/* Executive Hero Banner */}
           <div className="portal-hero">
             <div className="portal-hero-text">
-              <h1>Welcome, {user?.firstName || 'Candidate'}!</h1>
-              <p>
-                Audit and optimize your resume for modern Applicant Tracking Systems (ATS), identify keyword gaps,
-                and benchmark your engineering skills against industry standards.
-              </p>
-
-              {/* Quick AI Copilot Prompts */}
-              <div style={{ display: 'flex', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
-                <button
-                  type="button"
-                  onClick={() => handleAskCopilot('How do I optimize my resume bullet points for high ATS match?')}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    color: '#ffffff',
-                    padding: '6px 12px',
-                    borderRadius: '20px',
-                    fontSize: '11.5px',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                  }}
-                >
-                  <i className="fa-solid fa-robot"></i> How to optimize bullet points?
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleAskCopilot('What are the most critical ATS formatting rules for software engineers?')}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    color: '#ffffff',
-                    padding: '6px 12px',
-                    borderRadius: '20px',
-                    fontSize: '11.5px',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                  }}
-                >
-                  <i className="fa-solid fa-file-lines"></i> ATS formatting rules
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleAskCopilot('What are common interview questions for software engineering roles?')}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    color: '#ffffff',
-                    padding: '6px 12px',
-                    borderRadius: '20px',
-                    fontSize: '11.5px',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                  }}
-                >
-                  <i className="fa-solid fa-lightbulb"></i> Engineering interview tips
-                </button>
+              <div className="portal-hero-badge">
+                <span className="pulse-dot"></span>
+                <span>Job Seeker ATS Readiness Console</span>
               </div>
+              <h1>Welcome back, {user?.firstName || 'Candidate'}!</h1>
+              <p>
+                Track live diagnostics on your resume's machine readability, keyword indexing, and role alignment.
+              </p>
             </div>
 
             <div className="portal-hero-actions">
               <Link to="/candidate/resume-checker" className="hero-cta-btn primary">
                 <i className="fa-solid fa-file-shield"></i>
-                ATS Resume Audit
+                <span>ATS Resume Audit</span>
               </Link>
               <button
                 type="button"
@@ -138,7 +83,7 @@ export default function CandidateDashboard() {
                 onClick={() => handleAskCopilot('Give me a quick checklist to make my resume 100% ATS compliant.')}
               >
                 <i className="fa-solid fa-wand-magic-sparkles"></i>
-                Ask Copilot
+                <span>Ask Copilot</span>
               </button>
             </div>
           </div>
@@ -162,8 +107,11 @@ export default function CandidateDashboard() {
                     <i className="fa-solid fa-shield-heart"></i>
                   </div>
                   <div className="stat-card-info">
-                    <span>ATS Resume Score</span>
-                    <h3 className="mono-metric">{candidateAtsScore ? `${candidateAtsScore}%` : 'Scan Needed'}</h3>
+                    <span className="stat-card-label">ATS Resume Score</span>
+                    <h3 className="mono-metric">{candidateAtsScore ? `${candidateAtsScore}%` : 'Not Scanned'}</h3>
+                    <span className={`stat-card-tag ${candidateAtsScore >= 75 ? 'success' : candidateAtsScore > 0 ? 'warning' : 'neutral'}`}>
+                      {candidateAtsScore >= 75 ? 'Optimized' : candidateAtsScore > 0 ? 'Needs Attention' : 'Scan Required'}
+                    </span>
                   </div>
                 </div>
 
@@ -172,8 +120,11 @@ export default function CandidateDashboard() {
                     <i className="fa-solid fa-bolt"></i>
                   </div>
                   <div className="stat-card-info">
-                    <span>Identified Skills</span>
+                    <span className="stat-card-label">Identified Skills</span>
                     <h3 className="mono-metric">{skillsList.length} Skills</h3>
+                    <span className="stat-card-tag neutral">
+                      Verified Proficiencies
+                    </span>
                   </div>
                 </div>
 
@@ -182,8 +133,11 @@ export default function CandidateDashboard() {
                     <i className="fa-solid fa-circle-check"></i>
                   </div>
                   <div className="stat-card-info">
-                    <span>ATS Structure Health</span>
+                    <span className="stat-card-label">ATS Structure Health</span>
                     <h3 className="mono-metric">{candidateAtsScore >= 75 ? 'Optimized' : candidateAtsScore > 0 ? 'Fix Suggested' : 'Audit Ready'}</h3>
+                    <span className={`stat-card-tag ${candidateAtsScore >= 75 ? 'success' : 'warning'}`}>
+                      Machine Layer
+                    </span>
                   </div>
                 </div>
 
@@ -192,8 +146,11 @@ export default function CandidateDashboard() {
                     <i className="fa-solid fa-layer-group"></i>
                   </div>
                   <div className="stat-card-info">
-                    <span>Experience Profile</span>
+                    <span className="stat-card-label">Experience Profile</span>
                     <h3 className="mono-metric">{profile?.experienceYears ? `${profile.experienceYears}+ Yrs` : 'Tech Professional'}</h3>
+                    <span className="stat-card-tag neutral">
+                      {profile?.roleApplied || 'Software Engineering'}
+                    </span>
                   </div>
                 </div>
               </>
@@ -201,9 +158,9 @@ export default function CandidateDashboard() {
           </div>
 
           {/* Main Dashboard Two-Column Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.6fr) minmax(0, 1fr)', gap: '24px', alignItems: 'start' }}>
-            {/* Left Column */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          <div className="portal-main-grid">
+            {/* Left Column (Primary Diagnostics & Skills) */}
+            <div className="portal-grid-col primary">
               {/* ATS Audit Summary Card */}
               <div className="portal-card">
                 <div className="portal-card-header">
@@ -217,15 +174,7 @@ export default function CandidateDashboard() {
                   </div>
                   <Link
                     to="/candidate/resume-checker"
-                    style={{
-                      fontSize: '11.5px',
-                      fontWeight: 600,
-                      color: '#2563eb',
-                      textDecoration: 'none',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                    }}
+                    className="portal-action-link"
                   >
                     Run Full Audit <i className="fa-solid fa-arrow-right"></i>
                   </Link>
@@ -234,8 +183,8 @@ export default function CandidateDashboard() {
                 {candidateAtsScore ? (
                   <div>
                     <div className="portal-resume-highlight">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <i className="fa-solid fa-file-pdf" style={{ fontSize: '24px', color: '#ef4444' }}></i>
+                      <div className="portal-resume-meta">
+                        <i className="fa-solid fa-file-pdf resume-type-icon"></i>
                         <div>
                           <div className="portal-resume-filename">
                             {latestResume?.originalFileName || 'Uploaded Resume'}
@@ -245,21 +194,12 @@ export default function CandidateDashboard() {
                           </div>
                         </div>
                       </div>
-                      <div
-                        style={{
-                          background: candidateAtsScore >= 75 ? '#ecfdf5' : '#fef3c7',
-                          color: candidateAtsScore >= 75 ? '#065f46' : '#92400e',
-                          padding: '4px 10px',
-                          borderRadius: '20px',
-                          fontWeight: 700,
-                          fontSize: '12px',
-                        }}
-                      >
+                      <div className={`portal-score-pill ${candidateAtsScore >= 75 ? 'high' : 'medium'}`}>
                         {candidateAtsScore}% Score
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                    <div className="portal-metrics-stack">
                       <div className="portal-metric-row">
                         <div className="portal-metric-top">
                           <span>Machine Readability & Text Extraction</span>
@@ -296,21 +236,11 @@ export default function CandidateDashboard() {
                     </div>
                   </div>
                 ) : (
-                  <div
-                    style={{
-                      padding: '24px',
-                      background: '#eff6ff',
-                      borderRadius: '10px',
-                      border: '1px solid #bfdbfe',
-                      textAlign: 'center',
-                    }}
-                  >
-                    <i className="fa-solid fa-file-arrow-up" style={{ fontSize: '32px', color: '#2563eb', marginBottom: '12px' }}></i>
-                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#1e3a8a', margin: '0 0 6px 0' }}>
-                      No ATS Resume Scanned Yet
-                    </h3>
-                    <p style={{ fontSize: '11.5px', color: '#1e40af', maxWidth: '420px', margin: '0 auto 16px auto', lineHeight: 1.5 }}>
-                      Upload your PDF or Word resume to receive an instantaneous ATS compatibility breakdown, keyword gap report, and action verb suggestions.
+                  <div className="portal-empty-audit-card">
+                    <i className="fa-solid fa-file-arrow-up empty-audit-icon"></i>
+                    <h3>No ATS Resume Scanned Yet</h3>
+                    <p>
+                      Upload your PDF or Word resume to receive an instantaneous ATS compatibility breakdown and keyword gap report.
                     </p>
                     <button
                       type="button"
@@ -335,90 +265,104 @@ export default function CandidateDashboard() {
                       Recognized technical proficiencies parsed by the HireIQ semantic parser
                     </p>
                   </div>
-                  <span style={{ fontSize: '11.5px', fontWeight: 600, color: '#64748b' }}>
+                  <span className="portal-count-badge">
                     {skillsList.length} detected
                   </span>
                 </div>
 
                 {skillsList.length > 0 ? (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  <div className="portal-skills-wrap">
                     {skillsList.map((skill, idx) => (
                       <span key={idx} className="portal-skill-chip">
+                        <i className="fa-solid fa-check" style={{ fontSize: '9px', color: '#10b981', marginRight: '4px' }}></i>
                         {skill}
                       </span>
                     ))}
                   </div>
                 ) : (
-                  <div style={{ padding: '20px', background: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1', textAlign: 'center', color: '#64748b', fontSize: '12px' }}>
-                    <i className="fa-solid fa-code" style={{ marginRight: '6px', color: '#94a3b8' }}></i>
-                    No technical skills parsed yet. Upload your resume in the ATS Checker to automatically extract your technical skills inventory.
+                  <div className="portal-skills-empty-compact">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <i className="fa-solid fa-code" style={{ color: '#94a3b8', fontSize: '14px' }}></i>
+                      <span>No technical skills parsed yet. Upload your resume to extract skills.</span>
+                    </div>
+                    <Link to="/candidate/resume-checker" className="portal-mini-cta">
+                      Scan Resume <i className="fa-solid fa-arrow-right"></i>
+                    </Link>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Right Column */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              {/* ATS Best Practices Checklist */}
+            {/* Right Column (Checklist & Copilot) */}
+            <div className="portal-grid-col secondary">
+              {/* ATS Compliance Checklist */}
               <div className="portal-card">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-                  <i className="fa-solid fa-list-check" style={{ color: '#2563eb', fontSize: '16px' }}></i>
-                  <h2 className="portal-card-title" style={{ margin: 0 }}>
-                    ATS Compliance Checklist
-                  </h2>
+                <div className="portal-card-header compact">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <i className="fa-solid fa-list-check" style={{ color: '#2563eb', fontSize: '15px' }}></i>
+                    <h2 className="portal-card-title" style={{ margin: 0, fontSize: '14.5px' }}>
+                      ATS Compliance Checklist
+                    </h2>
+                  </div>
                 </div>
-                <p className="portal-card-subtitle" style={{ margin: '0 0 16px 0', lineHeight: 1.5 }}>
-                  Key standards modern Applicant Tracking Systems look for when parsing candidates:
+                <p className="portal-card-subtitle" style={{ margin: '0 0 14px 0', lineHeight: 1.4 }}>
+                  Key formatting criteria for modern ATS parsing systems:
                 </p>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <div className="portal-checklist-row">
-                    <i className="fa-solid fa-circle-check" style={{ color: '#10b981', fontSize: '13px', marginTop: '2px' }}></i>
-                    <div>
-                      <strong>Single-Column Layout:</strong> Multi-column tables confuse ATS text ordering.
+                <div className="portal-checklist-compact">
+                  <div className="portal-checklist-item">
+                    <i className="fa-solid fa-circle-check check-icon success"></i>
+                    <div className="checklist-text">
+                      <strong>Single-Column Layout</strong>
+                      <span>Linear structure prevents parse errors.</span>
                     </div>
                   </div>
-                  <div className="portal-checklist-row">
-                    <i className="fa-solid fa-circle-check" style={{ color: '#10b981', fontSize: '13px', marginTop: '2px' }}></i>
-                    <div>
-                      <strong>Quantified Business Impact:</strong> Include %, $, or time saved in bullet points.
+                  <div className="portal-checklist-item">
+                    <i className="fa-solid fa-circle-check check-icon success"></i>
+                    <div className="checklist-text">
+                      <strong>Standard Section Headings</strong>
+                      <span>Uses conventional labels (Experience, Education).</span>
                     </div>
                   </div>
-                  <div className="portal-checklist-row">
-                    <i className="fa-solid fa-circle-check" style={{ color: '#10b981', fontSize: '13px', marginTop: '2px' }}></i>
-                    <div>
-                      <strong>Standard Section Headings:</strong> Use standard labels like "Work Experience", "Education".
+                  <div className="portal-checklist-item">
+                    <i className="fa-solid fa-triangle-exclamation check-icon warning"></i>
+                    <div className="checklist-text">
+                      <strong>Quantified Business Impact</strong>
+                      <span>Include %, $, or measurable metrics in bullets.</span>
                     </div>
                   </div>
-                  <div className="portal-checklist-row">
-                    <i className="fa-solid fa-circle-check" style={{ color: '#10b981', fontSize: '13px', marginTop: '2px' }}></i>
-                    <div>
-                      <strong>Searchable Machine Text:</strong> Ensure text is selectable, not an image/scanned PDF.
+                  <div className="portal-checklist-item">
+                    <i className="fa-solid fa-circle-check check-icon success"></i>
+                    <div className="checklist-text">
+                      <strong>Searchable Machine Text</strong>
+                      <span>Ensure selectable text layer (avoid image PDFs).</span>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* AI Resume & Career Copilot Card */}
-              <div className="portal-copilot-box">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                  <i className="fa-solid fa-robot" style={{ color: '#4f46e5', fontSize: '16px' }}></i>
-                  <h2 className="portal-card-title" style={{ margin: 0 }}>
-                    AI Resume Copilot
-                  </h2>
+              <div className="portal-card copilot-card">
+                <div className="portal-card-header compact">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <i className="fa-solid fa-robot" style={{ color: '#4f46e5', fontSize: '15px' }}></i>
+                    <h2 className="portal-card-title" style={{ margin: 0, fontSize: '14.5px' }}>
+                      AI Resume Copilot
+                    </h2>
+                  </div>
                 </div>
-                <p className="portal-card-subtitle" style={{ margin: '0 0 16px 0', lineHeight: 1.5 }}>
-                  Get real-time feedback and intelligent resume improvements from your HireIQ AI Copilot.
+                <p className="portal-card-subtitle" style={{ margin: '0 0 14px 0', lineHeight: 1.4 }}>
+                  Instant AI optimizations for your resume & tech interviews:
                 </p>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div className="portal-copilot-actions">
                   <button
                     type="button"
                     className="portal-copilot-action-btn"
                     onClick={() => handleAskCopilot('How do I apply the Google XYZ formula (Accomplished [X] as measured by [Y] by doing [Z]) to my resume?')}
                   >
                     <span>💡 Learn the Google XYZ bullet formula</span>
-                    <i className="fa-solid fa-chevron-right" style={{ fontSize: '10px', color: '#94a3b8' }}></i>
+                    <i className="fa-solid fa-chevron-right arrow-icon"></i>
                   </button>
 
                   <button
@@ -427,22 +371,14 @@ export default function CandidateDashboard() {
                     onClick={() => handleAskCopilot('What are the top 10 keywords required for Full Stack and Backend engineering roles?')}
                   >
                     <span>🎯 Top keywords for tech roles</span>
-                    <i className="fa-solid fa-chevron-right" style={{ fontSize: '10px', color: '#94a3b8' }}></i>
-                  </button>
-
-                  <button
-                    type="button"
-                    className="portal-copilot-action-btn"
-                    onClick={() => handleAskCopilot('How can I prepare for technical system design interviews?')}
-                  >
-                    <span>⚙️ System design interview tips</span>
-                    <i className="fa-solid fa-chevron-right" style={{ fontSize: '10px', color: '#94a3b8' }}></i>
+                    <i className="fa-solid fa-chevron-right arrow-icon"></i>
                   </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );

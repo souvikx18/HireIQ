@@ -1,4 +1,6 @@
 import { prisma } from '../config/prisma.js';
+import { config } from '../config/index.js';
+import { logger } from '../utils/logger.js';
 import { resumeParserService } from '../services/resumeParser.service.js';
 import { sendSuccess, sendError } from '../utils/response.js';
 
@@ -17,8 +19,32 @@ export const candidatePortalController = {
       const fileSize = req.file.size;
 
       // Extract raw text and candidate details
-      const rawText = await resumeParserService.extractText(filePath, originalFileName);
-      const extracted = resumeParserService.extractCandidateInfo(rawText, originalFileName);
+      let rawText = await resumeParserService.extractText(filePath, originalFileName);
+      let extracted = null;
+
+      if ((!rawText || rawText.length < 40) && config.ai.geminiApiKey) {
+        logger.info(`Candidate portal audit: text short or empty (${rawText?.length || 0} chars). Using Gemini AI parser for ${originalFileName}...`);
+        const aiParsed = await resumeParserService.parseWithGemini(filePath, originalFileName, fileType);
+        if (aiParsed) {
+          rawText = aiParsed.fullText || rawText || `Candidate resume: ${originalFileName}`;
+          extracted = {
+            name: aiParsed.name || originalFileName.replace(/\.[^/.]+$/, ''),
+            email: aiParsed.email || req.user?.email || `candidate.${Date.now()}@applicant.hireiq.internal`,
+            phone: aiParsed.phone || null,
+            experienceYears: String(aiParsed.experienceYears ?? '0+'),
+            skills: Array.isArray(aiParsed.skills) ? aiParsed.skills : [],
+          };
+        }
+      }
+
+      if (!extracted) {
+        extracted = resumeParserService.extractCandidateInfo(rawText, originalFileName);
+      } else {
+        const detInfo = resumeParserService.extractCandidateInfo(rawText, originalFileName);
+        const combined = new Set([...extracted.skills, ...detInfo.skills]);
+        extracted.skills = Array.from(combined);
+      }
+
 
       // Analyze structure & ATS metrics
       const wordCount = rawText.split(/\s+/).filter(Boolean).length;
