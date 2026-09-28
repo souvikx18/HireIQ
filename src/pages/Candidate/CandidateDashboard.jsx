@@ -161,11 +161,11 @@ export default function CandidateDashboard() {
           <div className="portal-stats-grid">
             {loading ? (
               Array.from({ length: 4 }).map((_, i) => (
-                <div key={`skel-card-${i}`} className="hireiq-skeleton-card" style={{ padding: '20px', display: 'flex', gap: '14px', alignItems: 'center' }}>
-                  <Skeleton width="48px" height="48px" borderRadius="12px" />
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
-                    <Skeleton width="90px" height="12px" />
-                    <Skeleton width="110px" height="22px" />
+                <div key={`skel-card-${i}`} className="hireiq-skeleton-card" style={{ padding: '13px 16px', display: 'flex', gap: '12px', alignItems: 'center' }}>
+                  <Skeleton width="38px" height="38px" borderRadius="9px" />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1 }}>
+                    <Skeleton width="75px" height="10px" />
+                    <Skeleton width="95px" height="18px" />
                   </div>
                 </div>
               ))
