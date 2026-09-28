@@ -624,23 +624,7 @@ export default function ResumeUpload() {
                     </div>
                   </div>
 
-                  {/* MATCH SCORE */}
-                  <div className="match-section">
-                    <div className="match-row">
-                      <div
-                        className="match-circle"
-                        style={{
-                          background: `conic-gradient(#139b8e ${evalData.matchScore}%, #e5efed 0)`,
-                        }}
-                      >
-                        <div className="match-circle-inner">{evalData.matchScore}%</div>
-                      </div>
-                      <div className="match-info">
-                        <h3>{evalData.matchTitle}</h3>
-                        <p>{evalData.matchDesc}</p>
-                      </div>
-                    </div>
-                  </div>
+
 
                   {/* DETAILED AI EVALUATION METRICS GRID (4 COLUMNS) */}
                   <div className="ai-metrics-grid">
@@ -681,159 +665,45 @@ export default function ResumeUpload() {
                     </div>
                   </div>
 
-                  {/* SKILL COVERAGE BREAKDOWN */}
-                  <div className="coverage-breakdown-box">
-                    <div className="section-label" style={{ marginBottom: '8px' }}>Skill Coverage Breakdown</div>
-                    <div className="coverage-stats-row">
-                      <div className="cov-stat-item">
-                        <span className="cov-dot required"></span>
-                        <span className="cov-text">Required Skills: <strong>{evalData.requiredSkillsCount}</strong></span>
-                      </div>
-                      <div className="cov-stat-item">
-                        <span className="cov-dot matched"></span>
-                        <span className="cov-text">Matched Skills: <strong>{evalData.matchedSkillsCount}</strong></span>
-                      </div>
-                      <div className="cov-stat-item">
-                        <span className="cov-dot partial"></span>
-                        <span className="cov-text">Partial Match: <strong>{evalData.partialSkillsCount}</strong></span>
-                      </div>
-                      <div className="cov-stat-item">
-                        <span className="cov-dot missing"></span>
-                        <span className="cov-text">Missing Skills: <strong>{evalData.missingSkillsCount}</strong></span>
-                      </div>
-                      <div className="cov-stat-item">
-                        <span className="cov-dot required" style={{ background: '#139b8e' }}></span>
-                        <span className="cov-text">Skill Coverage: <strong>{evalData.skillCoverage}%</strong></span>
-                      </div>
-                    </div>
-                  </div>
 
-                  {/* TWO-COLUMN DETAILS GRID FOR COMPACT RESPONSIVE LAYOUT */}
+                  {/* TWO-COLUMN: MATCHED SKILLS + SKILL GAPS */}
                   <div className="eval-details-grid">
-                    {/* LEFT COLUMN: COMPETENCIES, GAPS & STRENGTHS */}
                     <div className="eval-details-col">
-                      {/* EXTRACTED CORE COMPETENCIES (MATCHED SKILLS) */}
                       <div className="eval-section-block">
-                        <div className="section-label">Extracted Core Competencies</div>
+                        <div className="section-label">Matched Skills</div>
                         <div className="skill-tags">
                           {evalData.skills.map((skill, sIdx) => (
-                            <span
-                              key={sIdx}
-                              className={`skill-tag ${skill.purple ? 'purple' : ''}`}
-                            >
+                            <span key={sIdx} className={`skill-tag ${skill.purple ? 'purple' : ''}`}>
                               <i className="fa-solid fa-check" style={{ fontSize: '9px', marginRight: '5px' }}></i>
                               {skill.name}
                             </span>
                           ))}
                         </div>
                       </div>
+                    </div>
 
-                      {/* PARTIAL / WEAK SKILLS */}
-                      {evalData.partialSkills && evalData.partialSkills.length > 0 && (
-                        <div className="eval-section-block">
-                          <div className="section-label">Partial & Weak Skills</div>
-                          <div className="skill-tags">
-                            {evalData.partialSkills.map((ps, psIdx) => (
-                              <span key={psIdx} className="partial-skill-tag">
-                                <i className="fa-solid fa-circle-half-stroke" style={{ fontSize: '10px', marginRight: '5px' }}></i>
-                                {ps}
-                              </span>
+                    <div className="eval-details-col">
+                      <div className="eval-section-block skill-gap">
+                        <div className="section-label">Skill Gaps</div>
+                        {evalData.gapPriorities.length === 0 ? (
+                          <p style={{ fontSize: '12px', color: '#64748b', marginTop: '6px' }}>No critical gaps identified.</p>
+                        ) : (
+                          <div className="gap-priorities-list">
+                            {evalData.gapPriorities.slice(0, 4).map((gapObj, gIdx) => (
+                              <div key={gIdx} className="gap-priority-item">
+                                <span className="gap-name">
+                                  <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: '6px' }}></i>
+                                  {gapObj.name}
+                                </span>
+                                <span className={`gap-priority-badge ${gapObj.priorityClass}`}>{gapObj.priority}</span>
+                              </div>
                             ))}
                           </div>
-                        </div>
-                      )}
-
-                      {/* IDENTIFIED SKILL GAPS & PRIORITIES */}
-                      <div className="eval-section-block skill-gap">
-                        <div className="section-label">Identified Skill Gaps</div>
-                        <div className="gap-priorities-list">
-                          {evalData.gapPriorities.map((gapObj, gIdx) => (
-                            <div key={gIdx} className="gap-priority-item">
-                              <span className="gap-name">
-                                <i className="fa-solid fa-triangle-exclamation" style={{ marginRight: '6px' }}></i>
-                                {gapObj.name}
-                              </span>
-                              <span className={`gap-priority-badge ${gapObj.priorityClass}`}>
-                                {gapObj.priority}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* CANDIDATE STRENGTHS */}
-                      <div className="eval-section-block">
-                        <div className="section-label">Candidate Strengths</div>
-                        <div className="strengths-list">
-                          {evalData.strengths.map((str, strIdx) => (
-                            <div key={strIdx} className="strength-item">
-                              <i className="fa-solid fa-circle-check"></i>
-                              <span>{str}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* RIGHT COLUMN: RECOMMENDED SKILLS, PATHWAY, ROADMAP & EXPLAINABILITY */}
-                    <div className="eval-details-col">
-                      {/* RECOMMENDED SKILLS */}
-                      <div className="eval-section-block">
-                        <div className="section-label">Recommended Skills</div>
-                        <div className="skill-tags">
-                          {evalData.recommendedSkills.map((rec, recIdx) => (
-                            <span key={recIdx} className="recommended-skill-tag">
-                              <i className="fa-solid fa-arrow-trend-up" style={{ fontSize: '10px', marginRight: '5px' }}></i>
-                              {rec}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* ACTIONABLE COURSE PATHWAY */}
-                      <div className="course-card">
-                        <div className="course-title">
-                          <i className="fa-regular fa-bookmark"></i>
-                          {evalData.courseTitle || 'Actionable Course Pathway'}
-                        </div>
-                        <p>{evalData.courseDesc}</p>
-                      </div>
-
-                      {/* LEARNING ROADMAP */}
-                      <div className="eval-section-block">
-                        <div className="section-label">Learning Roadmap</div>
-                        <div className="roadmap-timeline">
-                          {evalData.roadmapSteps.map((stepItem, stIdx) => (
-                            <div key={stIdx} className="roadmap-step">
-                              <div className="roadmap-step-badge">{stepItem.step}</div>
-                              <div className="roadmap-step-content">
-                                <strong>{stepItem.title}</strong>
-                                <p>{stepItem.desc}</p>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                        )}
                       </div>
                     </div>
                   </div>
 
-                  {/* EXPLAINABLE AI / WHY THIS SCORE? (FULL WIDTH) */}
-                  <div className="why-score-box">
-                    <div className="why-score-header">
-                      <i className="fa-solid fa-brain"></i>
-                      <strong>Explainable AI: Why this score?</strong>
-                    </div>
-                    <p>{evalData.whyScoreExplanation}</p>
-                    <div className="why-score-weights">
-                      <span>Core Skills: <strong>45%</strong></span>
-                      <span>•</span>
-                      <span>Experience: <strong>25%</strong></span>
-                      <span>•</span>
-                      <span>JD Relevance: <strong>15%</strong></span>
-                      <span>•</span>
-                      <span>ATS Quality: <strong>15%</strong></span>
-                    </div>
-                  </div>
 
                   {/* ACTION BUTTONS */}
                   <div className="resume-decision-actions">
