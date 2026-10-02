@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { usePageSEO } from '../hooks/usePageSEO';
 import '../css/signup.css';
 
 export default function Login() {
+  usePageSEO({
+    title: 'Login to HireIQ | Portal Access',
+    description: 'Sign in to your HireIQ account to access recruiter dashboards, ATS tools, and candidate screening records.',
+  });
+
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { usePageSEO } from '../hooks/usePageSEO';
 import logo from '../assets/img/hireiq-logo.png';
 import '../css/landing.css';
 
@@ -9,6 +10,14 @@ export default function LandingPage() {
   const { isAuthenticated } = useAuth();
   const [activeNav, setActiveNav] = useState('home');
   const [openFaq, setOpenFaq] = useState(0); // First question open by default
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [legalModal, setLegalModal] = useState(null); // 'privacy' | 'terms' | null
+
+  usePageSEO({
+    title: 'HireIQ — AI Resume Screening & Skill Gap Analysis Platform',
+    description: 'Transform your recruitment process with HireIQ. Automated AI resume parsing, candidate scoring, skill gap analysis, and ATS optimization.',
+    keywords: 'AI recruitment, resume screening, skill gap analysis, ATS checker, candidate ranking, hiring platform',
+  });
 
   // Disconnect from Dashboard dark/light mode: Always use fixed normal appearance
   useEffect(() => {
@@ -147,6 +156,120 @@ export default function LandingPage() {
               Login
             </Link>
             <Link to="/signup" className="lp-btn-signup">
+              Sign Up
+            </Link>
+            <button
+              type="button"
+              className="lp-mobile-toggle"
+              onClick={() => setMobileNavOpen((prev) => !prev)}
+              aria-label={mobileNavOpen ? "Close navigation menu" : "Open navigation menu"}
+              title={mobileNavOpen ? "Close menu" : "Open menu"}
+            >
+              <i className={`fa-solid ${mobileNavOpen ? 'fa-xmark' : 'fa-bars'}`}></i>
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Nav Backdrop */}
+        {mobileNavOpen && (
+          <div
+            className="lp-mobile-backdrop"
+            onClick={() => setMobileNavOpen(false)}
+            aria-hidden="true"
+          />
+        )}
+
+        {/* Mobile Slide Drawer */}
+        <div className={`lp-mobile-drawer ${mobileNavOpen ? 'open' : ''}`} aria-hidden={!mobileNavOpen}>
+          <ul className="lp-mobile-nav-list">
+            <li>
+              <a
+                href="#home"
+                className={`lp-mobile-nav-link ${activeNav === 'home' ? 'active' : ''}`}
+                onClick={(e) => {
+                  scrollToSection(e, 'home', 'home');
+                  setMobileNavOpen(false);
+                }}
+              >
+                Home
+              </a>
+            </li>
+            <li>
+              <a
+                href="#features"
+                className={`lp-mobile-nav-link ${activeNav === 'features' ? 'active' : ''}`}
+                onClick={(e) => {
+                  scrollToSection(e, 'features', 'features');
+                  setMobileNavOpen(false);
+                }}
+              >
+                Features
+              </a>
+            </li>
+            <li>
+              <a
+                href="#how-it-works"
+                className={`lp-mobile-nav-link ${activeNav === 'how-it-works' ? 'active' : ''}`}
+                onClick={(e) => {
+                  scrollToSection(e, 'how-it-works', 'how-it-works');
+                  setMobileNavOpen(false);
+                }}
+              >
+                How It Works
+              </a>
+            </li>
+            <li>
+              <a
+                href="#why-hireiq"
+                className={`lp-mobile-nav-link ${activeNav === 'why-hireiq' ? 'active' : ''}`}
+                onClick={(e) => {
+                  scrollToSection(e, 'why-hireiq', 'why-hireiq');
+                  setMobileNavOpen(false);
+                }}
+              >
+                Why HireIQ
+              </a>
+            </li>
+            <li>
+              <a
+                href="#testimonials"
+                className={`lp-mobile-nav-link ${activeNav === 'testimonials' ? 'active' : ''}`}
+                onClick={(e) => {
+                  scrollToSection(e, 'testimonials', 'testimonials');
+                  setMobileNavOpen(false);
+                }}
+              >
+                Testimonials
+              </a>
+            </li>
+            <li>
+              <a
+                href="#faq"
+                className={`lp-mobile-nav-link ${activeNav === 'faq' ? 'active' : ''}`}
+                onClick={(e) => {
+                  scrollToSection(e, 'faq', 'faq');
+                  setMobileNavOpen(false);
+                }}
+              >
+                FAQs
+              </a>
+            </li>
+          </ul>
+
+          <div className="lp-mobile-drawer-actions">
+            <Link
+              to={isAuthenticated ? "/candidate/resume-checker" : "/login?redirect=/candidate/resume-checker"}
+              className="lp-btn-login"
+              style={{ color: '#2563eb', fontWeight: 600, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+              onClick={() => setMobileNavOpen(false)}
+            >
+              <i className="fa-solid fa-file-shield"></i>
+              ATS Check
+            </Link>
+            <Link to="/login" className="lp-btn-login" onClick={() => setMobileNavOpen(false)}>
+              Login
+            </Link>
+            <Link to="/signup" className="lp-btn-signup" onClick={() => setMobileNavOpen(false)}>
               Sign Up
             </Link>
           </div>
@@ -707,11 +830,15 @@ export default function LandingPage() {
               <h4 className="lp-footer-col-title">Contact</h4>
               <div className="lp-footer-contact-item">
                 <i className="fa-regular fa-envelope"></i>
-                <span>support@hireiq.com</span>
+                <a href="mailto:support@hireiq.com" className="lp-footer-link" title="Send email to support">
+                  support@hireiq.com
+                </a>
               </div>
               <div className="lp-footer-contact-item">
                 <i className="fa-solid fa-phone"></i>
-                <span>+91 9732145124</span>
+                <a href="tel:+919732145124" className="lp-footer-link" title="Call support">
+                  +91 9732145124
+                </a>
               </div>
               <div className="lp-footer-contact-item">
                 <i className="fa-solid fa-location-dot"></i>
@@ -724,12 +851,77 @@ export default function LandingPage() {
           <div className="lp-footer-bottom">
             <div>© 2026 HireIQ. All rights reserved.</div>
             <div className="lp-footer-legal">
-              <a href="#">Privacy Policy</a>
-              <a href="#">Terms of Service</a>
+              <button
+                type="button"
+                className="lp-legal-btn"
+                onClick={() => setLegalModal('privacy')}
+              >
+                Privacy Policy
+              </button>
+              <button
+                type="button"
+                className="lp-legal-btn"
+                onClick={() => setLegalModal('terms')}
+              >
+                Terms of Service
+              </button>
             </div>
           </div>
         </div>
       </footer>
+
+      {/* Legal Dialog Modal */}
+      {legalModal && (
+        <div className="lp-legal-overlay" onClick={() => setLegalModal(null)} role="dialog" aria-modal="true">
+          <div className="lp-legal-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="lp-legal-header">
+              <h3>{legalModal === 'privacy' ? 'HireIQ Privacy Policy' : 'HireIQ Terms of Service'}</h3>
+              <button
+                type="button"
+                className="lp-legal-close"
+                onClick={() => setLegalModal(null)}
+                aria-label="Close dialog"
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+            <div className="lp-legal-body">
+              {legalModal === 'privacy' ? (
+                <>
+                  <p><strong>Effective Date:</strong> January 1, 2026</p>
+                  <p>HireIQ is committed to protecting the privacy of recruiters, hiring managers, and candidates. This policy explains how we collect, use, and safeguard personal and evaluation data.</p>
+                  <h4>1. Information We Collect</h4>
+                  <p>We process candidate resumes, contact details, parsed skill histories, and job role specifications strictly for AI screening, ATS compatibility checks, and hiring workflows.</p>
+                  <h4>2. Data Security & Encryption</h4>
+                  <p>All stored resumes and assessment profiles are encrypted at rest with AES-256 and in transit via TLS 1.3. We do not sell your personal data or candidate resumes to third parties.</p>
+                  <h4>3. Data Retention</h4>
+                  <p>Candidate resumes and audit metrics are retained in accordance with your organization's compliance policy or until an account administrator requests deletion.</p>
+                  <h4>4. Inquiries</h4>
+                  <p>For data access requests or GDPR inquiries, contact our Data Protection Officer at <a href="mailto:support@hireiq.com">support@hireiq.com</a>.</p>
+                </>
+              ) : (
+                <>
+                  <p><strong>Effective Date:</strong> January 1, 2026</p>
+                  <p>By accessing or using HireIQ, you agree to be bound by these Terms of Service.</p>
+                  <h4>1. Usage & Accounts</h4>
+                  <p>HireIQ provides AI-driven candidate ranking, skill gap analysis, and resume evaluation services. You agree to maintain account credential confidentiality and use the service in compliance with labor regulations.</p>
+                  <h4>2. Candidate Screening Compliance</h4>
+                  <p>Organizations remain responsible for fair hiring decisions. HireIQ operates as an intelligent decision-support assistant and does not guarantee employment outcomes.</p>
+                  <h4>3. Service Availability</h4>
+                  <p>We maintain an enterprise 99.9% uptime SLA for Pro and Enterprise subscribers. Planned maintenance will be communicated with advance notice.</p>
+                  <h4>4. Contact</h4>
+                  <p>Questions regarding service agreements can be directed to <a href="mailto:support@hireiq.com">support@hireiq.com</a>.</p>
+                </>
+              )}
+            </div>
+            <div className="lp-legal-footer">
+              <button type="button" className="lp-btn-login" onClick={() => setLegalModal(null)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

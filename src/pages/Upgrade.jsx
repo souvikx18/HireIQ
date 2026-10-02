@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { usePageSEO } from '../hooks/usePageSEO';
 import '../css/upgrade.css';
 import '../css/upgrade-polish.css';
 import '../css/upgrade-plans.css';
 
 export default function Upgrade() {
+  usePageSEO({
+    title: 'Subscription Plans & Pricing | HireIQ',
+    description: 'Upgrade your recruitment workflows with HireIQ Pro and Enterprise plans. Unlimited AI evaluations, team collaboration, and advanced ATS screening.',
+  });
+
   const navigate = useNavigate();
   const { user } = useAuth();
   const isCandidate = user?.role === 'CANDIDATE';

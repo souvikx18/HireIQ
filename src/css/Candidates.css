@@ -1161,42 +1161,26 @@ body.dark-mode .review.red-review {
 
 
 @media (max-width: 900px) {
-
-    .sidebar {
-        width: 230px !important;
-    }
-
     .main,
     .main-content {
-        margin-left: 230px;
-        width: calc(100% - 230px);
         padding: 24px 20px;
     }
 
     .top-header {
         flex-direction: column;
-
         gap: 20px;
     }
 
     .header-actions {
         width: 100%;
-
         justify-content: flex-start;
     }
 }
 
 
 @media (max-width: 650px) {
-
-    .sidebar {
-        width: 210px !important;
-    }
-
     .main,
     .main-content {
-        margin-left: 210px;
-        width: calc(100% - 210px);
         padding: 20px 15px;
     }
 

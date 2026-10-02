@@ -326,3 +326,93 @@ body.sidebar-collapsed .menu-item span,
     transform: translateY(-2px);
     box-shadow: 0 8px 16px rgba(13, 64, 170, .3);
 }
+
+/* =====================================================
+   MOBILE & TABLET OFF-CANVAS SIDEBAR DRAWER (<1024px)
+===================================================== */
+@media (max-width: 1024px) {
+    .sidebar {
+        transform: translateX(-100%) !important;
+        width: 270px !important;
+        position: fixed !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        z-index: 2000 !important;
+        box-shadow: 0 0 35px rgba(0, 0, 0, 0.6) !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    .sidebar.mobile-open {
+        transform: translateX(0) !important;
+    }
+
+    .sidebar-backdrop {
+        position: fixed !important;
+        inset: 0 !important;
+        background: rgba(0, 0, 0, 0.65) !important;
+        backdrop-filter: blur(4px) !important;
+        -webkit-backdrop-filter: blur(4px) !important;
+        z-index: 1999 !important;
+        animation: fadeInBackdrop 0.2s ease forwards !important;
+    }
+
+    @keyframes fadeInBackdrop {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .sidebar-mobile-close-btn {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 255, 255, 0.12) !important;
+        border: 1px solid rgba(255, 255, 255, 0.22) !important;
+        color: #fff !important;
+        border-radius: 8px !important;
+        cursor: pointer !important;
+        font-size: 15px !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .sidebar-mobile-close-btn:hover {
+        background: rgba(239, 68, 68, 0.3) !important;
+        border-color: rgba(239, 68, 68, 0.6) !important;
+        color: #fca5a5 !important;
+    }
+
+    .sidebar-toggle-btn {
+        display: none !important;
+    }
+
+    .main,
+    .main-content,
+    .portal-main-content,
+    .jobrole-main,
+    .setting-main,
+    .report-main,
+    body.sidebar-collapsed .main,
+    body.sidebar-collapsed .main-content,
+    body.sidebar-collapsed .portal-main-content,
+    body.sidebar-collapsed .jobrole-main,
+    body.sidebar-collapsed .setting-main,
+    body.sidebar-collapsed .report-main {
+        margin-left: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+}
+
+@media (min-width: 1025px) {
+    .sidebar-mobile-close-btn {
+        display: none !important;
+    }
+    .sidebar-backdrop {
+        display: none !important;
+    }
+}

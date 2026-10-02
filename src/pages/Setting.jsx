@@ -5,9 +5,15 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { authApi } from '../api/auth.js';
 import { adminApi } from '../api/admin.js';
 import { skillsApi } from '../api/skills.js';
+import { usePageSEO } from '../hooks/usePageSEO';
 import '../css/setting.css';
 
 export default function Setting() {
+  usePageSEO({
+    title: 'Account & Organization Settings | HireIQ',
+    description: 'Manage profile preferences, password security, notification channels, integrations, and administrative controls.',
+  });
+
   const { user, updateUser } = useAuth();
   const [activeTab, setActiveTab] = useState('account');
   const [healthData, setHealthData] = useState(null);
@@ -1139,7 +1145,15 @@ export default function Setting() {
                         usersList.map((u) => (
                           <tr key={u.id}>
                             <td style={{ fontWeight: '600' }}>{u.firstName} {u.lastName}</td>
-                            <td className="setting-cell-subtext">{u.email}</td>
+                            <td className="setting-cell-subtext">
+                              <a
+                                href={`mailto:${u.email}`}
+                                style={{ color: '#2563eb', textDecoration: 'none' }}
+                                title={`Send email to ${u.email}`}
+                              >
+                                {u.email}
+                              </a>
+                            </td>
                             <td>
                               <select
                                 value={u.role}

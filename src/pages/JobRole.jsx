@@ -3,9 +3,15 @@ import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { jobsApi } from '../api/jobs';
 import { candidatesApi } from '../api/candidates';
+import { usePageSEO } from '../hooks/usePageSEO';
 import '../css/jobrole.css';
 
 export default function JobRole() {
+  usePageSEO({
+    title: 'Job Roles & Positions Management | HireIQ',
+    description: 'Create and manage organizational job roles, required skill profiles, experience thresholds, and candidate assignments.',
+  });
+
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -488,7 +494,31 @@ export default function JobRole() {
                 </thead>
 
                 <tbody>
-                  {filteredRoles.map((r) => (
+                  {filteredRoles.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} style={{ textAlign: 'center', padding: '48px 20px', color: '#64748b' }}>
+                        <div style={{ maxWidth: '340px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                          <i className="fa-solid fa-briefcase" style={{ fontSize: '36px', color: '#94a3b8', marginBottom: '4px' }}></i>
+                          <h4 style={{ margin: 0, fontSize: '15px', color: '#1e293b', fontWeight: 600 }}>No Job Roles Found</h4>
+                          <p style={{ margin: 0, fontSize: '12px', lineHeight: 1.5, color: '#64748b' }}>
+                            {search || departmentFilter !== 'all' || statusFilter !== 'all'
+                              ? 'No roles match the selected filters or search keyword. Try clearing filters.'
+                              : 'No job roles have been created yet. Click "Create Role" above to set up your first opening.'}
+                          </p>
+                          {(search || departmentFilter !== 'all' || statusFilter !== 'all') && (
+                            <button
+                              type="button"
+                              onClick={() => { setSearch(''); setDepartmentFilter('all'); setStatusFilter('all'); }}
+                              style={{ marginTop: '8px', padding: '6px 14px', borderRadius: '6px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+                            >
+                              Reset Filters
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredRoles.map((r) => (
                     <tr
                       key={r.id}
                       data-role={r.name}
@@ -569,7 +599,8 @@ export default function JobRole() {
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  ))
+                )}
                 </tbody>
               </table>
             </div>
@@ -1069,7 +1100,14 @@ export default function JobRole() {
                         <tr key={cand.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                           <td style={{ padding: '8px 12px' }}>
                             <div className="role-cand-name" style={{ fontWeight: '600' }}>{cand.name}</div>
-                            <div className="role-cand-email" style={{ fontSize: '10.5px' }}>{cand.email}</div>
+                            <a
+                              href={`mailto:${cand.email}`}
+                              className="role-cand-email"
+                              style={{ fontSize: '10.5px', color: '#2563eb', textDecoration: 'none' }}
+                              title={`Send email to ${cand.email}`}
+                            >
+                              {cand.email}
+                            </a>
                           </td>
                           <td style={{ padding: '8px 12px' }}>
                             <span

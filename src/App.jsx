@@ -15,6 +15,7 @@ import Login from './pages/Login';
 import Upgrade from './pages/Upgrade';
 import CandidateDashboard from './pages/Candidate/CandidateDashboard';
 import ResumeChecker from './pages/Candidate/ResumeChecker';
+import NotFound from './pages/NotFound';
 import AIChatbot from './components/AIChatbot';
 import CommandPalette from './components/CommandPalette';
 
@@ -248,21 +249,8 @@ function AppRoutes() {
         <Route path="/login" element={<Login />} />
         <Route path="/login.html" element={<Login />} />
 
-        {/* Fallback */}
-        <Route
-          path="*"
-          element={
-            isAuthenticated ? (
-              user?.role === 'CANDIDATE' ? (
-                <Navigate to="/candidate/dashboard" replace />
-              ) : (
-                <Navigate to="/dashboard" replace />
-              )
-            ) : (
-              <Navigate to="/" replace />
-            )
-          }
-        />
+        {/* 404 Custom Not Found Route */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <CommandPalette />
       {!hideChatbot && <AIChatbot />}

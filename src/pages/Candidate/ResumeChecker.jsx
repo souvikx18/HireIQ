@@ -4,10 +4,16 @@ import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
 import { useAuth } from '../../context/AuthContext';
 import { candidatePortalApi } from '../../api/candidatePortal';
+import { usePageSEO } from '../../hooks/usePageSEO';
 import logo from '../../assets/img/hireiq-logo.png';
 import '../../css/candidate-portal.css';
 
 export default function ResumeChecker() {
+  usePageSEO({
+    title: 'Free ATS Resume Checker & Compatibility Audit | HireIQ',
+    description: 'Audit your resume against ATS scanner rules, get instant score breakdown, identify missing keywords, and view actionable improvements.',
+  });
+
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const fileInputRef = useRef(null);

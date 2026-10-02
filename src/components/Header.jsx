@@ -171,9 +171,22 @@ export default function Header({
     <>
       <header className={`header ${className}`.trim()}>
         <div className="header-left">
-          {extraLeft}
-          {eyebrow && <span className="eyebrow">{eyebrow}</span>}
-          {title && <h1>{title}</h1>}
+          <div className="header-title-row">
+            <button
+              type="button"
+              className="header-mobile-menu-btn"
+              onClick={() => window.dispatchEvent(new CustomEvent('hireiq-toggle-mobile-sidebar'))}
+              title="Open navigation menu"
+              aria-label="Open navigation menu"
+            >
+              <i className="fa-solid fa-bars"></i>
+            </button>
+            <div className="header-title-group">
+              {extraLeft}
+              {eyebrow && <span className="eyebrow">{eyebrow}</span>}
+              {title && <h1>{title}</h1>}
+            </div>
+          </div>
           {subtitle && <p>{subtitle}</p>}
         </div>
 

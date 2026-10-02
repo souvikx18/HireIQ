@@ -5,9 +5,15 @@ import Header from '../components/Header';
 import { useAuth } from '../context/AuthContext';
 import { analyticsApi } from '../api/analytics';
 import { resumesApi } from '../api/resumes';
+import { usePageSEO } from '../hooks/usePageSEO';
 import '../css/style.css';
 
 export default function Index() {
+  usePageSEO({
+    title: 'Recruiter Dashboard & Talent Analytics | HireIQ',
+    description: 'Real-time candidate pipeline overview, screening conversion rates, top matched candidates, and AI talent telemetry.',
+  });
+
   const navigate = useNavigate();
   const { user } = useAuth();
 

@@ -2092,16 +2092,6 @@ body.dark-mode .setting-cell-subtext {
 ========================================================= */
 
 @media (max-width: 1050px) {
-
-    .sidebar {
-        width: 200px;
-    }
-
-    .main-content,
-    .setting-main {
-        margin-left: 200px;
-    }
-
     .settings-page {
         padding-left: 22px;
         padding-right: 22px;
@@ -2110,22 +2100,10 @@ body.dark-mode .setting-cell-subtext {
     .profile-content {
         gap: 12px;
     }
-
 }
 
 
 @media (max-width: 850px) {
-
-    .sidebar {
-        width: 72px;
-
-        padding: 20px 8px;
-    }
-
-    .main-content,
-    .setting-main {
-        margin-left: 72px;
-    }
 
     .brand {
         justify-content: center;

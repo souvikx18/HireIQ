@@ -4,6 +4,7 @@ import Header from '../components/Header';
 import { resumesApi } from '../api/resumes';
 import { candidatesApi } from '../api/candidates';
 import { jobsApi } from '../api/jobs';
+import { usePageSEO } from '../hooks/usePageSEO';
 import '../css/resumeupload.css';
 
 
@@ -126,6 +127,11 @@ function getEvaluationData(candidate) {
 
 
 export default function ResumeUpload() {
+  usePageSEO({
+    title: 'AI Resume Upload & Candidate Evaluator | HireIQ',
+    description: 'Upload candidate resumes, trigger automated multi-layer AI skill extraction, ATS parsing, and benchmark job matching.',
+  });
+
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [isDragging, setIsDragging] = useState(false);

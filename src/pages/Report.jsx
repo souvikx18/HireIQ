@@ -2,10 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { reportsApi } from '../api/reports';
+import { usePageSEO } from '../hooks/usePageSEO';
 import '../css/report.css';
 
 export default function Report() {
-  const [selectedDate, setSelectedDate] = useState('May 20, 2024 - Jun 19, 2024');
+  usePageSEO({
+    title: 'Recruitment Reports & Hiring Analytics | HireIQ',
+    description: 'Generate and export executive recruiting analytics, candidate velocity audits, and department hiring performance reports.',
+  });
+
+  const [selectedDate, setSelectedDate] = useState('Last 30 Days');
   const [dateMenuOpen, setDateMenuOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState('Report generated successfully.');
   const [toastVisible, setToastVisible] = useState(false);
@@ -131,27 +137,6 @@ export default function Report() {
                   <button
                     type="button"
                     className="date-option"
-                    onClick={() => handleDateSelect('May 20, 2024 - Jun 19, 2024')}
-                  >
-                    May 20, 2024 - Jun 19, 2024
-                  </button>
-                  <button
-                    type="button"
-                    className="date-option"
-                    onClick={() => handleDateSelect('Apr 20, 2024 - May 19, 2024')}
-                  >
-                    Apr 20, 2024 - May 19, 2024
-                  </button>
-                  <button
-                    type="button"
-                    className="date-option"
-                    onClick={() => handleDateSelect('Mar 20, 2024 - Apr 19, 2024')}
-                  >
-                    Mar 20, 2024 - Apr 19, 2024
-                  </button>
-                  <button
-                    type="button"
-                    className="date-option"
                     onClick={() => handleDateSelect('Last 30 Days')}
                   >
                     Last 30 Days
@@ -162,6 +147,27 @@ export default function Report() {
                     onClick={() => handleDateSelect('Last 90 Days')}
                   >
                     Last 90 Days
+                  </button>
+                  <button
+                    type="button"
+                    className="date-option"
+                    onClick={() => handleDateSelect('This Month')}
+                  >
+                    This Month
+                  </button>
+                  <button
+                    type="button"
+                    className="date-option"
+                    onClick={() => handleDateSelect('Previous Quarter')}
+                  >
+                    Previous Quarter
+                  </button>
+                  <button
+                    type="button"
+                    className="date-option"
+                    onClick={() => handleDateSelect('Year to Date (2026)')}
+                  >
+                    Year to Date (2026)
                   </button>
                 </div>
               </div>

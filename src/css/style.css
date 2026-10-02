@@ -1835,29 +1835,6 @@ body.dark-mode .topic-tag {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .sidebar {
-    width: 75px;
-  }
-
-  .brand div:last-child,
-  .menu-item span,
-  .upgrade-card {
-    display: none;
-  }
-
-  .brand {
-    justify-content: center;
-  }
-
-  .menu-item {
-    justify-content: center;
-  }
-
-  .main {
-    margin-left: 75px;
-    width: calc(100% - 75px);
-  }
-
   .header {
     flex-direction: column;
     align-items: flex-start;

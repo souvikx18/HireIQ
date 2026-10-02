@@ -1,9 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { usePageSEO } from '../hooks/usePageSEO';
 import '../css/signup.css';
 
 export default function Signup() {
+  usePageSEO({
+    title: 'Create an Account | HireIQ',
+    description: 'Join HireIQ today. Start optimizing resume evaluations and candidate scoring with AI.',
+  });
+
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();

@@ -5,9 +5,15 @@ import Header from '../../components/Header';
 import { useAuth } from '../../context/AuthContext';
 import { candidatePortalApi } from '../../api/candidatePortal';
 import { Skeleton } from '../../components/common/Skeleton';
+import { usePageSEO } from '../../hooks/usePageSEO';
 import '../../css/candidate-portal.css';
 
 export default function CandidateDashboard() {
+  usePageSEO({
+    title: 'Candidate Career Dashboard & ATS Profile | HireIQ',
+    description: 'Track your application status, ATS readiness score, evaluated skills, and career progress with HireIQ.',
+  });
+
   const navigate = useNavigate();
   const { user } = useAuth();
 

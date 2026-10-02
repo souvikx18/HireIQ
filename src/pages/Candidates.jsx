@@ -4,9 +4,15 @@ import Header from '../components/Header';
 import { candidatesApi } from '../api/candidates';
 import { jobsApi } from '../api/jobs';
 import { Skeleton } from '../components/common/Skeleton';
+import { usePageSEO } from '../hooks/usePageSEO';
 import '../css/candidates.css';
 
 export default function Candidates() {
+  usePageSEO({
+    title: 'Candidates Management & Talent Pipeline | HireIQ',
+    description: 'Track, filter, evaluate, and compare candidate profiles, AI screening scores, and interview stages with HireIQ.',
+  });
+
   const [candidatesList, setCandidatesList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [jobRoles, setJobRoles] = useState([]);
@@ -613,7 +619,15 @@ export default function Candidates() {
                           </div>
                           <div>
                             <strong>{c.name}</strong>
-                            <span>{c.email}</span>
+                            <a
+                              href={`mailto:${c.email}`}
+                              className="candidate-email-link"
+                              onClick={(e) => e.stopPropagation()}
+                              style={{ color: '#64748b', fontSize: '11px', textDecoration: 'none', display: 'inline-block' }}
+                              title={`Send email to ${c.email}`}
+                            >
+                              {c.email}
+                            </a>
                           </div>
                         </div>
                       </td>
@@ -981,12 +995,20 @@ export default function Candidates() {
                 </h2>
                 <p
                   style={{
-                    color: '#8497b0',
-                    fontSize: '12px',
                     margin: 0,
                   }}
                 >
-                  {selectedCandidateModal.email}
+                  <a
+                    href={`mailto:${selectedCandidateModal.email}`}
+                    style={{
+                      color: '#2563eb',
+                      fontSize: '12px',
+                      textDecoration: 'none',
+                    }}
+                    title={`Send email to ${selectedCandidateModal.email}`}
+                  >
+                    {selectedCandidateModal.email}
+                  </a>
                 </p>
               </div>
             </div>

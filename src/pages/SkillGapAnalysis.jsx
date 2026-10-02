@@ -3,9 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
 import { analyticsApi } from '../api/analytics';
+import { usePageSEO } from '../hooks/usePageSEO';
 import '../css/skillgapanalysis.css';
 
 export default function SkillGapAnalysis() {
+  usePageSEO({
+    title: 'Skill Gap Analysis & Upskilling Roadmaps | HireIQ',
+    description: 'Diagnose talent shortfalls, assess competency benchmarks across departments, and generate targeted training curriculums.',
+  });
+
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -324,13 +330,39 @@ export default function SkillGapAnalysis() {
               </tbody>
             </table>
           </div>
-          <div
-            className="empty-state"
-            id="emptyState"
-            style={{ display: filteredGaps.length === 0 ? 'block' : 'none' }}
-          >
-            No matching skills found.
-          </div>
+          {filteredGaps.length === 0 && (
+            <div
+              className="empty-state"
+              id="emptyState"
+              style={{
+                padding: '48px 24px',
+                textAlign: 'center',
+                background: 'var(--surface, #ffffff)',
+                borderRadius: '12px',
+                border: '1px solid var(--border, #e2e8f0)',
+                marginTop: '16px',
+              }}
+            >
+              <div style={{ maxWidth: '340px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                <i className="fa-solid fa-chart-pie" style={{ fontSize: '36px', color: '#94a3b8', marginBottom: '4px' }}></i>
+                <h4 style={{ margin: 0, fontSize: '15px', color: 'var(--text, #1e293b)', fontWeight: 600 }}>No Skill Gaps Found</h4>
+                <p style={{ margin: 0, fontSize: '12px', lineHeight: 1.5, color: '#64748b' }}>
+                  {searchTerm || categoryFilter !== 'all'
+                    ? 'No skills match your current search query or filter. Try clearing filters.'
+                    : 'Candidate evaluations have not detected any critical skill gaps for the selected criteria.'}
+                </p>
+                {(searchTerm || categoryFilter !== 'all') && (
+                  <button
+                    type="button"
+                    onClick={() => { setSearchTerm(''); setCategoryFilter('all'); }}
+                    style={{ marginTop: '8px', padding: '6px 14px', borderRadius: '6px', background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1d4ed8', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    Reset Filters
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </section>
       </main>
 

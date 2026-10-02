@@ -2072,16 +2072,6 @@
 
         @media (max-width: 1200px) {
 
-            .sidebar {
-                width: 230px;
-            }
-
-            .main {
-                width: calc(100% - 230px);
-
-                margin-left: 230px;
-            }
-
             .candidate-card {
                 min-height: auto;
             }
@@ -2108,32 +2098,6 @@
 
 
         @media (max-width: 800px) {
-
-            .sidebar {
-                width: 75px;
-
-                padding: 22px 10px;
-            }
-
-            .logo-text,
-            .nav-item span {
-                display: none;
-            }
-
-            .logo {
-                justify-content: center;
-            }
-
-            .nav-item {
-                justify-content: center;
-            }
-
-            .main {
-                width: calc(100% - 75px);
-
-                margin-left: 75px;
-            }
-
             .header {
                 height: auto;
 
