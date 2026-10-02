@@ -4,7 +4,7 @@ import Header from '../components/Header';
 import { candidatesApi } from '../api/candidates';
 import { jobsApi } from '../api/jobs';
 import { Skeleton } from '../components/common/Skeleton';
-import '../css/candidates.css';
+import '../css/Candidates.css';
 
 export default function Candidates() {
   const [candidatesList, setCandidatesList] = useState([]);
