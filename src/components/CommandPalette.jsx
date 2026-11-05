@@ -72,14 +72,6 @@ export default function CommandPalette() {
         }
       },
     },
-    {
-      id: 'cand-upgrade',
-      category: 'Account',
-      title: 'Upgrade to Pro Account',
-      subtitle: 'Unlock unlimited AI resume audits and priority screening',
-      icon: 'fa-solid fa-crown',
-      action: () => navigate('/upgrade'),
-    },
   ];
 
   // Recruiter-specific command set
@@ -170,14 +162,6 @@ export default function CommandPalette() {
           localStorage.setItem('theme', 'dark');
         }
       },
-    },
-    {
-      id: 'rec-upgrade',
-      category: 'Account',
-      title: 'View Subscription & Pricing',
-      subtitle: 'Manage team subscription tier and billing',
-      icon: 'fa-solid fa-crown',
-      action: () => navigate('/upgrade'),
     },
   ];
 

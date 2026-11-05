@@ -50,3 +50,13 @@ temp/
 *.njsproj
 *.sln
 *.sw?
+~$*
+
+# Python & AI Service cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+ai_service/__pycache__/
+ai_service/**/__pycache__/
+

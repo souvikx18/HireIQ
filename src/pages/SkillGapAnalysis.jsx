@@ -18,7 +18,13 @@ export default function SkillGapAnalysis() {
   const [toastMessage, setToastMessage] = useState('');
   const [showToast, setShowToast] = useState(false);
   const [gapsList, setGapsList] = useState([]);
-  const [readinessScore, setReadinessScore] = useState(72);
+  const [readinessScore, setReadinessScore] = useState(0);
+  const [readinessHeadline, setReadinessHeadline] = useState('Workforce Readiness');
+  const [readinessDescription, setReadinessDescription] = useState('Evaluating candidate skills against benchmarks...');
+  const [trendText, setTrendText] = useState('Talent pool evaluation');
+  const [priorityFocus, setPriorityFocus] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedPlanModal, setSelectedPlanModal] = useState(null);
 
   const triggerToast = (msg) => {
     setToastMessage(msg);
@@ -33,10 +39,15 @@ export default function SkillGapAnalysis() {
       const res = await analyticsApi.getSkillGaps({ search: searchTerm, category: categoryFilter });
       if (res?.data) {
         if (res.data.gaps) setGapsList(res.data.gaps);
-        if (res.data.readinessScore) setReadinessScore(res.data.readinessScore);
+        if (typeof res.data.readinessScore === 'number') setReadinessScore(res.data.readinessScore);
+        if (res.data.readinessHeadline) setReadinessHeadline(res.data.readinessHeadline);
+        if (res.data.readinessDescription) setReadinessDescription(res.data.readinessDescription);
+        if (res.data.trendText) setTrendText(res.data.trendText);
+        if (Array.isArray(res.data.priorityFocus)) setPriorityFocus(res.data.priorityFocus);
+        if (Array.isArray(res.data.categories)) setCategories(res.data.categories);
       }
-    } catch {
-      // keep fallback
+    } catch (err) {
+      console.error('Failed to load skill gaps:', err);
     }
   };
 
@@ -54,15 +65,24 @@ export default function SkillGapAnalysis() {
   });
 
   const handleExport = () => {
+    const focusStr = priorityFocus.length > 0
+      ? priorityFocus.map((p) => `${p.title} (${p.percent})`).join(', ')
+      : 'None identified';
+
     const content = [
-      'HIREIQ SKILL GAP ANALYSIS',
-      '=========================',
-      'Overall readiness: 72%',
-      'Priority focus: Cloud & DevOps, System Design, Communication',
+      'HIREIQ SKILL GAP ANALYSIS REPORT',
+      '================================',
+      `Overall Readiness Score: ${readinessScore}/100 (${readinessHeadline})`,
+      `Talent Status: ${trendText}`,
+      `Priority Focus Gaps: ${focusStr}`,
       '',
+      'CATEGORY BREAKDOWN:',
+      ...categories.map((c) => `- ${c.label}: ${c.coverage}% coverage (${c.detail})`),
+      '',
+      'SKILL INVENTORY & GAPS:',
       ...filteredGaps.map(
         (g) =>
-          `${g.skill} | ${g.categoryLabel} | Required: ${g.required} | Avg: ${g.candidateAvg} | Gap: ${g.severityPercent}`
+          `${g.skill.padEnd(24)} | Category: ${g.categoryLabel.padEnd(20)} | Required: ${g.required.padEnd(5)} | Avg: ${g.candidateAvg.padEnd(5)} | Gap: ${g.severityLabel} (${g.severityPercent})`
       ),
     ].join('\n');
 
@@ -70,15 +90,13 @@ export default function SkillGapAnalysis() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'hireiq-skill-gap-analysis.txt';
+    link.download = `hireiq-skill-gap-analysis-${new Date().toISOString().slice(0, 10)}.txt`;
     document.body.appendChild(link);
     link.click();
     link.remove();
     URL.revokeObjectURL(url);
-    triggerToast('Skill gap analysis exported successfully.');
+    triggerToast('Skill gap analysis report exported successfully.');
   };
-
-  const [selectedPlanModal, setSelectedPlanModal] = useState(null);
 
   const handleRowAction = (item) => {
     setSelectedPlanModal(item);
@@ -128,28 +146,29 @@ export default function SkillGapAnalysis() {
           <div className="readiness-panel panel">
             <div className="section-label">Overall workforce readiness</div>
             <div className="readiness-main">
-              <div className="score-ring">
+              <div
+                className="score-ring"
+                style={{
+                  background: `radial-gradient(circle at center, var(--card, #fff) 57%, transparent 58%), conic-gradient(var(--blue, #2869e8) 0 ${readinessScore}%, #e8edf5 ${readinessScore}% 100%)`,
+                }}
+              >
                 <strong>{readinessScore}</strong>
                 <span>/100</span>
               </div>
               <div>
-                <h2>Good foundation</h2>
-                <p>
-                  Most candidates meet core requirements. Closing the priority
-                  gaps could improve hiring fit by <b>18%</b>.
-                </p>
+                <h2>{readinessHeadline}</h2>
+                <p>{readinessDescription}</p>
                 <span className="trend">
-                  <i className="fa-solid fa-arrow-trend-up"></i> 6.4% from last
-                  month
+                  <i className="fa-solid fa-users"></i> {trendText}
                 </span>
               </div>
             </div>
             <div className="readiness-track">
-              <span></span>
+              <span style={{ width: `${Math.max(0, Math.min(100, readinessScore))}%` }}></span>
             </div>
             <div className="track-labels">
               <span>Needs focus</span>
-              <b>72% ready</b>
+              <b>{readinessScore}% ready</b>
               <span>Strong</span>
             </div>
           </div>
@@ -161,96 +180,46 @@ export default function SkillGapAnalysis() {
               </div>
               <i className="fa-solid fa-bullseye"></i>
             </div>
-            <div className="focus-item">
-              <span className="focus-icon cloud">
-                <i className="fa-solid fa-cloud"></i>
-              </span>
-              <div>
-                <strong>Cloud & DevOps</strong>
-                <small>Most frequent gap across roles</small>
+            {priorityFocus.length === 0 ? (
+              <div style={{ padding: '24px 12px', textAlign: 'center', color: '#64748b' }}>
+                <i className="fa-solid fa-circle-check" style={{ fontSize: '28px', color: '#10b981', marginBottom: '8px', display: 'block' }}></i>
+                <strong style={{ fontSize: '13px', color: '#1e293b', display: 'block' }}>All Benchmarks Met</strong>
+                <small style={{ fontSize: '11px', color: '#64748b' }}>No critical competency shortfalls detected in active candidate pool.</small>
               </div>
-              <b>45%</b>
-            </div>
-            <div className="focus-item">
-              <span className="focus-icon design">
-                <i className="fa-solid fa-diagram-project"></i>
-              </span>
-              <div>
-                <strong>System Design</strong>
-                <small>High impact on senior matches</small>
-              </div>
-              <b>40%</b>
-            </div>
-            <div className="focus-item">
-              <span className="focus-icon soft">
-                <i className="fa-solid fa-comments"></i>
-              </span>
-              <div>
-                <strong>Communication</strong>
-                <small>Growing interview signal</small>
-              </div>
-              <b>28%</b>
-            </div>
+            ) : (
+              priorityFocus.map((item, idx) => (
+                <div key={idx} className="focus-item">
+                  <span className={`focus-icon ${item.iconStyle || 'cloud'}`}>
+                    <i className={item.iconFa}></i>
+                  </span>
+                  <div>
+                    <strong>{item.title}</strong>
+                    <small>{item.subtitle}</small>
+                  </div>
+                  <b>{item.percent}</b>
+                </div>
+              ))
+            )}
           </div>
         </section>
 
         <section className="category-grid">
-          <div className="panel category-card">
-            <div className="category-top">
-              <span className="category-icon blue">
-                <i className="fa-solid fa-code"></i>
-              </span>
-              <span className="category-change up">+8.2%</span>
+          {categories.map((cat, idx) => (
+            <div key={idx} className="panel category-card">
+              <div className="category-top">
+                <span className={`category-icon ${cat.iconClass}`}>
+                  <i className={cat.iconFa}></i>
+                </span>
+                <span className={`category-change ${cat.statusClass}`}>{cat.statusLabel}</span>
+              </div>
+              <h3>{cat.label}</h3>
+              <strong>{cat.coverage}%</strong>
+              <div className={`mini-track ${cat.trackClass}`}>
+                <span style={{ width: `${Math.max(0, Math.min(100, cat.coverage))}%` }}></span>
+              </div>
+              <p>{cat.detail}</p>
             </div>
-            <h3>Technical Skills</h3>
-            <strong>58%</strong>
-            <div className="mini-track">
-              <span style={{ width: '58%' }}></span>
-            </div>
-            <p>Average candidate coverage</p>
-          </div>
-          <div className="panel category-card">
-            <div className="category-top">
-              <span className="category-icon green">
-                <i className="fa-solid fa-screwdriver-wrench"></i>
-              </span>
-              <span className="category-change up">+4.1%</span>
-            </div>
-            <h3>Tools & Frameworks</h3>
-            <strong>64%</strong>
-            <div className="mini-track green-track">
-              <span style={{ width: '64%' }}></span>
-            </div>
-            <p>Average candidate coverage</p>
-          </div>
-          <div className="panel category-card">
-            <div className="category-top">
-              <span className="category-icon orange">
-                <i className="fa-solid fa-people-group"></i>
-              </span>
-              <span className="category-change down">-2.6%</span>
-            </div>
-            <h3>Soft Skills</h3>
-            <strong>76%</strong>
-            <div className="mini-track orange-track">
-              <span style={{ width: '76%' }}></span>
-            </div>
-            <p>Average candidate coverage</p>
-          </div>
-          <div className="panel category-card">
-            <div className="category-top">
-              <span className="category-icon violet">
-                <i className="fa-solid fa-layer-group"></i>
-              </span>
-              <span className="category-change up">+3.8%</span>
-            </div>
-            <h3>Domain Knowledge</h3>
-            <strong>49%</strong>
-            <div className="mini-track violet-track">
-              <span style={{ width: '49%' }}></span>
-            </div>
-            <p>Average candidate coverage</p>
-          </div>
+          ))}
         </section>
 
         <section className="panel gaps-panel">
@@ -518,19 +487,19 @@ export default function SkillGapAnalysis() {
               <div
                 style={{
                   padding: '12px 14px',
-                  background: '#fff1f2',
-                  border: '1px solid #fecdd3',
+                  background: selectedPlanModal.severityClass === 'met' ? '#f0fdf4' : '#fff1f2',
+                  border: `1px solid ${selectedPlanModal.severityClass === 'met' ? '#bbf7d0' : '#fecdd3'}`,
                   borderRadius: '8px',
                 }}
               >
-                <div style={{ fontSize: '11px', color: '#e11d48', fontWeight: '500' }}>
-                  Identified Talent Gap
+                <div style={{ fontSize: '11px', color: selectedPlanModal.severityClass === 'met' ? '#16a34a' : '#e11d48', fontWeight: '500' }}>
+                  {selectedPlanModal.severityClass === 'met' ? 'Benchmark Status' : 'Identified Talent Gap'}
                 </div>
-                <div style={{ fontSize: '18px', fontWeight: '700', color: '#e11d48', marginTop: '2px' }}>
-                  {selectedPlanModal.severityPercent}
+                <div style={{ fontSize: '18px', fontWeight: '700', color: selectedPlanModal.severityClass === 'met' ? '#16a34a' : '#e11d48', marginTop: '2px' }}>
+                  {selectedPlanModal.severityClass === 'met' ? 'Satisfied' : selectedPlanModal.severityPercent}
                 </div>
-                <div style={{ fontSize: '10px', color: '#be123c', marginTop: '2px' }}>
-                  Gap to Bridge
+                <div style={{ fontSize: '10px', color: selectedPlanModal.severityClass === 'met' ? '#15803d' : '#be123c', marginTop: '2px' }}>
+                  {selectedPlanModal.severityClass === 'met' ? '0% Gap to Bridge' : 'Gap to Bridge'}
                 </div>
               </div>
             </div>

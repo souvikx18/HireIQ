@@ -14,7 +14,11 @@ export const authenticate = (req, res, next) => {
     return sendError(res, 'Token expired or invalid', 401);
   }
 
-  req.user = decoded;
+  req.user = {
+    ...decoded,
+    id: decoded.userId || decoded.id,
+    userId: decoded.userId || decoded.id,
+  };
   next();
 };
 
@@ -24,7 +28,11 @@ export const optionalAuthenticate = (req, res, next) => {
     const token = authHeader.split(' ')[1];
     const decoded = verifyAccessToken(token);
     if (decoded) {
-      req.user = decoded;
+      req.user = {
+        ...decoded,
+        id: decoded.userId || decoded.id,
+        userId: decoded.userId || decoded.id,
+      };
     }
   }
   next();

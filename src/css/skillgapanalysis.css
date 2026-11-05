@@ -612,6 +612,29 @@ td:first-child {
     color: #dd932c;
 }
 
+.severity.low {
+    color: #2869e8;
+}
+
+.severity.met {
+    color: #10b981;
+}
+
+.table-icon.react {
+    background: #e0f7fa;
+    color: #00bcd4;
+}
+
+.table-icon.js {
+    background: #fffde7;
+    color: #fbc02d;
+}
+
+.table-icon.python {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
 .row-action {
     border: 0;
     background: transparent;

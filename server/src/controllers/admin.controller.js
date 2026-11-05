@@ -12,20 +12,24 @@ export const adminController = {
 
       const mem = process.memoryUsage();
 
-      const [usersCount, jobsCount, candidatesCount, resumesCount, logsCount] = await Promise.all([
+      const [usersCount, jobsCount, candidatesCount, resumesCount, logsCount, skillsCount] = await Promise.all([
         prisma.user.count(),
         prisma.jobRole.count(),
         prisma.candidate.count(),
         prisma.resume.count(),
         prisma.auditLog.count(),
+        prisma.skill.count(),
       ]);
+
+      const isSqlite = process.env.DATABASE_URL?.startsWith('file:');
+      const dbProviderName = isSqlite ? 'SQLite (Embedded DB)' : 'PostgreSQL Database';
 
       const health = {
         status: 'OPERATIONAL',
         timestamp: new Date().toISOString(),
         uptimeSeconds: Math.floor(process.uptime()),
         database: {
-          provider: 'PostgreSQL (Supabase)',
+          provider: dbProviderName,
           status: 'CONNECTED',
           latencyMs: dbLatency,
         },
@@ -40,6 +44,7 @@ export const adminController = {
           totalCandidates: candidatesCount,
           totalResumes: resumesCount,
           totalAuditLogs: logsCount,
+          totalSkills: skillsCount,
         },
       };
 

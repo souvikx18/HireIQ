@@ -20,7 +20,12 @@ export const skillController = {
       }
 
       if (category && category !== 'all') {
-        whereClause.category = category.toUpperCase();
+        const catUpper = category.toUpperCase();
+        if (catUpper === 'SOFT' || catUpper === 'SOFT_SKILLS') {
+          whereClause.category = { in: ['SOFT', 'SOFT_SKILLS'] };
+        } else {
+          whereClause.category = catUpper;
+        }
       }
 
       if (requiredOnly === 'true') {
@@ -91,11 +96,14 @@ export const skillController = {
 
       const benchmarkNum = Math.min(100, Math.max(0, parseInt(requiredBenchmark, 10) || 70));
 
+      const rawCat = category ? category.toUpperCase() : 'TECHNICAL';
+      const cleanCat = rawCat === 'SOFT_SKILLS' ? 'SOFT' : rawCat;
+
       // Upsert to handle potential duplicates gracefully
       const skill = await prisma.skill.upsert({
         where: { name: name.trim() },
         update: {
-          category: category.toUpperCase(),
+          category: cleanCat,
           requiredBenchmark: benchmarkNum,
           isCompanyRequired: Boolean(isCompanyRequired),
           importance: importance.toUpperCase(),
@@ -104,7 +112,7 @@ export const skillController = {
         },
         create: {
           name: name.trim(),
-          category: category.toUpperCase(),
+          category: cleanCat,
           requiredBenchmark: benchmarkNum,
           isCompanyRequired: Boolean(isCompanyRequired),
           importance: importance.toUpperCase(),
@@ -234,29 +242,32 @@ export const skillController = {
   },
 
   /**
-   * Seed default company hiring skills if empty
+   * Sync and standardize company hiring criteria aligned with active job roles
    */
   async seedDefaultSkills(req, res, next) {
     try {
-      const defaultCompanySkills = [
-        { name: 'JavaScript', category: 'TECHNICAL', requiredBenchmark: 80, isCompanyRequired: true, importance: 'CRITICAL', description: 'Core ES6+, asynchronous patterns, event loop' },
-        { name: 'React', category: 'TECHNICAL', requiredBenchmark: 85, isCompanyRequired: true, importance: 'CRITICAL', description: 'Modern hooks, state management, component architecture' },
-        { name: 'Node.js', category: 'TECHNICAL', requiredBenchmark: 75, isCompanyRequired: true, importance: 'HIGH', description: 'Express, REST APIs, middleware, event emitters' },
-        { name: 'Python', category: 'TECHNICAL', requiredBenchmark: 70, isCompanyRequired: false, importance: 'HIGH', description: 'Scripting, backend frameworks, data handling' },
-        { name: 'SQL', category: 'TECHNICAL', requiredBenchmark: 75, isCompanyRequired: true, importance: 'HIGH', description: 'PostgreSQL queries, relational schema design, indexing' },
-        { name: 'TypeScript', category: 'TECHNICAL', requiredBenchmark: 75, isCompanyRequired: false, importance: 'HIGH', description: 'Type safety, generics, interface modeling' },
-        { name: 'Docker', category: 'TOOLS', requiredBenchmark: 70, isCompanyRequired: false, importance: 'HIGH', description: 'Containerization, Dockerfile optimization, multi-stage builds' },
-        { name: 'AWS', category: 'TOOLS', requiredBenchmark: 80, isCompanyRequired: true, importance: 'HIGH', description: 'S3, EC2, Lambda, IAM, VPC cloud infrastructure' },
-        { name: 'Kubernetes', category: 'TOOLS', requiredBenchmark: 70, isCompanyRequired: false, importance: 'MEDIUM', description: 'Pod orchestration, deployments, ingress management' },
-        { name: 'System Design', category: 'TECHNICAL', requiredBenchmark: 75, isCompanyRequired: true, importance: 'CRITICAL', description: 'Scalability, microservices, caching strategies, CAP theorem' },
-        { name: 'Communication', category: 'SOFT_SKILLS', requiredBenchmark: 80, isCompanyRequired: true, importance: 'CRITICAL', description: 'Cross-functional collaboration, technical articulation' },
-        { name: 'Problem Solving', category: 'SOFT_SKILLS', requiredBenchmark: 85, isCompanyRequired: true, importance: 'CRITICAL', description: 'Algorithmic efficiency, debugging and root-cause analysis' },
+      const companyRoleBenchmarks = [
+        { name: 'JavaScript', category: 'TECHNICAL', requiredBenchmark: 75, isCompanyRequired: true, importance: 'CRITICAL', description: 'Core ES6+, asynchronous patterns, component state logic' },
+        { name: 'React', category: 'TECHNICAL', requiredBenchmark: 80, isCompanyRequired: true, importance: 'CRITICAL', description: 'Modern hooks, component lifecycle, virtual DOM performance' },
+        { name: 'Node.js', category: 'TECHNICAL', requiredBenchmark: 75, isCompanyRequired: true, importance: 'HIGH', description: 'REST APIs, asynchronous microservices, Express middleware' },
+        { name: 'SQL', category: 'TECHNICAL', requiredBenchmark: 75, isCompanyRequired: true, importance: 'HIGH', description: 'Relational schema design, query optimization, indexing' },
+        { name: 'Python', category: 'TECHNICAL', requiredBenchmark: 75, isCompanyRequired: true, importance: 'HIGH', description: 'Data pipelines, scripting, OOP architectural patterns' },
+        { name: 'Docker', category: 'TOOLS', requiredBenchmark: 70, isCompanyRequired: true, importance: 'HIGH', description: 'Containerization, Dockerfile optimization, service orchestration' },
+        { name: 'AWS', category: 'TOOLS', requiredBenchmark: 75, isCompanyRequired: true, importance: 'HIGH', description: 'Cloud infrastructure, serverless, VPC and deployment configs' },
+        { name: 'System Design', category: 'TECHNICAL', requiredBenchmark: 75, isCompanyRequired: true, importance: 'CRITICAL', description: 'Distributed architecture, scalability, latency optimization' },
+        { name: 'Communication', category: 'SOFT', requiredBenchmark: 80, isCompanyRequired: true, importance: 'HIGH', description: 'Cross-functional alignment, technical documentation and clarity' },
+        { name: 'Problem Solving', category: 'SOFT', requiredBenchmark: 80, isCompanyRequired: true, importance: 'HIGH', description: 'Algorithmic reasoning, analytical debugging, root-cause analysis' },
+        { name: 'Figma', category: 'TOOLS', requiredBenchmark: 75, isCompanyRequired: false, importance: 'HIGH', description: 'Wireframing, UI/UX prototyping, design systems' },
+        { name: 'CI/CD', category: 'TOOLS', requiredBenchmark: 70, isCompanyRequired: false, importance: 'HIGH', description: 'Automated build and deployment pipelines, GitHub Actions' },
+        { name: 'Kubernetes', category: 'TECHNICAL', requiredBenchmark: 70, isCompanyRequired: false, importance: 'MEDIUM', description: 'Cluster orchestration, ingress controllers, pod scaling' },
+        { name: 'Industry Knowledge', category: 'DOMAIN', requiredBenchmark: 70, isCompanyRequired: false, importance: 'MEDIUM', description: 'SaaS product lifecycle, market competition analysis' },
       ];
 
-      for (const item of defaultCompanySkills) {
+      for (const item of companyRoleBenchmarks) {
         await prisma.skill.upsert({
           where: { name: item.name },
           update: {
+            category: item.category,
             requiredBenchmark: item.requiredBenchmark,
             isCompanyRequired: item.isCompanyRequired,
             importance: item.importance,
@@ -269,11 +280,25 @@ export const skillController = {
         });
       }
 
+      // Audit log
+      try {
+        await prisma.auditLog.create({
+          data: {
+            action: 'SYNC_COMPANY_CRITERIA',
+            resource: 'Hiring Criteria',
+            actorEmail: req.user?.email || 'admin@hireiq.com',
+            details: JSON.stringify({ syncedCount: companyRoleBenchmarks.length }),
+          },
+        });
+      } catch (logErr) {
+        logger.warn('Audit logging failed for sync criteria', logErr);
+      }
+
       const all = await prisma.skill.findMany({
-        orderBy: [{ isCompanyRequired: 'desc' }, { requiredBenchmark: 'desc' }],
+        orderBy: [{ isCompanyRequired: 'desc' }, { requiredBenchmark: 'desc' }, { name: 'asc' }],
       });
 
-      return sendSuccess(res, all, 'Default company skill benchmarks seeded successfully');
+      return sendSuccess(res, all, 'Company hiring criteria synchronized with active role standards');
     } catch (err) {
       next(err);
     }

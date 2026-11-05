@@ -25,6 +25,7 @@ export default function Index() {
 
   const [periodOpen, setPeriodOpen] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState('This Month');
+  const [customDate, setCustomDate] = useState(null);
 
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [allSkillsModalOpen, setAllSkillsModalOpen] = useState(false);
@@ -43,6 +44,17 @@ export default function Index() {
     interviewRate: '0%',
     avgApplicationsPerDay: '0',
   });
+  const [candidateChart, setCandidateChart] = useState({
+    period: 'This Month',
+    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5'],
+    applications: [0, 0, 0, 0, 0],
+    shortlisted: [0, 0, 0, 0, 0],
+    totalApplications: 0,
+    totalShortlisted: 0,
+    shortlistRate: '0%',
+    interviewRate: '0%',
+    avgApplicationsPerDay: '0',
+  });
   const [topCandidate, setTopCandidate] = useState(null);
   const [recentCandidates, setRecentCandidates] = useState([]);
   const [topSkillGaps, setTopSkillGaps] = useState([]);
@@ -53,11 +65,14 @@ export default function Index() {
   const modalFileRef = useRef(null);
   const headerResumeInputRef = useRef(null);
 
-  const fetchOverview = async () => {
+  const fetchOverview = async (period = selectedPeriod, dateVal = customDate) => {
     try {
-      const res = await analyticsApi.getOverview();
+      const params = { period };
+      if (dateVal) params.customDate = dateVal;
+      const res = await analyticsApi.getOverview(params);
       if (res?.data) {
         if (res.data.stats) setStats(res.data.stats);
+        if (res.data.candidateChart) setCandidateChart(res.data.candidateChart);
         setTopCandidate(res.data.topCandidate || null);
         setRecentCandidates(res.data.recentCandidates || []);
         setTopSkillGaps(res.data.topSkillGaps || []);
@@ -69,8 +84,8 @@ export default function Index() {
   };
 
   useEffect(() => {
-    fetchOverview();
-  }, []);
+    fetchOverview(selectedPeriod, customDate);
+  }, [selectedPeriod, customDate]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -98,12 +113,14 @@ export default function Index() {
 
   const handlePeriodSelect = (period) => {
     setSelectedPeriod(period);
+    setCustomDate(null);
     setPeriodOpen(false);
   };
 
   const handleCustomDateChange = (e) => {
     if (!e.target.value) return;
-    const selectedDate = new Date(`${e.target.value}T00:00:00`);
+    const rawVal = e.target.value;
+    const selectedDate = new Date(`${rawVal}T00:00:00`);
     setSelectedPeriod(
       selectedDate.toLocaleDateString('en-US', {
         month: 'short',
@@ -111,6 +128,7 @@ export default function Index() {
         year: 'numeric',
       })
     );
+    setCustomDate(rawVal);
     setPeriodOpen(false);
   };
 
@@ -190,6 +208,70 @@ export default function Index() {
   const handleViewAllSkills = () => {
     setAllSkillsModalOpen(true);
   };
+
+  // Calculate dynamic scale and coordinates for the candidates overview chart
+  const chartLabels = candidateChart.labels || [];
+  const appValues = candidateChart.applications || [];
+  const shortValues = candidateChart.shortlisted || [];
+  const maxVal = Math.max(...appValues, ...shortValues, 0);
+
+  const getYScale = (max) => {
+    if (max === 0) return [30, 25, 20, 15, 10, 5, 0];
+    if (max <= 6) return [6, 5, 4, 3, 2, 1, 0];
+    if (max <= 12) return [12, 10, 8, 6, 4, 2, 0];
+    if (max <= 30) return [30, 25, 20, 15, 10, 5, 0];
+    if (max <= 60) return [60, 50, 40, 30, 20, 10, 0];
+    if (max <= 120) return [120, 100, 80, 60, 40, 20, 0];
+    if (max <= 300) return [300, 250, 200, 150, 100, 50, 0];
+    const step = Math.ceil((max * 1.25) / 6 / 10) * 10;
+    return [step * 6, step * 5, step * 4, step * 3, step * 2, step * 1, 0];
+  };
+
+  const yScale = getYScale(maxVal);
+  const chartTopMax = yScale[0];
+
+  const baselineY = 285;
+  const topY = 48;
+  const chartHeightRange = baselineY - topY;
+
+  const N = Math.max(chartLabels.length, 1);
+  const startX = 42;
+  const endX = 634;
+  const getX = (index) => (N > 1 ? startX + (index * (endX - startX)) / (N - 1) : 338);
+  const getY = (val) => {
+    if (chartTopMax === 0 || val === 0) return baselineY;
+    const clamped = Math.min(val, chartTopMax);
+    return Math.round(baselineY - (clamped / chartTopMax) * chartHeightRange);
+  };
+
+  const appPoints = appValues.map((val, idx) => ({
+    x: getX(idx),
+    y: getY(val),
+    val,
+  }));
+
+  const shortPoints = shortValues.map((val, idx) => ({
+    x: getX(idx),
+    y: getY(val),
+    val,
+  }));
+
+  const appLinePoints = appPoints.map((p) => `${p.x},${p.y}`).join(' ');
+  const shortLinePoints = shortPoints.map((p) => `${p.x},${p.y}`).join(' ');
+
+  const appFillD =
+    appPoints.length > 0
+      ? `M${appPoints[0].x} ${appPoints[0].y} ` +
+        appPoints.slice(1).map((p) => `L${p.x} ${p.y} `).join('') +
+        `L${appPoints[appPoints.length - 1].x} ${baselineY} L${appPoints[0].x} ${baselineY} Z`
+      : '';
+
+  const shortFillD =
+    shortPoints.length > 0
+      ? `M${shortPoints[0].x} ${shortPoints[0].y} ` +
+        shortPoints.slice(1).map((p) => `L${p.x} ${p.y} `).join('') +
+        `L${shortPoints[shortPoints.length - 1].x} ${baselineY} L${shortPoints[0].x} ${baselineY} Z`
+      : '';
 
   return (
     <div className="app">
@@ -289,13 +371,9 @@ export default function Index() {
 
             <div className="chart-area">
               <div className="chart-y-axis">
-                <span>300</span>
-                <span>250</span>
-                <span>200</span>
-                <span>150</span>
-                <span>100</span>
-                <span>50</span>
-                <span>0</span>
+                {yScale.map((val, idx) => (
+                  <span key={idx}>{val}</span>
+                ))}
               </div>
               <div className="chart-main">
                 <div className="chart-grid">
@@ -311,79 +389,51 @@ export default function Index() {
                   className="candidate-chart"
                   viewBox="0 0 700 330"
                   role="img"
-                  aria-label="Applications and shortlisted candidates from May to September"
+                  aria-label={`Applications and shortlisted candidates for ${selectedPeriod}`}
                 >
-                  <path
-                    className="applications-fill"
-                    d="M42 238 L190 191 L338 143 L486 96 L634 48 L634 285 L42 285 Z"
-                  ></path>
-                  <path
-                    className="shortlisted-fill"
-                    d="M42 253 L190 222 L338 206 L486 174 L634 143 L634 285 L42 285 Z"
-                  ></path>
-                  <polyline
-                    className="applications-line"
-                    points="42,238 190,191 338,143 486,96 634,48"
-                  ></polyline>
-                  <polyline
-                    className="shortlisted-line"
-                    points="42,253 190,222 338,206 486,174 634,143"
-                  ></polyline>
+                  {appFillD && <path className="applications-fill" d={appFillD}></path>}
+                  {shortFillD && <path className="shortlisted-fill" d={shortFillD}></path>}
+                  {appLinePoints && (
+                    <polyline
+                      className="applications-line"
+                      points={appLinePoints}
+                    ></polyline>
+                  )}
+                  {shortLinePoints && (
+                    <polyline
+                      className="shortlisted-line"
+                      points={shortLinePoints}
+                    ></polyline>
+                  )}
                   <g className="chart-points applications-points">
-                    <circle cx="42" cy="238" r="9"></circle>
-                    <circle cx="190" cy="191" r="9"></circle>
-                    <circle cx="338" cy="143" r="9"></circle>
-                    <circle cx="486" cy="96" r="9"></circle>
-                    <circle cx="634" cy="48" r="9"></circle>
+                    {appPoints.map((p, idx) => (
+                      <circle key={idx} cx={p.x} cy={p.y} r="8"></circle>
+                    ))}
                   </g>
                   <g className="chart-points shortlisted-points">
-                    <circle cx="42" cy="253" r="9"></circle>
-                    <circle cx="190" cy="222" r="9"></circle>
-                    <circle cx="338" cy="206" r="9"></circle>
-                    <circle cx="486" cy="174" r="9"></circle>
-                    <circle cx="634" cy="143" r="9"></circle>
+                    {shortPoints.map((p, idx) => (
+                      <circle key={idx} cx={p.x} cy={p.y} r="8"></circle>
+                    ))}
                   </g>
                   <g className="chart-value application-values">
-                    <text x="42" y="218">
-                      120
-                    </text>
-                    <text x="190" y="171">
-                      150
-                    </text>
-                    <text x="338" y="123">
-                      180
-                    </text>
-                    <text x="486" y="76">
-                      210
-                    </text>
-                    <text x="634" y="28">
-                      250
-                    </text>
+                    {appPoints.map((p, idx) => (
+                      <text key={idx} x={p.x} y={p.y - 12}>
+                        {p.val}
+                      </text>
+                    ))}
                   </g>
                   <g className="chart-value shortlisted-values">
-                    <text x="42" y="277">
-                      40
-                    </text>
-                    <text x="190" y="246">
-                      60
-                    </text>
-                    <text x="338" y="230">
-                      75
-                    </text>
-                    <text x="486" y="198">
-                      90
-                    </text>
-                    <text x="634" y="167">
-                      110
-                    </text>
+                    {shortPoints.map((p, idx) => (
+                      <text key={idx} x={p.x} y={p.y === baselineY && p.val === 0 ? p.y + 22 : p.y + 22}>
+                        {p.val}
+                      </text>
+                    ))}
                   </g>
                 </svg>
                 <div className="chart-months">
-                  <span>May</span>
-                  <span>Jun</span>
-                  <span>Jul</span>
-                  <span>Aug</span>
-                  <span>Sep</span>
+                  {chartLabels.map((lbl, idx) => (
+                    <span key={idx}>{lbl}</span>
+                  ))}
                 </div>
               </div>
             </div>
@@ -403,7 +453,7 @@ export default function Index() {
                 </div>
                 <div>
                   <span>Avg. Applications / Day</span>
-                  <strong className="mono-metric">8.5</strong>
+                  <strong className="mono-metric">{candidateChart.avgApplicationsPerDay ?? '0'}</strong>
                 </div>
               </div>
               <div className="metric-card metric-green gpu-card">
@@ -412,7 +462,7 @@ export default function Index() {
                 </div>
                 <div>
                   <span>Shortlist Rate</span>
-                  <strong className="mono-metric">{stats.shortlistRate || '30.5%'}</strong>
+                  <strong className="mono-metric">{candidateChart.shortlistRate ?? '0%'}</strong>
                 </div>
               </div>
               <div className="metric-card metric-purple gpu-card">
@@ -421,7 +471,7 @@ export default function Index() {
                 </div>
                 <div>
                   <span>Interview Rate</span>
-                  <strong className="mono-metric">{stats.interviewRate || '18.2%'}</strong>
+                  <strong className="mono-metric">{candidateChart.interviewRate ?? '0%'}</strong>
                 </div>
               </div>
             </div>

@@ -52,11 +52,32 @@ export default function Candidates() {
 
   const handleStageChange = async (candidateId, newStage) => {
     try {
-      await candidatesApi.updateStatus(candidateId, { currentStage: newStage });
+      const res = await candidatesApi.updateStatus(candidateId, { currentStage: newStage });
+      const updatedCand = res?.data;
       setCandidatesList((prev) =>
-        prev.map((c) => (c.id === candidateId ? { ...c, currentStage: newStage } : c))
+        prev.map((c) => {
+          if (c.id !== candidateId) return c;
+          const isRej = newStage === 'REJECTED';
+          return {
+            ...c,
+            currentStage: newStage,
+            status: isRej ? 'Rejected' : (newStage === 'SHORTLISTED' ? 'Shortlisted' : 'Active'),
+            statusVal: isRej ? 'rejected' : (newStage === 'SHORTLISTED' ? 'shortlisted' : 'active'),
+            role: isRej ? 'Unassigned' : (updatedCand?.jobRole?.title || c.originalRoleApplied || c.role || 'Unassigned'),
+            jobRole: isRej ? null : (updatedCand?.jobRole || c.jobRole),
+            department: isRej ? 'General Talent Pool' : (updatedCand?.jobRole?.department || c.department || 'General'),
+            reviewText: isRej
+              ? 'Candidate application rejected. Profile archived from active role pipeline.'
+              : 'Candidate profile active and ready for interview scheduling.',
+            reviewClass: isRej ? 'red-review' : 'green-review',
+          };
+        })
       );
-      triggerToast(`Candidate stage updated to ${newStage.replace('_', ' ')}`);
+      triggerToast(
+        newStage === 'REJECTED'
+          ? 'Candidate rejected and unassigned from active job opening'
+          : `Candidate stage updated to ${newStage.replace('_', ' ')}`
+      );
     } catch (err) {
       triggerToast(err.message || 'Failed to update candidate stage');
     }
@@ -185,6 +206,14 @@ export default function Candidates() {
       c.status.toLowerCase() === statusFilter.toLowerCase();
     return matchesRole && matchesStatus;
   });
+
+  const totalViews = candidatesList.reduce((acc, c) => acc + parseInt(c.views || 0, 10), 0);
+  const totalReviews = candidatesList.reduce((acc, c) => acc + parseInt(c.reviews || 0, 10), 0);
+  const candidatesWithRatings = candidatesList.filter((c) => parseFloat(c.rating || 0) > 0);
+  const avgRatingNum = candidatesWithRatings.length > 0
+    ? (candidatesWithRatings.reduce((acc, c) => acc + parseFloat(c.rating || 0), 0) / candidatesWithRatings.length).toFixed(1)
+    : '0.0';
+  const starCount = Math.round(parseFloat(avgRatingNum));
 
   const handleExport = () => {
     if (filteredCandidates.length === 0) {
@@ -346,7 +375,7 @@ export default function Candidates() {
               </div>
               <div className="stat-content">
                 <h3>Total Views</h3>
-                <strong>{candidatesList.reduce((acc, c) => acc + parseInt(c.views || 0, 10), 0)}</strong>
+                <strong>{totalViews}</strong>
                 <span className="positive">↑ 0% this month</span>
               </div>
             </div>
@@ -370,7 +399,7 @@ export default function Candidates() {
               </div>
               <div className="stat-content">
                 <h3>Total Reviews</h3>
-                <strong>{candidatesList.reduce((acc, c) => acc + parseInt(c.reviews || 0, 10), 0)}</strong>
+                <strong>{totalReviews}</strong>
                 <span className="positive">↑ 0% this month</span>
               </div>
             </div>
@@ -382,8 +411,10 @@ export default function Candidates() {
               </div>
               <div className="stat-content">
                 <h3>Average Rating</h3>
-                <strong>4.2 / 5</strong>
-                <div className="rating-stars">★ ★ ★ ★ ★</div>
+                <strong>{avgRatingNum} / 5</strong>
+                <div className="rating-stars">
+                  {'★ '.repeat(starCount) + '☆ '.repeat(Math.max(0, 5 - starCount)).trim()}
+                </div>
               </div>
             </div>
           </div>
@@ -634,8 +665,8 @@ export default function Candidates() {
 
                       <td>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                          <span style={{ fontWeight: '600', color: '#0f172a' }}>
-                            {c.jobRole ? c.jobRole.title : (c.role || 'Unassigned')}
+                          <span style={{ fontWeight: '600', color: c.currentStage === 'REJECTED' ? '#94a3b8' : '#0f172a' }}>
+                            {c.currentStage === 'REJECTED' ? 'Unassigned' : (c.jobRole ? c.jobRole.title : (c.role || 'Unassigned'))}
                           </span>
                           <span
                             style={{
@@ -646,8 +677,8 @@ export default function Candidates() {
                               gap: '4px',
                             }}
                           >
-                            <i className="fa-solid fa-layer-group" style={{ fontSize: '10px', color: '#2563eb' }}></i>
-                            {c.department || c.jobRole?.department || 'General Talent Pool'}
+                            <i className="fa-solid fa-layer-group" style={{ fontSize: '10px', color: c.currentStage === 'REJECTED' ? '#94a3b8' : '#2563eb' }}></i>
+                            {c.currentStage === 'REJECTED' ? 'General Talent Pool' : (c.department || c.jobRole?.department || 'General Talent Pool')}
                           </span>
                         </div>
                       </td>

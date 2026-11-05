@@ -52,6 +52,9 @@ export const jobController = {
       if (department && department !== 'all') {
         where.department = { contains: department };
       }
+      if (experience && experience !== 'all') {
+        where.experienceLevel = { contains: experience };
+      }
       if (status && status !== 'all') {
         where.status = status.toUpperCase();
       }
@@ -60,16 +63,51 @@ export const jobController = {
         where,
         include: {
           skills: { include: { skill: true } },
-          _count: { select: { candidates: true } },
+          _count: {
+            select: {
+              candidates: {
+                where: {
+                  NOT: [
+                    { status: 'REJECTED' },
+                    { currentStage: 'REJECTED' },
+                  ],
+                },
+              },
+            },
+          },
         },
         orderBy: { createdAt: 'desc' },
       });
+
+      const getRoleIconClass = (name) => {
+        const role = (name || '').toLowerCase();
+        if (role.includes('security') || role.includes('cyber')) return 'red-role';
+        if (role.includes('data') || role.includes('analyst')) return 'green-role';
+        if (role.includes('designer') || role.includes('ui') || role.includes('ux')) return 'orange-role';
+        if (role.includes('marketing')) return 'orange-role';
+        if (role.includes('devops') || role.includes('cloud')) return 'purple-role';
+        if (role.includes('product')) return 'cyan-role';
+        return 'blue-role';
+      };
+
+      const getRoleIcon = (name) => {
+        const role = (name || '').toLowerCase();
+        if (role.includes('security') || role.includes('cyber')) return 'fa-solid fa-shield-halved';
+        if (role.includes('data') || role.includes('analyst')) return 'fa-solid fa-chart-column';
+        if (role.includes('designer') || role.includes('ui') || role.includes('ux')) return 'fa-solid fa-mobile-screen-button';
+        if (role.includes('marketing')) return 'fa-solid fa-bullhorn';
+        if (role.includes('devops') || role.includes('cloud')) return 'fa-solid fa-gear';
+        if (role.includes('product')) return 'fa-solid fa-briefcase';
+        return 'fa-solid fa-code';
+      };
 
       const formatted = roles.map((r) => ({
         id: r.id,
         code: r.code,
         name: r.title,
         title: r.title,
+        iconClass: getRoleIconClass(r.title),
+        iconFa: getRoleIcon(r.title),
         department: r.department,
         departmentVal: r.department.toLowerCase().replace(/\s+/g, '-'),
         experience: r.experienceLevel,
@@ -257,13 +295,9 @@ export const jobController = {
       if (responsibilities !== undefined) updateData.responsibilities = responsibilities;
       if (status !== undefined) updateData.status = status.toUpperCase();
 
-      const updated = await prisma.jobRole.update({
+      await prisma.jobRole.update({
         where: { id: existing.id },
         data: updateData,
-        include: {
-          skills: { include: { skill: true } },
-          _count: { select: { candidates: true } },
-        },
       });
 
       // Update skills if provided
@@ -337,6 +371,12 @@ export const jobController = {
         where: { OR: [{ id }, { code: id }] },
         include: {
           candidates: {
+            where: {
+              NOT: [
+                { status: 'REJECTED' },
+                { currentStage: 'REJECTED' },
+              ],
+            },
             include: {
               skills: { include: { skill: true } },
               resumes: { orderBy: { createdAt: 'desc' }, take: 1 },

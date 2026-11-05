@@ -28,7 +28,12 @@ export async function apiClient(endpoint, { body, headers = {}, method = 'GET', 
 
   const url = endpoint.startsWith('http') ? endpoint : `${BASE_URL}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
 
-  const response = await fetch(url, config);
+  let response;
+  try {
+    response = await fetch(url, config);
+  } catch (networkError) {
+    throw new Error('Unable to connect to the HireIQ backend service. Please try again in a moment.');
+  }
 
   // On 401: do NOT aggressively clear localStorage — one failed API call
   // (e.g. candidates list timing out) shouldn't break every other request.
@@ -37,7 +42,22 @@ export async function apiClient(endpoint, { body, headers = {}, method = 'GET', 
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    const error = new Error(data.message || 'An error occurred with the request');
+    let message = data.message;
+    if (!message) {
+      if (response.status === 502 || response.status === 503 || response.status === 504) {
+        message = 'Server was momentarily restarting. Please click Login again.';
+      } else if (response.status === 401) {
+        message = 'Invalid email or password';
+      } else if (response.status === 403) {
+        message = 'Access forbidden. You do not have permission for this action.';
+      } else if (response.status === 404) {
+        message = 'API endpoint not found.';
+      } else {
+        message = data.error || 'An error occurred with the request';
+      }
+    }
+
+    const error = new Error(message);
     error.status = response.status;
     error.data = data;
     throw error;

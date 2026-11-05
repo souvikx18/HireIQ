@@ -1634,13 +1634,72 @@ body {
 }
 
 .setting-role-select {
-    padding: 3px 8px;
-    border-radius: 5px;
+    padding: 4px 10px;
+    border-radius: 6px;
     border: 1px solid #cbd5e1;
-    font-size: 10.5px;
+    font-size: 11px;
     font-weight: 600;
     background: #ffffff;
     color: var(--text);
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+}
+
+.setting-role-select:focus {
+    border-color: #2869e8;
+    outline: none;
+}
+
+.setting-audit-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.setting-audit-details-text {
+    font-size: 11.5px;
+    color: var(--text);
+    line-height: 1.4;
+    max-width: 420px;
+    word-break: break-word;
+}
+
+.setting-user-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.setting-user-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #e0e7ff;
+    color: #2563eb;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.setting-active-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    border-radius: 12px;
+    font-size: 10.5px;
+    font-weight: 600;
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
 }
 
 
@@ -2084,6 +2143,27 @@ body.dark-mode .setting-audit-status {
 
 body.dark-mode .setting-cell-subtext {
     color: #94a3b8;
+}
+
+body.dark-mode .setting-audit-details-text {
+    color: #cbd5e1;
+}
+
+body.dark-mode .setting-user-avatar {
+    background: #1e3a5f;
+    color: #93c5fd;
+}
+
+body.dark-mode .setting-active-badge {
+    background: #064e3b;
+    color: #6ee7b7;
+    border-color: #047857;
+}
+
+body.dark-mode .setting-role-select {
+    background: #0f1c30;
+    border-color: #263f60;
+    color: #ffffff;
 }
 
 

@@ -20,6 +20,7 @@ export default function Setting() {
   const [auditLogs, setAuditLogs] = useState([]);
   const [usersList, setUsersList] = useState([]);
   const [logSearch, setLogSearch] = useState('');
+  const [auditCategoryFilter, setAuditCategoryFilter] = useState('all');
   const [loadingAdmin, setLoadingAdmin] = useState(false);
 
   const [theme, setTheme] = useState(
@@ -214,13 +215,56 @@ export default function Setting() {
     }
   };
 
-  const handleSeedDefaults = async () => {
+  const getCategoryMeta = (cat) => {
+    switch (cat?.toUpperCase()) {
+      case 'TECHNICAL':
+        return { label: 'Technical Skills', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe' };
+      case 'TOOLS':
+        return { label: 'Tools & Cloud', color: '#059669', bg: '#ecfdf5', border: '#a7f3d0' };
+      case 'SOFT':
+      case 'SOFT_SKILLS':
+        return { label: 'Soft Skills', color: '#d97706', bg: '#fffbeb', border: '#fde68a' };
+      case 'DOMAIN':
+        return { label: 'Domain Knowledge', color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe' };
+      default:
+        return { label: cat || 'General', color: '#64748b', bg: '#f1f5f9', border: '#e2e8f0' };
+    }
+  };
+
+  const handleExportCriteriaCSV = () => {
+    if (!skillsList || skillsList.length === 0) {
+      triggerToast('No criteria data available to export.');
+      return;
+    }
+    const headers = ['Skill Name', 'Category', 'Importance', 'Required Benchmark (%)', 'Mandatory For Hire', 'Evaluation Criteria'];
+    const rows = skillsList.map((s) => [
+      `"${(s.name || '').replace(/"/g, '""')}"`,
+      `"${getCategoryMeta(s.category).label}"`,
+      `"${s.importance || 'HIGH'}"`,
+      s.requiredBenchmark || 70,
+      s.isCompanyRequired ? 'MANDATORY' : 'PREFERRED',
+      `"${(s.description || '').replace(/"/g, '""')}"`,
+    ]);
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `hireiq_company_hiring_benchmarks_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    triggerToast('Company hiring criteria exported as CSV.');
+  };
+
+  const handleSyncWithRoles = async () => {
     try {
       await skillsApi.seedDefaultSkills();
-      triggerToast('Standard industry skill benchmarks seeded successfully');
+      triggerToast('Hiring criteria synchronized with active role standards');
       loadSkills();
     } catch {
-      triggerToast('Failed to seed default skill benchmarks');
+      triggerToast('Failed to synchronize role standards');
     }
   };
 
@@ -259,6 +303,151 @@ export default function Setting() {
     } catch (err) {
       triggerToast(err.message || 'Failed to update user role');
     }
+  };
+
+  const formatAuditAction = (action) => {
+    switch (action) {
+      case 'CANDIDATE_STAGE_UPDATE':
+        return {
+          label: 'Stage Updated',
+          icon: 'fa-solid fa-user-pen',
+          color: '#2563eb',
+          bg: '#eff6ff',
+          border: '#bfdbfe',
+        };
+      case 'RESUME_UPLOAD_EVALUATED':
+        return {
+          label: 'Resume Evaluated',
+          icon: 'fa-solid fa-file-shield',
+          color: '#059669',
+          bg: '#ecfdf5',
+          border: '#a7f3d0',
+        };
+      case 'CREATE_SKILL_BENCHMARK':
+        return {
+          label: 'Criteria Added',
+          icon: 'fa-solid fa-plus',
+          color: '#7c3aed',
+          bg: '#f5f3ff',
+          border: '#ddd6fe',
+        };
+      case 'UPDATE_SKILL_BENCHMARK':
+        return {
+          label: 'Benchmark Updated',
+          icon: 'fa-solid fa-sliders',
+          color: '#d97706',
+          bg: '#fffbeb',
+          border: '#fde68a',
+        };
+      case 'DELETE_SKILL_BENCHMARK':
+        return {
+          label: 'Criteria Removed',
+          icon: 'fa-solid fa-trash-can',
+          color: '#dc2626',
+          bg: '#fef2f2',
+          border: '#fecaca',
+        };
+      case 'SYNC_COMPANY_CRITERIA':
+        return {
+          label: 'Criteria Synced',
+          icon: 'fa-solid fa-arrows-rotate',
+          color: '#0891b2',
+          bg: '#ecfeff',
+          border: '#a5f3fc',
+        };
+      case 'USER_ROLE_CHANGED':
+        return {
+          label: 'Role Changed',
+          icon: 'fa-solid fa-shield-halved',
+          color: '#4f46e5',
+          bg: '#eef2ff',
+          border: '#c7d2fe',
+        };
+      default:
+        return {
+          label: action?.replace(/_/g, ' ') || 'Event',
+          icon: 'fa-solid fa-circle-info',
+          color: '#475569',
+          bg: '#f8fafc',
+          border: '#e2e8f0',
+        };
+    }
+  };
+
+  const formatAuditDetails = (log) => {
+    if (!log.details) return 'System automated event completed successfully.';
+    let parsed = null;
+    try {
+      parsed = typeof log.details === 'string' ? JSON.parse(log.details) : log.details;
+    } catch {
+      return String(log.details);
+    }
+
+    if (log.action === 'CANDIDATE_STAGE_UPDATE') {
+      const name = parsed.candidateName || 'Candidate';
+      const stage = parsed.newStage || parsed.newStatus || 'Updated';
+      const role = parsed.roleAssigned ? ` (${parsed.roleAssigned})` : '';
+      return `${name} moved to stage ${stage}${role}`;
+    }
+
+    if (log.action === 'RESUME_UPLOAD_EVALUATED') {
+      const name = parsed.candidateName || 'Candidate';
+      const role = parsed.targetRole ? ` for ${parsed.targetRole}` : '';
+      const score = parsed.matchScore ? ` (${parsed.matchScore}% match)` : '';
+      return `${name} resume analyzed${role}${score}`;
+    }
+
+    if (log.action === 'SYNC_COMPANY_CRITERIA') {
+      return `Synchronized ${parsed.syncedCount || 14} role benchmarks with company policy`;
+    }
+
+    if (log.action === 'CREATE_SKILL_BENCHMARK') {
+      return `Configured ${parsed.name} with ${parsed.requiredBenchmark}% threshold`;
+    }
+
+    if (log.action === 'UPDATE_SKILL_BENCHMARK') {
+      const parts = [];
+      if (parsed.requiredBenchmark !== undefined) parts.push(`threshold: ${parsed.requiredBenchmark}%`);
+      if (parsed.isCompanyRequired !== undefined) parts.push(`mandatory: ${parsed.isCompanyRequired ? 'Yes' : 'No'}`);
+      return `Updated benchmark properties: ${parts.join(', ') || 'saved'}`;
+    }
+
+    if (log.action === 'USER_ROLE_CHANGED') {
+      return `Assigned role ${parsed.newRole} to ${parsed.targetEmail || 'user'}`;
+    }
+
+    return Object.entries(parsed)
+      .slice(0, 3)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join(' • ');
+  };
+
+  const handleExportAuditLogsCSV = () => {
+    if (!auditLogs || auditLogs.length === 0) {
+      triggerToast('No audit records available to export.');
+      return;
+    }
+    const headers = ['Timestamp', 'Actor', 'Event Type', 'Resource', 'Status', 'Event Summary', 'IP Address'];
+    const rows = auditLogs.map((l) => [
+      `"${new Date(l.createdAt).toISOString()}"`,
+      `"${l.actorEmail || l.user?.email || 'system'}"`,
+      `"${l.action || ''}"`,
+      `"${l.resource || ''}"`,
+      `"${l.status || 'SUCCESS'}"`,
+      `"${(formatAuditDetails(l) || '').replace(/"/g, '""')}"`,
+      `"${l.ipAddress || ''}"`,
+    ]);
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `hireiq_security_audit_log_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    triggerToast('Security audit trail exported successfully.');
   };
 
   const handleThemeChange = (newTheme) => {
@@ -701,15 +890,27 @@ export default function Setting() {
                 </div>
 
                 <div className="setting-kpi-card">
-                  <span className="kpi-label">Quick Actions</span>
-                  <button
-                    type="button"
-                    onClick={handleSeedDefaults}
-                    className="kpi-action-btn"
-                  >
-                    <i className="fa-solid fa-sparkles"></i> Seed Defaults
-                  </button>
-                  <small className="kpi-sub" style={{ textAlign: 'center' }}>Reset to tech industry standards</small>
+                  <span className="kpi-label">Criteria Governance</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <button
+                      type="button"
+                      onClick={handleExportCriteriaCSV}
+                      className="kpi-action-btn"
+                      title="Export company benchmark criteria policy as CSV"
+                    >
+                      <i className="fa-solid fa-file-arrow-down"></i> Export Criteria CSV
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSyncWithRoles}
+                      className="kpi-action-btn"
+                      style={{ background: '#f0fdf4', color: '#16a34a', borderColor: '#bbf7d0' }}
+                      title="Sync benchmarks with requirements from active job roles"
+                    >
+                      <i className="fa-solid fa-arrows-rotate"></i> Sync Role Standards
+                    </button>
+                  </div>
+                  <small className="kpi-sub" style={{ textAlign: 'center' }}>Aligned with active job roles</small>
                 </div>
               </div>
 
@@ -752,7 +953,7 @@ export default function Setting() {
                       >
                         <option value="TECHNICAL">Technical Skills</option>
                         <option value="TOOLS">Tools & Frameworks</option>
-                        <option value="SOFT_SKILLS">Soft Skills</option>
+                        <option value="SOFT">Soft Skills</option>
                         <option value="DOMAIN">Domain Knowledge</option>
                       </select>
                     </div>
@@ -863,7 +1064,7 @@ export default function Setting() {
                       <option value="all">All Categories</option>
                       <option value="TECHNICAL">Technical Skills</option>
                       <option value="TOOLS">Tools & Frameworks</option>
-                      <option value="SOFT_SKILLS">Soft Skills</option>
+                      <option value="SOFT">Soft Skills</option>
                       <option value="DOMAIN">Domain Knowledge</option>
                     </select>
 
@@ -882,11 +1083,11 @@ export default function Setting() {
                   <table className="setting-table">
                     <thead>
                       <tr>
-                        <th style={{ width: '22%' }}>Skill Name</th>
-                        <th style={{ width: '16%' }}>Category</th>
+                        <th style={{ width: '24%' }}>Skill Name</th>
+                        <th style={{ width: '18%' }}>Category</th>
                         <th style={{ width: '14%' }}>Status</th>
-                        <th style={{ width: '32%' }}>Required Benchmark (%)</th>
-                        <th style={{ width: '16%', textAlign: 'right' }}>Actions</th>
+                        <th style={{ width: '30%' }}>Required Benchmark (%)</th>
+                        <th style={{ width: '14%', textAlign: 'right' }}>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -899,6 +1100,7 @@ export default function Setting() {
                           const hasUnsavedChanges =
                             tempBenchmark[skill.id] !== undefined &&
                             tempBenchmark[skill.id] !== skill.requiredBenchmark;
+                          const catMeta = getCategoryMeta(skill.category);
 
                           return (
                             <tr key={skill.id}>
@@ -925,7 +1127,21 @@ export default function Setting() {
                               </td>
 
                               <td style={{ fontSize: '11px' }}>
-                                {skill.category}
+                                <span
+                                  style={{
+                                    display: 'inline-block',
+                                    padding: '3px 8px',
+                                    borderRadius: '12px',
+                                    fontSize: '11px',
+                                    fontWeight: '600',
+                                    color: catMeta.color,
+                                    background: catMeta.bg,
+                                    border: `1px solid ${catMeta.border}`,
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
+                                  {catMeta.label}
+                                </span>
                               </td>
 
                               <td>
@@ -1021,24 +1237,31 @@ export default function Setting() {
                     <span className="setting-status-dot"></span>
                     <strong className="kpi-val" style={{ fontSize: '16px' }}>{healthData?.status || 'OPERATIONAL'}</strong>
                   </div>
-                  <small className="kpi-sub">Uptime: {healthData?.uptimeSeconds || 120}s</small>
+                  <small className="kpi-sub">
+                    Uptime: {healthData?.uptimeSeconds ? `${Math.floor(healthData.uptimeSeconds / 60)}m ${healthData.uptimeSeconds % 60}s` : 'Active'}
+                  </small>
                 </div>
 
                 <div className="setting-kpi-card">
-                  <span className="kpi-label">Supabase PostgreSQL</span>
-                  <strong className="kpi-val" style={{ fontSize: '16px', color: '#1769ff' }}>
-                    {healthData?.database?.latencyMs ? `${healthData.database.latencyMs}ms` : 'Connected'}
+                  <span className="kpi-label">Database Engine</span>
+                  <strong className="kpi-val" style={{ fontSize: '15px', color: '#1769ff' }}>
+                    {healthData?.database?.provider || 'SQLite Engine'}
                   </strong>
-                  <small className="kpi-sub" style={{ color: '#10b981' }}>Status: {healthData?.database?.status || 'Active'}</small>
+                  <small className="kpi-sub" style={{ color: '#10b981' }}>
+                    Status: {healthData?.database?.status || 'CONNECTED'} • {healthData?.database?.latencyMs ?? 1}ms latency
+                  </small>
                 </div>
 
                 <div className="setting-kpi-card">
-                  <span className="kpi-label">Total Records</span>
+                  <span className="kpi-label">Total Managed Records</span>
                   <strong className="kpi-val" style={{ fontSize: '16px' }}>
-                    {(healthData?.counts?.totalCandidates || 0) + (healthData?.counts?.totalJobs || 0)}
+                    {(healthData?.counts?.totalCandidates || 0) +
+                      (healthData?.counts?.totalJobs || 0) +
+                      (healthData?.counts?.totalResumes || 0) +
+                      (healthData?.counts?.totalSkills || 0)}
                   </strong>
                   <small className="kpi-sub">
-                    {healthData?.counts?.totalCandidates || 0} Cand. • {healthData?.counts?.totalJobs || 0} Roles
+                    {healthData?.counts?.totalCandidates || 0} Candidates • {healthData?.counts?.totalJobs || 0} Roles • {healthData?.counts?.totalResumes || 0} Resumes • {healthData?.counts?.totalSkills || 0} Skills
                   </small>
                 </div>
 
@@ -1047,7 +1270,7 @@ export default function Setting() {
                   <strong className="kpi-val" style={{ fontSize: '16px', color: '#8b5cf6' }}>
                     {healthData?.memory?.rssMb || 110} MB
                   </strong>
-                  <small className="kpi-sub">Heap: {healthData?.memory?.heapUsedMb || 45} MB</small>
+                  <small className="kpi-sub">Heap: {healthData?.memory?.heapUsedMb || 45} MB / {healthData?.memory?.heapTotalMb || 60} MB</small>
                 </div>
               </div>
 
@@ -1067,14 +1290,49 @@ export default function Setting() {
                       onChange={(e) => setLogSearch(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && loadAdminData()}
                       className="setting-filter-input"
-                      style={{ width: '200px' }}
+                      style={{ width: '180px' }}
                     />
+
+                    <select
+                      value={auditCategoryFilter}
+                      onChange={(e) => setAuditCategoryFilter(e.target.value)}
+                      className="setting-filter-select"
+                    >
+                      <option value="all">All Events</option>
+                      <option value="CANDIDATE">Candidate Pipeline</option>
+                      <option value="RESUME">Resume Evaluations</option>
+                      <option value="BENCHMARK">Criteria Benchmarks</option>
+                      <option value="RBAC">Security & Roles</option>
+                    </select>
+
+                    <button
+                      type="button"
+                      onClick={handleExportAuditLogsCSV}
+                      className="setting-filter-input"
+                      style={{
+                        width: 'auto',
+                        padding: '6px 12px',
+                        cursor: 'pointer',
+                        fontWeight: '600',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        color: '#2869e8',
+                        background: '#f8fafc',
+                        border: '1px solid #cbd5e1',
+                      }}
+                      title="Download compliance audit trail as CSV"
+                    >
+                      <i className="fa-solid fa-file-arrow-down"></i> Export CSV
+                    </button>
+
                     <button
                       type="button"
                       onClick={loadAdminData}
                       className="setting-refresh-btn"
+                      title="Refresh audit records"
                     >
-                      <i className="fa-solid fa-rotate-right"></i> Refresh
+                      <i className="fa-solid fa-rotate-right"></i>
                     </button>
                   </div>
                 </div>
@@ -1083,39 +1341,87 @@ export default function Setting() {
                   <table className="setting-table">
                     <thead>
                       <tr>
-                        <th>Timestamp</th>
-                        <th>Actor</th>
-                        <th>Action</th>
-                        <th>Resource</th>
-                        <th>Status</th>
+                        <th style={{ width: '15%' }}>Timestamp</th>
+                        <th style={{ width: '17%' }}>Actor</th>
+                        <th style={{ width: '16%' }}>Event Type</th>
+                        <th style={{ width: '32%' }}>Event Summary & Audit Details</th>
+                        <th style={{ width: '11%' }}>Resource</th>
+                        <th style={{ width: '9%', textAlign: 'center' }}>Status</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {auditLogs.length > 0 ? (
-                        auditLogs.slice(0, 10).map((log) => (
-                          <tr key={log.id}>
-                            <td className="setting-cell-subtext">{new Date(log.createdAt).toLocaleString()}</td>
-                            <td style={{ fontWeight: '500' }}>{log.actorEmail || log.user?.email || 'system'}</td>
-                            <td>
-                              <span className="setting-audit-action">
-                                {log.action}
-                              </span>
-                            </td>
-                            <td>{log.resource}</td>
-                            <td>
-                              <span className="setting-audit-status">
-                                {log.status || 'SUCCESS'}
-                              </span>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="5" style={{ padding: '20px', textAlign: 'center', color: '#94a3b8' }}>
-                            {loadingAdmin ? 'Loading audit trail...' : 'No audit records found.'}
-                          </td>
-                        </tr>
-                      )}
+                      {(() => {
+                        const filtered = auditLogs.filter((log) => {
+                          if (auditCategoryFilter === 'all') return true;
+                          if (auditCategoryFilter === 'CANDIDATE') return log.action?.includes('CANDIDATE') || log.resource === 'Candidate';
+                          if (auditCategoryFilter === 'RESUME') return log.action?.includes('RESUME') || log.resource === 'Resume';
+                          if (auditCategoryFilter === 'BENCHMARK') return log.action?.includes('SKILL') || log.action?.includes('CRITERIA') || log.resource?.includes('Skill');
+                          if (auditCategoryFilter === 'RBAC') return log.action?.includes('USER') || log.action?.includes('ROLE') || log.resource === 'User';
+                          return true;
+                        });
+
+                        if (filtered.length === 0) {
+                          return (
+                            <tr>
+                              <td colSpan="6" style={{ padding: '24px', textAlign: 'center', color: '#94a3b8' }}>
+                                {loadingAdmin ? 'Loading audit trail...' : 'No audit records found matching your filters.'}
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        return filtered.slice(0, 15).map((log) => {
+                          const actionMeta = formatAuditAction(log.action);
+                          const detailsSummary = formatAuditDetails(log);
+
+                          return (
+                            <tr key={log.id}>
+                              <td className="setting-cell-subtext" style={{ whiteSpace: 'nowrap' }}>
+                                {new Date(log.createdAt).toLocaleString(undefined, {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </td>
+                              <td style={{ fontWeight: '500' }}>
+                                <span style={{ fontSize: '12px' }}>
+                                  {log.actorEmail || log.user?.email || 'system'}
+                                </span>
+                              </td>
+                              <td>
+                                <span
+                                  className="setting-audit-badge"
+                                  style={{
+                                    color: actionMeta.color,
+                                    background: actionMeta.bg,
+                                    border: `1px solid ${actionMeta.border}`,
+                                  }}
+                                >
+                                  <i className={actionMeta.icon} style={{ fontSize: '10px' }}></i>
+                                  {actionMeta.label}
+                                </span>
+                              </td>
+                              <td>
+                                <div className="setting-audit-details-text">
+                                  {detailsSummary}
+                                </div>
+                              </td>
+                              <td>
+                                <span style={{ fontSize: '11.5px', color: '#64748b', fontWeight: '500' }}>
+                                  {log.resource}
+                                </span>
+                              </td>
+                              <td style={{ textAlign: 'center' }}>
+                                <span className="setting-audit-status">
+                                  {log.status || 'SUCCESS'}
+                                </span>
+                              </td>
+                            </tr>
+                          );
+                        });
+                      })()}
                     </tbody>
                   </table>
                 </div>
@@ -1134,44 +1440,73 @@ export default function Setting() {
                   <table className="setting-table">
                     <thead>
                       <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Assigned Role</th>
-                        <th>Created</th>
+                        <th style={{ width: '28%' }}>Team Member</th>
+                        <th style={{ width: '26%' }}>Email Address</th>
+                        <th style={{ width: '16%' }}>Account Status</th>
+                        <th style={{ width: '18%' }}>Assigned Role</th>
+                        <th style={{ width: '12%', textAlign: 'right' }}>Registered</th>
                       </tr>
                     </thead>
                     <tbody>
                       {usersList.length > 0 ? (
-                        usersList.map((u) => (
-                          <tr key={u.id}>
-                            <td style={{ fontWeight: '600' }}>{u.firstName} {u.lastName}</td>
-                            <td className="setting-cell-subtext">
-                              <a
-                                href={`mailto:${u.email}`}
-                                style={{ color: '#2563eb', textDecoration: 'none' }}
-                                title={`Send email to ${u.email}`}
-                              >
-                                {u.email}
-                              </a>
-                            </td>
-                            <td>
-                              <select
-                                value={u.role}
-                                onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                                className="setting-role-select"
-                              >
-                                <option value="ADMIN">ADMIN</option>
-                                <option value="HR_MANAGER">HR_MANAGER</option>
-                                <option value="RECRUITER">RECRUITER</option>
-                                <option value="INTERVIEWER">INTERVIEWER</option>
-                              </select>
-                            </td>
-                            <td className="setting-cell-subtext">{new Date(u.createdAt).toLocaleDateString()}</td>
-                          </tr>
-                        ))
+                        usersList.map((u) => {
+                          const initials = `${(u.firstName || '')[0] || 'U'}${(u.lastName || '')[0] || ''}`.toUpperCase();
+                          return (
+                            <tr key={u.id}>
+                              <td>
+                                <div className="setting-user-cell">
+                                  <div className="setting-user-avatar">
+                                    {initials}
+                                  </div>
+                                  <div>
+                                    <strong style={{ display: 'block', fontSize: '13px' }}>
+                                      {u.firstName} {u.lastName}
+                                    </strong>
+                                    <small style={{ color: '#64748b', fontSize: '10.5px' }}>
+                                      ID: {u.id?.slice(0, 8)}...
+                                    </small>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="setting-cell-subtext">
+                                <a
+                                  href={`mailto:${u.email}`}
+                                  style={{ color: '#2563eb', textDecoration: 'none', fontWeight: '500' }}
+                                  title={`Send email to ${u.email}`}
+                                >
+                                  {u.email}
+                                </a>
+                              </td>
+                              <td>
+                                <span className="setting-active-badge">
+                                  <i className="fa-solid fa-circle-check"></i> Active
+                                </span>
+                              </td>
+                              <td>
+                                <select
+                                  value={u.role}
+                                  onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                                  className="setting-role-select"
+                                >
+                                  <option value="ADMIN">ADMIN</option>
+                                  <option value="HR_MANAGER">HR_MANAGER</option>
+                                  <option value="RECRUITER">RECRUITER</option>
+                                  <option value="INTERVIEWER">INTERVIEWER</option>
+                                </select>
+                              </td>
+                              <td className="setting-cell-subtext" style={{ textAlign: 'right' }}>
+                                {new Date(u.createdAt).toLocaleDateString(undefined, {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                })}
+                              </td>
+                            </tr>
+                          );
+                        })
                       ) : (
                         <tr>
-                          <td colSpan="4" style={{ padding: '20px', textAlign: 'center', color: '#94a3b8' }}>
+                          <td colSpan="5" style={{ padding: '24px', textAlign: 'center', color: '#94a3b8' }}>
                             {loadingAdmin ? 'Loading users...' : 'No users loaded.'}
                           </td>
                         </tr>

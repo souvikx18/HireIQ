@@ -243,7 +243,7 @@ export default function AIChatbot() {
       query.includes('pro') ||
       query.includes('upgrade')
     ) {
-      return "HireIQ offers 3 flexible plans:\n• **Starter** ($9/mo): 50 resume screenings & monthly summaries.\n• **Pro** ($29/mo): Unlimited AI parsing, deep skill analysis & priority support.\n• **Enterprise** (Custom): Dedicated pipelines & API access.\nClick **'Upgrade to Pro'** on the sidebar to learn more!";
+      return "HireIQ offers complete recruitment intelligence:\n• **Core Evaluation**: AI resume parsing, candidate scoring, and ATS compatibility.\n• **Talent Analytics**: Skill gap benchmarking, stage progression, and workforce readiness.\n• **Enterprise Governance**: Role-based access control, criteria policies, and audit trails.";
     }
 
     if (

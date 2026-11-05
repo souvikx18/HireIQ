@@ -662,29 +662,43 @@ export default function ResumeUpload() {
             </div>
 
             {/* UPLOAD HISTORY */}
-            <div className="history-card">
+            <div className="history-card" data-lenis-prevent="true">
               <div className="history-header">
                 <h2>Upload History</h2>
                 <span>{historyItems.length} items total</span>
               </div>
 
-              <div className="history-list">
-                {historyItems.map((item) => (
-                  <div key={item.id} className="history-item">
-                    <div className="file-info">
-                      <div className="file-icon">
-                        <i className="fa-regular fa-file"></i>
-                      </div>
-                      <div className="file-info-text">
-                        <div className="file-name" title={item.fileName}>{item.fileName}</div>
-                        <div className="file-meta">{item.meta}</div>
-                      </div>
+              <div
+                className="history-list"
+                data-lenis-prevent="true"
+                onWheel={(e) => e.stopPropagation()}
+              >
+                {historyItems.length === 0 ? (
+                  <div className="history-empty">
+                    <div className="history-empty-icon">
+                      <i className="fa-regular fa-folder-open"></i>
                     </div>
-                    <span className={`file-status ${item.statusClass}`}>
-                      {item.status}
-                    </span>
+                    <p>No uploaded resumes yet</p>
+                    <small>Upload a resume on the left to start screening</small>
                   </div>
-                ))}
+                ) : (
+                  historyItems.map((item) => (
+                    <div key={item.id} className="history-item">
+                      <div className="file-info">
+                        <div className="file-icon">
+                          <i className="fa-regular fa-file"></i>
+                        </div>
+                        <div className="file-info-text">
+                          <div className="file-name" title={item.fileName}>{item.fileName}</div>
+                          <div className="file-meta">{item.meta}</div>
+                        </div>
+                      </div>
+                      <span className={`file-status ${item.statusClass}`}>
+                        {item.status}
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>

@@ -89,27 +89,27 @@ export default function JobRole() {
   };
 
   const getRoleIconClass = (name) => {
-    const role = name.toLowerCase();
+    const role = (name || '').toLowerCase();
+    if (role.includes('security') || role.includes('cyber')) return 'red-role';
     if (role.includes('data') || role.includes('analyst')) return 'green-role';
-    if (role.includes('designer') || role.includes('marketing'))
+    if (role.includes('designer') || role.includes('marketing') || role.includes('ui') || role.includes('ux'))
       return 'orange-role';
     if (role.includes('devops') || role.includes('cloud')) return 'purple-role';
-    if (role.includes('security') || role.includes('cyber')) return 'red-role';
     if (role.includes('product')) return 'cyan-role';
     return 'blue-role';
   };
 
   const getRoleIcon = (name) => {
-    const role = name.toLowerCase();
+    const role = (name || '').toLowerCase();
+    if (role.includes('security') || role.includes('cyber'))
+      return 'fa-solid fa-shield-halved';
     if (role.includes('data') || role.includes('analyst'))
       return 'fa-solid fa-chart-column';
-    if (role.includes('designer'))
+    if (role.includes('designer') || role.includes('ui') || role.includes('ux'))
       return 'fa-solid fa-mobile-screen-button';
     if (role.includes('marketing')) return 'fa-solid fa-bullhorn';
     if (role.includes('devops') || role.includes('cloud'))
       return 'fa-solid fa-gear';
-    if (role.includes('security') || role.includes('cyber'))
-      return 'fa-solid fa-shield-halved';
     if (role.includes('product')) return 'fa-solid fa-briefcase';
     return 'fa-solid fa-code';
   };
@@ -395,7 +395,12 @@ export default function JobRole() {
               </div>
               <div className="stat-content">
                 <span>Open Positions</span>
-                <strong>32</strong>
+                <strong>
+                  {roles.reduce(
+                    (acc, r) => acc + (parseInt(r.openPositions, 10) || 0),
+                    0
+                  )}
+                </strong>
                 <small>Positions to fill</small>
               </div>
             </div>
@@ -494,9 +499,16 @@ export default function JobRole() {
                 </thead>
 
                 <tbody>
-                  {filteredRoles.length === 0 ? (
+                  {loading ? (
                     <tr>
-                      <td colSpan={7} style={{ textAlign: 'center', padding: '48px 20px', color: '#64748b' }}>
+                      <td colSpan={8} style={{ textAlign: 'center', padding: '48px 20px', color: '#64748b' }}>
+                        <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '24px', color: '#3b82f6', marginBottom: '8px', display: 'block' }}></i>
+                        <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>Loading organizational job roles...</p>
+                      </td>
+                    </tr>
+                  ) : filteredRoles.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} style={{ textAlign: 'center', padding: '48px 20px', color: '#64748b' }}>
                         <div style={{ maxWidth: '340px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
                           <i className="fa-solid fa-briefcase" style={{ fontSize: '36px', color: '#94a3b8', marginBottom: '4px' }}></i>
                           <h4 style={{ margin: 0, fontSize: '15px', color: '#1e293b', fontWeight: 600 }}>No Job Roles Found</h4>
@@ -528,8 +540,8 @@ export default function JobRole() {
                     >
                       <td>
                         <div className="role-info">
-                          <div className={`role-icon ${r.iconClass}`}>
-                            <i className={r.iconFa}></i>
+                          <div className={`role-icon ${r.iconClass || getRoleIconClass(r.name)}`}>
+                            <i className={r.iconFa || getRoleIcon(r.name)}></i>
                           </div>
                           <div>
                             <strong>{r.name}</strong>
@@ -544,13 +556,15 @@ export default function JobRole() {
 
                       <td>
                         <div className="skill-tags">
-                          {r.skills.map((s, idx) => (
+                          {r.skills.slice(0, 4).map((s, idx) => (
                             <span key={idx}>{s}</span>
                           ))}
-                          {r.extraSkillsCount > 0 && (
-                            <span>+{r.extraSkillsCount}</span>
+                          {r.skills.length > 4 && (
+                            <span title={r.skills.slice(4).join(', ')}>
+                              +{r.skills.length - 4}
+                            </span>
                           )}
-                          {r.skills.length === 0 && <span>No skills</span>}
+                          {r.skills.length === 0 && <span>No skills specified</span>}
                         </div>
                       </td>
 

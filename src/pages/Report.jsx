@@ -137,6 +137,13 @@ export default function Report() {
                   <button
                     type="button"
                     className="date-option"
+                    onClick={() => handleDateSelect('Last 7 Days')}
+                  >
+                    Last 7 Days
+                  </button>
+                  <button
+                    type="button"
+                    className="date-option"
                     onClick={() => handleDateSelect('Last 30 Days')}
                   >
                     Last 30 Days
@@ -144,16 +151,16 @@ export default function Report() {
                   <button
                     type="button"
                     className="date-option"
-                    onClick={() => handleDateSelect('Last 90 Days')}
+                    onClick={() => handleDateSelect('This Month')}
                   >
-                    Last 90 Days
+                    This Month
                   </button>
                   <button
                     type="button"
                     className="date-option"
-                    onClick={() => handleDateSelect('This Month')}
+                    onClick={() => handleDateSelect('Last 90 Days')}
                   >
-                    This Month
+                    Last 90 Days
                   </button>
                   <button
                     type="button"
@@ -168,6 +175,13 @@ export default function Report() {
                     onClick={() => handleDateSelect('Year to Date (2026)')}
                   >
                     Year to Date (2026)
+                  </button>
+                  <button
+                    type="button"
+                    className="date-option"
+                    onClick={() => handleDateSelect('All Time')}
+                  >
+                    All Time
                   </button>
                 </div>
               </div>

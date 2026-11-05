@@ -10,6 +10,7 @@ async function main() {
   const salt = await bcrypt.genSalt(12);
   const adminPassword = await bcrypt.hash('Admin@123456', salt);
   const hrPassword = await bcrypt.hash('Manager@123456', salt);
+  const candidatePassword = await bcrypt.hash('Candidate@123456', salt);
 
   const admin = await prisma.user.upsert({
     where: { email: 'admin@hireiq.com' },
@@ -45,7 +46,27 @@ async function main() {
     },
   });
 
-  console.log(`Created default users: ${admin.email}, ${hrManager.email}`);
+  const candidate = await prisma.user.upsert({
+    where: { email: 'candidate@hireiq.com' },
+    update: {
+      passwordHash: candidatePassword,
+      role: 'CANDIDATE',
+    },
+    create: {
+      email: 'candidate@hireiq.com',
+      passwordHash: candidatePassword,
+      firstName: 'Surja Kanta',
+      lastName: 'Chowdhury',
+      role: 'CANDIDATE',
+      avatarUrl: null,
+      emailNotifications: true,
+      hiringUpdates: true,
+      candidateUpdates: true,
+      interviewReminders: true,
+    },
+  });
+
+  console.log(`Created default users: ${admin.email}, ${hrManager.email}, ${candidate.email}`);
 
   // 2. Create In-Demand Skills Catalog
   const skillsData = [
@@ -180,252 +201,7 @@ async function main() {
   }
   console.log(`Seeded ${Object.keys(roleMap).length} job roles.`);
 
-  // 4. Create Initial Candidates
-  const candidatesData = [
-    {
-      name: 'Sarah Jenkins',
-      email: 'sarah.jenkins@email.com',
-      roleApplied: 'Frontend Engineer',
-      jobRoleCode: 'FS-001',
-      matchScore: 92,
-      atsScore: 95,
-      views: 32,
-      viewsThisWeek: '5 this week',
-      reviewsCount: 18,
-      rating: 4.6,
-      status: 'SHORTLISTED',
-      skills: ['React', 'JavaScript', 'SQL', 'Docker'],
-      review: {
-        authorName: 'John Doe',
-        text: 'Exceptional problem solving skills, high semantic code alignment.',
-        rating: 4.8,
-        date: 'May 24, 2025',
-        reviewClass: 'green-review',
-      },
-      gaps: [
-        { skill: 'AWS', required: 80, candidate: 35, gap: 45, priority: 'HIGH' },
-      ],
-    },
-    {
-      name: 'Rohan Mehta',
-      email: 'rohan.mehta@email.com',
-      roleApplied: 'Full Stack Developer',
-      jobRoleCode: 'FS-001',
-      matchScore: 85,
-      atsScore: 88,
-      views: 28,
-      viewsThisWeek: '4 this week',
-      reviewsCount: 15,
-      rating: 4.2,
-      status: 'ACTIVE',
-      skills: ['Node.js', 'React', 'Docker', 'SQL'],
-      review: {
-        authorName: 'Emily Johnson',
-        text: 'Good technical knowledge, can improve in system design.',
-        rating: 4.2,
-        date: 'May 23, 2025',
-        reviewClass: 'blue-review',
-      },
-      gaps: [
-        { skill: 'Kubernetes', required: 70, candidate: 25, gap: 45, priority: 'HIGH' },
-      ],
-    },
-    {
-      name: 'Ananya Patel',
-      email: 'ananya.patel@email.com',
-      roleApplied: 'Backend Developer',
-      jobRoleCode: 'FS-001',
-      matchScore: 88,
-      atsScore: 91,
-      views: 25,
-      viewsThisWeek: '3 this week',
-      reviewsCount: 12,
-      rating: 4.0,
-      status: 'SHORTLISTED',
-      skills: ['Python', 'SQL', 'Docker', 'Node.js'],
-      review: {
-        authorName: 'Michael Smith',
-        text: 'Strong backend concepts, fast API integration.',
-        rating: 4.5,
-        date: 'May 22, 2025',
-        reviewClass: 'yellow-review',
-      },
-      gaps: [
-        { skill: 'System Design', required: 60, candidate: 20, gap: 40, priority: 'MEDIUM' },
-      ],
-    },
-    {
-      name: 'Vikram Kumar',
-      email: 'vikram.kumar@email.com',
-      roleApplied: 'Frontend Engineer',
-      jobRoleCode: 'FS-001',
-      matchScore: 74,
-      atsScore: 79,
-      views: 20,
-      viewsThisWeek: '2 this week',
-      reviewsCount: 9,
-      rating: 3.8,
-      status: 'UNDER_REVIEW',
-      skills: ['JavaScript', 'HTML', 'CSS'],
-      review: {
-        authorName: 'John Doe',
-        text: 'Needs improvement in advanced JavaScript frameworks and TypeScript.',
-        rating: 3.5,
-        date: 'May 21, 2025',
-        reviewClass: 'red-review',
-      },
-      gaps: [
-        { skill: 'Docker', required: 70, candidate: 30, gap: 40, priority: 'HIGH' },
-      ],
-    },
-    {
-      name: 'Neha Tiwari',
-      email: 'neha.tiwari@email.com',
-      roleApplied: 'UI/UX Designer',
-      jobRoleCode: 'UX-003',
-      matchScore: 89,
-      atsScore: 92,
-      views: 18,
-      viewsThisWeek: '2 this week',
-      reviewsCount: 8,
-      rating: 4.4,
-      status: 'ACTIVE',
-      skills: ['Figma', 'System Design'],
-      review: {
-        authorName: 'Emily Johnson',
-        text: 'Creative designs, exceptional understanding of UI/UX design systems.',
-        rating: 4.6,
-        date: 'May 21, 2025',
-        reviewClass: 'green-review',
-      },
-      gaps: [
-        { skill: 'Industry Knowledge', required: 65, candidate: 42, gap: 23, priority: 'LOW' },
-      ],
-    },
-  ];
-
-  for (const c of candidatesData) {
-    const jobRole = roleMap[c.jobRoleCode];
-    const candidate = await prisma.candidate.upsert({
-      where: { email: c.email },
-      update: {
-        name: c.name,
-        roleApplied: c.roleApplied,
-        jobRoleId: jobRole?.id || null,
-        matchScore: c.matchScore,
-        atsScore: c.atsScore,
-        views: c.views,
-        viewsThisWeek: c.viewsThisWeek,
-        reviewsCount: c.reviewsCount,
-        rating: c.rating,
-        status: c.status,
-      },
-      create: {
-        name: c.name,
-        email: c.email,
-        roleApplied: c.roleApplied,
-        jobRoleId: jobRole?.id || null,
-        matchScore: c.matchScore,
-        atsScore: c.atsScore,
-        views: c.views,
-        viewsThisWeek: c.viewsThisWeek,
-        reviewsCount: c.reviewsCount,
-        rating: c.rating,
-        status: c.status,
-      },
-    });
-
-    // Link skills
-    for (const skName of c.skills) {
-      if (skillMap[skName]) {
-        await prisma.candidateSkill.upsert({
-          where: {
-            candidateId_skillId: {
-              candidateId: candidate.id,
-              skillId: skillMap[skName].id,
-            },
-          },
-          update: {},
-          create: {
-            candidateId: candidate.id,
-            skillId: skillMap[skName].id,
-            proficiency: 'Proficient',
-          },
-        });
-      }
-    }
-
-    // Link gaps
-    for (const g of c.gaps) {
-      if (skillMap[g.skill]) {
-        await prisma.skillGap.create({
-          data: {
-            candidateId: candidate.id,
-            skillId: skillMap[g.skill].id,
-            requiredLevel: g.required,
-            candidateLevel: g.candidate,
-            gapPercentage: g.gap,
-            priority: g.priority,
-            learningPlan: `Structured course pathway for ${g.skill}`,
-          },
-        });
-      }
-    }
-
-    // Add review
-    if (c.review) {
-      await prisma.candidateReview.create({
-        data: {
-          candidateId: candidate.id,
-          reviewerName: c.review.authorName,
-          reviewText: c.review.text,
-          rating: c.review.rating,
-          reviewDate: c.review.date,
-          reviewClass: c.review.reviewClass,
-        },
-      });
-    }
-
-    // Add Resume record with mock analysis
-    const resume = await prisma.resume.create({
-      data: {
-        candidateId: candidate.id,
-        originalFileName: `${c.name.toLowerCase().replace(/\s+/g, '_')}_resume.pdf`,
-        storedFileName: `seed-${candidate.id}.pdf`,
-        filePath: `uploads/resumes/seed-${candidate.id}.pdf`,
-        fileType: 'application/pdf',
-        fileSize: 245760,
-        parsingStatus: 'COMPLETED',
-        rawText: `Candidate ${c.name} - Applied for ${c.roleApplied}. Skills: ${c.skills.join(', ')}`,
-      },
-    });
-
-    await prisma.resumeAnalysis.create({
-      data: {
-        resumeId: resume.id,
-        overallScore: c.matchScore,
-        atsScore: c.atsScore,
-        skillCoverage: Math.round((c.skills.length / 5) * 100),
-        aiRecommendation: c.matchScore >= 85 ? 'HIGHLY RECOMMENDED' : 'REVIEW REQUIRED',
-        aiConfidence: '95%',
-        matchedSkills: JSON.stringify(c.skills.map((s, idx) => ({ name: s, purple: idx % 2 !== 0 }))),
-        missingSkills: JSON.stringify(c.gaps.map((g) => g.skill)),
-        partialSkills: JSON.stringify([]),
-        strengths: JSON.stringify([
-          `Solid command of ${c.skills.slice(0, 2).join(' & ')}`,
-          'Strong problem solving and architectural foundations',
-        ]),
-        gapRoadmap: JSON.stringify([
-          { step: 'Phase 1', title: `${c.gaps[0]?.skill || 'Core'} Fundamentals`, desc: '1-2 weeks foundational study' },
-          { step: 'Phase 2', title: 'Hands-on Implementation', desc: 'Deploy practical demo architecture' },
-        ]),
-        scoreExplanation: `${c.name} achieved an overall match score of ${c.matchScore}%.`,
-        courseRecommendation: `Actionable courses available to fill priority gaps.`,
-      },
-    });
-  }
-
-  console.log(`Seeded ${candidatesData.length} candidates with reviews, skills, and resume analyses.`);
+  // Candidates will be populated purely by actual user uploads and additions
   console.log('Database seeding complete!');
 }
 

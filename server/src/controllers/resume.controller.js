@@ -252,7 +252,12 @@ export const resumeController = {
   async getUploadHistory(req, res, next) {
     try {
       const resumes = await prisma.resume.findMany({
-        take: 10,
+        where: {
+          NOT: {
+            storedFileName: { startsWith: 'seed-' },
+          },
+        },
+        take: 20,
         orderBy: { createdAt: 'desc' },
         include: { candidate: true },
       });

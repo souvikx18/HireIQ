@@ -49,11 +49,6 @@ export default function Sidebar({ activePage }) {
     setIsCollapsed((prev) => !prev);
   };
 
-  const handleUpgradeClick = () => {
-    setIsMobileOpen(false);
-    navigate('/upgrade');
-  };
-
   const closeMobile = () => {
     setIsMobileOpen(false);
   };
@@ -219,31 +214,6 @@ export default function Sidebar({ activePage }) {
             </>
           )}
         </nav>
-
-        {/* Upgrade Card */}
-        {(!isCollapsed || isMobileOpen) ? (
-          <div className="upgrade-card">
-            <div className="upgrade-icon">
-              <i className="fa-solid fa-crown"></i>
-            </div>
-
-            <h3>Upgrade to Pro</h3>
-
-            <p>Unlock advanced insights and hire top talent faster.</p>
-
-            <button type="button" onClick={handleUpgradeClick}>
-              Upgrade Now
-            </button>
-          </div>
-        ) : (
-          <div
-            className="upgrade-card-collapsed"
-            onClick={handleUpgradeClick}
-            title="Upgrade to Pro"
-          >
-            <i className="fa-solid fa-crown"></i>
-          </div>
-        )}
       </aside>
     </>
   );

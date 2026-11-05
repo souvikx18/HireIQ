@@ -3342,6 +3342,96 @@ body.dark-mode .audit-ocr-explainer-banner {
    REDESIGNED CANDIDATE OVERVIEW - EXECUTIVE TELEMETRY STYLES
    ========================================================= */
 
+/* Executive Candidate Banner (Sleek, Clean, Modern) */
+.candidate-executive-banner {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 18px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 22px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.candidate-executive-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.candidate-avatar-chip {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1.5px solid #bfdbfe;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.candidate-verified-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #059669;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    padding: 3px 9px;
+    border-radius: 14px;
+}
+
+.candidate-executive-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.candidate-header-btn {
+    height: 38px;
+    padding: 0 16px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.candidate-header-btn.primary {
+    background: #2563eb;
+    color: #ffffff;
+}
+
+.candidate-header-btn.primary:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.candidate-header-btn.secondary {
+    background: #f8fafc;
+    color: #334155;
+    border-color: #cbd5e1;
+}
+
+.candidate-header-btn.secondary:hover {
+    background: #f1f5f9;
+}
+
 /* 1. Action Engine Hero Banner (Compact Enterprise Scale) */
 .portal-action-engine-hero {
     background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #1e40af 100%);
@@ -3969,6 +4059,27 @@ body.dark-mode .audit-ocr-explainer-banner {
 }
 
 /* 7. Dark Mode Overrides for Overview */
+body.dark-mode .candidate-executive-banner {
+    background: #142740 !important;
+    border-color: #263f60 !important;
+}
+
+body.dark-mode .candidate-avatar-chip {
+    background: #1e3a5f !important;
+    color: #93c5fd !important;
+    border-color: #3b82f6 !important;
+}
+
+body.dark-mode .candidate-header-btn.secondary {
+    background: #192d4c !important;
+    color: #cbd5e1 !important;
+    border-color: #263f60 !important;
+}
+
+body.dark-mode .candidate-header-btn.secondary:hover {
+    background: #203759 !important;
+}
+
 body.dark-mode .portal-action-engine-hero {
     background: linear-gradient(135deg, #0b1120 0%, #172554 60%, #1e3a8a 100%) !important;
     border-color: rgba(59, 130, 246, 0.3) !important;
@@ -4135,6 +4246,144 @@ body.dark-mode .pipeline-empty-box p {
 
     .apply-mini-btn {
         width: 100%;
+    }
+}
+
+/* =========================================================
+   EXECUTIVE RESUME AUDIT PRESENTATION (CLEAN & PROFESSIONAL)
+   ========================================================= */
+.resume-audit-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.audit-metric-tile {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.audit-metric-tile:hover {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.audit-tile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.audit-tile-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    text-transform: uppercase;
+}
+
+.audit-tile-badge.pass {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #059669;
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    padding: 1px 7px;
+    border-radius: 12px;
+}
+
+.audit-tile-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    margin: 2px 0;
+}
+
+.audit-tile-desc {
+    font-size: 11.5px;
+    color: #64748b;
+    line-height: 1.35;
+}
+
+.resume-audit-checklist {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 16px;
+    padding: 14px 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: #334155;
+    font-weight: 500;
+}
+
+.checklist-item .check-icon {
+    color: #10b981;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+/* Dark mode support */
+body.dark-mode .audit-metric-tile {
+    background: #192237;
+    border-color: #26354f;
+}
+
+body.dark-mode .audit-metric-tile:hover {
+    background: #1e2942;
+    border-color: #3b82f6;
+}
+
+body.dark-mode .audit-tile-value {
+    color: #f8fafc;
+}
+
+body.dark-mode .audit-tile-label {
+    color: #94a3b8;
+}
+
+body.dark-mode .audit-tile-desc {
+    color: #94a3b8;
+}
+
+body.dark-mode .audit-tile-badge.pass {
+    background: #064e3b;
+    color: #6ee7b7;
+    border-color: #047857;
+}
+
+body.dark-mode .resume-audit-checklist {
+    background: #192237;
+    border-color: #26354f;
+}
+
+body.dark-mode .checklist-item {
+    color: #e2e8f0;
+}
+
+@media (max-width: 768px) {
+    .resume-audit-metrics-grid {
+        grid-template-columns: 1fr;
+    }
+    .resume-audit-checklist {
+        grid-template-columns: 1fr;
     }
 }
 

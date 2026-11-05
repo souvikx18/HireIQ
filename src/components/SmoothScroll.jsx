@@ -11,13 +11,15 @@ export default function SmoothScroll({ children }) {
     
     // We can enable Lenis globally with smooth inertial easing
     const lenis = new Lenis({
-      duration: 1.1,
+      duration: 1.0,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Smooth exponential ease-out
       direction: 'vertical',
       gestureDirection: 'vertical',
       smooth: true,
       smoothTouch: false, // Keep native touch on mobile/tablets to prevent scroll stutter
       touchMultiplier: 1.5,
+      wheelMultiplier: 1.0,
+      autoResize: true,
     });
 
     // Make lenis globally accessible for programmatic scrolling
@@ -30,16 +32,33 @@ export default function SmoothScroll({ children }) {
     }
     rafId = requestAnimationFrame(raf);
 
+    // Watch for DOM changes to recalculate scroll boundaries automatically
+    let resizeObserver = null;
+    if (typeof ResizeObserver !== 'undefined' && document.body) {
+      resizeObserver = new ResizeObserver(() => {
+        lenis.resize();
+      });
+      resizeObserver.observe(document.body);
+    }
+
+    const handleWindowResize = () => {
+      lenis.resize();
+    };
+    window.addEventListener('resize', handleWindowResize);
+
     return () => {
       cancelAnimationFrame(rafId);
+      if (resizeObserver) resizeObserver.disconnect();
+      window.removeEventListener('resize', handleWindowResize);
       lenis.destroy();
       delete window.__lenis;
     };
   }, []);
 
-  // When route changes, reset scroll smoothly to top
+  // When route changes, reset scroll smoothly to top and recalculate layout
   useEffect(() => {
     if (window.__lenis) {
+      window.__lenis.resize();
       window.__lenis.scrollTo(0, { immediate: true });
     } else {
       window.scrollTo(0, 0);

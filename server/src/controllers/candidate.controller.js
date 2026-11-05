@@ -93,16 +93,38 @@ export const candidateController = {
         const colors = ['purple', 'blue', 'green', 'pink', 'orange-bg'];
         const avatarColor = colors[Math.abs(c.name.charCodeAt(0)) % colors.length];
 
+        const isRejected = c.status === 'REJECTED' || c.currentStage === 'REJECTED';
+
+        // Stage-based role assignment logic:
+        // When rejected, candidate is NOT assigned to any role opening
+        const displayRole = isRejected
+          ? 'Unassigned'
+          : (c.jobRole ? c.jobRole.title : (c.roleApplied || 'Unassigned'));
+
+        const displayDepartment = isRejected
+          ? 'General Talent Pool'
+          : (c.jobRole ? c.jobRole.department : 'General');
+
+        let reviewText = latestReview?.reviewText;
+        let reviewClass = latestReview?.reviewClass || 'green-review';
+        if (isRejected) {
+          reviewText = 'Candidate application rejected. Profile archived from active role pipeline.';
+          reviewClass = 'red-review';
+        } else if (!reviewText) {
+          reviewText = 'Candidate profile active and ready for interview scheduling.';
+        }
+
         return {
           id: c.id,
           name: c.name,
           email: c.email,
           avatar: initials,
           avatarColor,
-          role: c.roleApplied,
-          jobRoleId: c.jobRoleId,
-          jobRole: c.jobRole ? { id: c.jobRole.id, title: c.jobRole.title, department: c.jobRole.department } : null,
-          department: c.jobRole ? c.jobRole.department : 'General',
+          role: displayRole,
+          originalRoleApplied: c.roleApplied,
+          jobRoleId: isRejected ? null : c.jobRoleId,
+          jobRole: isRejected ? null : (c.jobRole ? { id: c.jobRole.id, title: c.jobRole.title, department: c.jobRole.department } : null),
+          department: displayDepartment,
           views: String(c.views),
           viewsThisWeek: c.viewsThisWeek,
           reviews: String(c.reviewsCount || c.reviews.length),
@@ -111,10 +133,10 @@ export const candidateController = {
           starEmpty: '★ '.repeat(Math.max(0, 5 - Math.floor(c.rating))).trim(),
           reviewerName: latestReview?.reviewerName || 'Hiring Team',
           reviewDate: latestReview?.reviewDate || new Date(c.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-          reviewText: latestReview?.reviewText || 'Candidate profile active and ready for interview scheduling.',
-          reviewClass: latestReview?.reviewClass || 'green-review',
-          status: c.status === 'SHORTLISTED' ? 'Shortlisted' : c.status === 'REJECTED' ? 'Rejected' : 'Active',
-          statusVal: c.status.toLowerCase(),
+          reviewText,
+          reviewClass,
+          status: isRejected ? 'Rejected' : (c.status === 'SHORTLISTED' ? 'Shortlisted' : 'Active'),
+          statusVal: isRejected ? 'rejected' : c.status.toLowerCase(),
           currentStage: c.currentStage || 'UNDER_REVIEW',
           notes: c.notes || '',
           matchScore: c.matchScore,
@@ -167,14 +189,60 @@ export const candidateController = {
       const { id } = req.params;
       const { status, currentStage, notes } = req.body;
 
+      const candidate = await prisma.candidate.findUnique({
+        where: { id },
+        include: { jobRole: true },
+      });
+      if (!candidate) {
+        return sendError(res, 'Candidate not found', 404);
+      }
+
       const updateData = {};
-      if (status) updateData.status = status.toUpperCase().replace(/\s+/g, '_');
-      if (currentStage) updateData.currentStage = currentStage.toUpperCase().replace(/\s+/g, '_');
+      const newStage = currentStage ? currentStage.toUpperCase().replace(/\s+/g, '_') : null;
+      const newStatus = status ? status.toUpperCase().replace(/\s+/g, '_') : null;
+
+      const targetStage = newStage || (newStatus === 'REJECTED' ? 'REJECTED' : candidate.currentStage);
+      const isRejection = targetStage === 'REJECTED' || newStatus === 'REJECTED';
+
+      // Pipeline Stage Logic:
+      // When candidate is REJECTED, they are unassigned from any job opening
+      if (isRejection) {
+        updateData.status = 'REJECTED';
+        updateData.currentStage = 'REJECTED';
+        updateData.jobRoleId = null;
+      } else {
+        // Active pipeline stages: UPLOADED, PARSED, UNDER_REVIEW, SHORTLISTED, INTERVIEW, SELECTED
+        updateData.currentStage = targetStage;
+        if (targetStage === 'SHORTLISTED' || newStatus === 'SHORTLISTED') {
+          updateData.status = 'SHORTLISTED';
+        } else if (targetStage === 'SELECTED' || newStatus === 'HIRED') {
+          updateData.status = 'HIRED';
+        } else {
+          updateData.status = 'ACTIVE';
+        }
+
+        // If candidate was previously unassigned and had a roleApplied, re-link to role
+        if (!candidate.jobRoleId && candidate.roleApplied && candidate.roleApplied !== 'General Talent Pool' && candidate.roleApplied !== 'Unassigned') {
+          const matchingRole = await prisma.jobRole.findFirst({
+            where: {
+              OR: [
+                { title: { contains: candidate.roleApplied } },
+                { code: { contains: candidate.roleApplied } },
+              ],
+            },
+          });
+          if (matchingRole) {
+            updateData.jobRoleId = matchingRole.id;
+          }
+        }
+      }
+
       if (notes !== undefined) updateData.notes = notes;
 
       const updated = await prisma.candidate.update({
         where: { id },
         data: updateData,
+        include: { jobRole: true },
       });
 
       // Log status transition audit event
@@ -189,6 +257,7 @@ export const candidateController = {
           candidateName: updated.name,
           newStage: updated.currentStage,
           newStatus: updated.status,
+          roleAssigned: updated.jobRole ? updated.jobRole.title : 'Unassigned',
           notes,
         },
         ipAddress: req.ip,
