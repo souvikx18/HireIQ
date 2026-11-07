@@ -1,0 +1,55 @@
+# Git & CI
+.git
+.github
+
+# Node dependencies & caches
+node_modules
+server/node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-store
+
+# Environment files & secrets
+.env
+.env.*
+!.env.example
+server/.env
+server/.env.*
+!.server/.env.example
+
+# Build artifacts
+dist
+dist-ssr
+coverage
+server/coverage
+
+# Documentation & academic reports
+HireIQ_PBL_Report.*
+HireIQ_Documentation_Assets/
+*.docx
+*.pdf
+
+# Python bytecode & virtual environments
+__pycache__
+*/__pycache__
+*/*/__pycache__
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+env/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+server/prisma/*.db
+server/prisma/*.db-journal
+
+# Uploads & local temp
+uploads/
+server/uploads/
+tmp/
+temp/

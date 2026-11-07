@@ -81,7 +81,7 @@ export default function CandidateDashboard() {
     const charCount = text.length;
     const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
     // Calculate clean character parsing accuracy (standard printable ASCII + punctuation + bullet)
-    const cleanChars = (text.match(/[a-zA-Z0-9\s.,\-\–@+●()]/g) || []).length;
+    const cleanChars = (text.match(/[a-zA-Z0-9\s.,\-–@+●()]/g) || []).length;
     const readabilityScore = charCount > 0
       ? Math.min(99, Math.max(75, Math.round((cleanChars / charCount) * 98)))
       : 95;

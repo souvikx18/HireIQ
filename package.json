@@ -1,13 +1,15 @@
 {
-  "name": "react-app",
+  "name": "hireiq-frontend",
+  "version": "1.0.0",
+  "description": "HireIQ - Enterprise AI-Powered Resume Screening & Skill Gap Analysis Platform",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
+    "test": "npm --prefix server test",
     "server": "npm --prefix server start",
     "server:dev": "npm --prefix server run dev",
     "server:test": "npm --prefix server test",

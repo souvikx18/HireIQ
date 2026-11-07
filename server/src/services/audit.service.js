@@ -1,4 +1,4 @@
-import { prisma } from '../config/prisma.js';
+import { prisma, stringFilter } from '../config/prisma.js';
 import { logger } from '../utils/logger.js';
 
 export const auditService = {
@@ -43,10 +43,10 @@ export const auditService = {
     if (resource) where.resource = resource;
     if (search) {
       where.OR = [
-        { action: { contains: search, mode: 'insensitive' } },
-        { resource: { contains: search, mode: 'insensitive' } },
-        { actorEmail: { contains: search, mode: 'insensitive' } },
-        { details: { contains: search, mode: 'insensitive' } },
+        { action: stringFilter(search) },
+        { resource: stringFilter(search) },
+        { actorEmail: stringFilter(search) },
+        { details: stringFilter(search) },
       ];
     }
 

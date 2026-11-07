@@ -184,12 +184,6 @@ export default function Index() {
     }
   };
 
-  const handleCandidateView = (name) => {
-    window.alert(
-      `Candidate Profile\n\n${name}\n\nDetailed resume analysis will appear here.`
-    );
-  };
-
   const handleAIRecommendation = () => {
     window.alert(
       'AI Recommendations\n\n' +
@@ -199,10 +193,6 @@ export default function Index() {
         '• Improve Communication Skills\n' +
         '• Gain domain-specific knowledge'
     );
-  };
-
-  const handleNotificationClick = () => {
-    window.alert('Notifications\n\nYou are all caught up.');
   };
 
   const handleViewAllSkills = () => {

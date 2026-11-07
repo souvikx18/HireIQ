@@ -11,7 +11,7 @@ Safety Guidelines:
 4. Keep answers professional, concise, and structured with markdown bullet points when helpful.`;
 
 export const aiAgent = {
-  async processQuery({ message, userId = null }) {
+  async processQuery({ message, _userId = null }) {
     const rawQuery = String(message || '').trim();
     if (!rawQuery) {
       return { reply: "Hello! How can I assist you with candidate evaluation, skill gaps, or job roles today?" };

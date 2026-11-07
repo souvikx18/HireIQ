@@ -6,10 +6,7 @@ export default function SmoothScroll({ children }) {
   const location = useLocation();
 
   useEffect(() => {
-    // Only initialize Lenis on desktop / large viewports or when smooth scroll is supported
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    
-    // We can enable Lenis globally with smooth inertial easing
+    // Initialize Lenis with smooth inertial easing
     const lenis = new Lenis({
       duration: 1.0,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Smooth exponential ease-out

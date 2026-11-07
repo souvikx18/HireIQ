@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Header from '../components/Header';
@@ -34,7 +34,7 @@ export default function SkillGapAnalysis() {
     }, 2500);
   };
 
-  const loadGaps = async () => {
+  const loadGaps = useCallback(async () => {
     try {
       const res = await analyticsApi.getSkillGaps({ search: searchTerm, category: categoryFilter });
       if (res?.data) {
@@ -49,11 +49,11 @@ export default function SkillGapAnalysis() {
     } catch (err) {
       console.error('Failed to load skill gaps:', err);
     }
-  };
+  }, [searchTerm, categoryFilter]);
 
   useEffect(() => {
     loadGaps();
-  }, [categoryFilter]);
+  }, [loadGaps]);
 
   const filteredGaps = gapsList.filter((item) => {
     const matchesSearch =

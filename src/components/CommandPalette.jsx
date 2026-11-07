@@ -201,12 +201,15 @@ export default function CommandPalette() {
     };
   }, [isOpen]);
 
-  // Focus input on open
+  // Focus and reset input on open
   useEffect(() => {
     if (isOpen) {
-      setSearch('');
-      setSelectedIndex(0);
-      setTimeout(() => inputRef.current?.focus(), 50);
+      const timer = setTimeout(() => {
+        setSearch('');
+        setSelectedIndex(0);
+        inputRef.current?.focus();
+      }, 20);
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 

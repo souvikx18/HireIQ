@@ -15,6 +15,19 @@ export function AuthProvider({ children }) {
   });
   const [loading, setLoading] = useState(true);
 
+  const logout = () => {
+    const refresh = localStorage.getItem('hireiq_refresh');
+    if (refresh) {
+      authApi.logout(refresh).catch(() => {});
+    }
+    localStorage.removeItem('hireiq_token');
+    localStorage.removeItem('hireiq_refresh');
+    localStorage.removeItem('hireiq_user');
+    localStorage.setItem('isAuthenticated', 'false');
+    setToken(null);
+    setUser(null);
+  };
+
   useEffect(() => {
     const initAuth = async () => {
       const savedToken = localStorage.getItem('hireiq_token');
@@ -65,19 +78,6 @@ export function AuthProvider({ children }) {
       return res.data.user;
     }
     throw new Error('Signup failed: token not returned');
-  };
-
-  const logout = () => {
-    const refresh = localStorage.getItem('hireiq_refresh');
-    if (refresh) {
-      authApi.logout(refresh).catch(() => {});
-    }
-    localStorage.removeItem('hireiq_token');
-    localStorage.removeItem('hireiq_refresh');
-    localStorage.removeItem('hireiq_user');
-    localStorage.setItem('isAuthenticated', 'false');
-    setToken(null);
-    setUser(null);
   };
 
   const updateUser = (newUserData) => {

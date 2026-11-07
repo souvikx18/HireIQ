@@ -1,4 +1,4 @@
-import { prisma } from '../config/prisma.js';
+import { prisma, stringFilter } from '../config/prisma.js';
 import { sendSuccess, sendError } from '../utils/response.js';
 import { logger } from '../utils/logger.js';
 
@@ -13,10 +13,7 @@ export const skillController = {
       const whereClause = {};
 
       if (search && search.trim()) {
-        whereClause.name = {
-          contains: search.trim(),
-          mode: 'insensitive',
-        };
+        whereClause.name = stringFilter(search.trim());
       }
 
       if (category && category !== 'all') {

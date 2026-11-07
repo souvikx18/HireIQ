@@ -4,7 +4,7 @@ import { app } from '../src/server.js';
 
 describe('Candidate / Job Seeker Portal Suite', () => {
   let candidateToken = '';
-  let candidateUser = null;
+  let _candidateUser = null;
   let testJobId = '';
 
   beforeAll(async () => {
@@ -20,7 +20,7 @@ describe('Candidate / Job Seeker Portal Suite', () => {
 
     expect(regRes.status).toBe(201);
     candidateToken = regRes.body.data.accessToken;
-    candidateUser = regRes.body.data.user;
+    _candidateUser = regRes.body.data.user;
   });
 
   it('GET /api/candidate-portal/jobs should return active job roles with match score', async () => {

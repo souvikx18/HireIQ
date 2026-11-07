@@ -1,41 +1,83 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
-import Index from './pages/Index';
-import LandingPage from './pages/LandingPage';
-import ResumeUpload from './pages/ResumeUpload';
-import Candidates from './pages/Candidates';
-import SkillGapAnalysis from './pages/SkillGapAnalysis';
-import JobRole from './pages/JobRole';
-import Report from './pages/Report';
-import Setting from './pages/Setting';
-import Signup from './pages/Signup';
-import Login from './pages/Login';
-import Upgrade from './pages/Upgrade';
-import CandidateDashboard from './pages/Candidate/CandidateDashboard';
-import ResumeChecker from './pages/Candidate/ResumeChecker';
-import NotFound from './pages/NotFound';
+import ErrorBoundary from './components/ErrorBoundary';
 import AIChatbot from './components/AIChatbot';
 import CommandPalette from './components/CommandPalette';
 
+// Lazy-loaded routes for production performance and optimal bundle chunking
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const Index = lazy(() => import('./pages/Index'));
+const ResumeUpload = lazy(() => import('./pages/ResumeUpload'));
+const Candidates = lazy(() => import('./pages/Candidates'));
+const SkillGapAnalysis = lazy(() => import('./pages/SkillGapAnalysis'));
+const JobRole = lazy(() => import('./pages/JobRole'));
+const Report = lazy(() => import('./pages/Report'));
+const Setting = lazy(() => import('./pages/Setting'));
+const Signup = lazy(() => import('./pages/Signup'));
+const Login = lazy(() => import('./pages/Login'));
+const CandidateDashboard = lazy(() => import('./pages/Candidate/CandidateDashboard'));
+const ResumeChecker = lazy(() => import('./pages/Candidate/ResumeChecker'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+
+function PageFallback() {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '60vh',
+        width: '100%',
+        color: '#4361ee',
+        fontFamily: 'Inter, system-ui, sans-serif',
+        fontSize: '0.95rem',
+        fontWeight: 500,
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '12px',
+        }}
+      >
+        <div
+          style={{
+            width: '32px',
+            height: '32px',
+            border: '3px solid rgba(67, 97, 238, 0.15)',
+            borderTopColor: '#4361ee',
+            borderRadius: '50%',
+            animation: 'spin 0.8s linear infinite',
+          }}
+        />
+        <span>Loading HireIQ...</span>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    </div>
+  );
+}
+
 function AppRoutes() {
   const location = useLocation();
-  const { isAuthenticated, user } = useAuth();
   const path = location.pathname.toLowerCase();
 
   const hideChatbot =
     path === '/' ||
     path === '' ||
     path.includes('signup') ||
-    path.includes('upgrade') ||
     path.includes('login');
 
   return (
     <>
-      <Routes>
-        {/* Landing Page */}
-        <Route path="/" element={<LandingPage />} />
+      <ErrorBoundary>
+        <Suspense fallback={<PageFallback />}>
+          <Routes>
+            {/* Landing Page */}
+            <Route path="/" element={<LandingPage />} />
 
         {/* Dashboard Routes (Protected) */}
         <Route
@@ -190,23 +232,6 @@ function AppRoutes() {
           }
         />
 
-        <Route
-          path="/upgrade"
-          element={
-            <ProtectedRoute>
-              <Upgrade />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/upgrade.html"
-          element={
-            <ProtectedRoute>
-              <Upgrade />
-            </ProtectedRoute>
-          }
-        />
-
         {/* Candidate Portal Routes */}
         <Route
           path="/candidate/dashboard"
@@ -252,9 +277,11 @@ function AppRoutes() {
         {/* 404 Custom Not Found Route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <CommandPalette />
-      {!hideChatbot && <AIChatbot />}
-    </>
+    </Suspense>
+  </ErrorBoundary>
+  <CommandPalette />
+  {!hideChatbot && <AIChatbot />}
+</>
   );
 }
 

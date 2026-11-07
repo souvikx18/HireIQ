@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { prisma } from '../config/prisma.js';
+import { prisma, stringFilter } from '../config/prisma.js';
 import { auditService } from '../services/audit.service.js';
 import { sendSuccess, sendError } from '../utils/response.js';
 
@@ -48,13 +48,13 @@ export const candidateController = {
       const where = {};
       if (search) {
         where.OR = [
-          { name: { contains: search, mode: 'insensitive' } },
-          { email: { contains: search, mode: 'insensitive' } },
-          { roleApplied: { contains: search, mode: 'insensitive' } },
+          { name: stringFilter(search) },
+          { email: stringFilter(search) },
+          { roleApplied: stringFilter(search) },
         ];
       }
       if (role && role !== 'All Roles') {
-        where.roleApplied = { contains: role, mode: 'insensitive' };
+        where.roleApplied = stringFilter(role);
       }
       if (jobRoleId && jobRoleId !== 'all') {
         where.jobRoleId = jobRoleId;

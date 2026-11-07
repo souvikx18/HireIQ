@@ -31,7 +31,7 @@ export async function apiClient(endpoint, { body, headers = {}, method = 'GET', 
   let response;
   try {
     response = await fetch(url, config);
-  } catch (networkError) {
+  } catch (_networkError) {
     throw new Error('Unable to connect to the HireIQ backend service. Please try again in a moment.');
   }
 

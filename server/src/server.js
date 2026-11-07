@@ -1,7 +1,9 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import compression from 'compression';
 import rateLimit from 'express-rate-limit';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -29,7 +31,10 @@ const __dirname = path.dirname(__filename);
 
 export const app = express();
 
-// 1. Security Headers via Helmet
+// 1. Response Compression (gzip / deflate) for production efficiency
+app.use(compression());
+
+// 2. Security Headers via Helmet
 app.use(
   helmet({
     crossOriginResourcePolicy: { policy: 'cross-origin' },
@@ -115,17 +120,45 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/skills', skillRoutes);
 app.use('/api/candidate-portal', candidatePortalRoutes);
 
-// 8. 404 Route Handler
-app.use((req, res) => {
+// 8. Production Static Frontend Delivery (Unified Deployment Mode)
+const distPath = path.resolve(__dirname, '../../dist');
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
+
+// 9. API 404 Route Handler
+app.use('/api/*', (req, res) => {
   sendError(res, `Route ${req.method} ${req.originalUrl} not found`, 404);
 });
 
-// 9. Centralized Error Handler
+// 10. Centralized Error Handler
 app.use(errorHandler);
 
-// Start server if run directly
+// 11. Server Initialization & Graceful Shutdown
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(config.port, () => {
+  const server = app.listen(config.port, () => {
     logger.info(`🚀 HireIQ Backend Server listening on port ${config.port} (${config.env})`);
   });
+
+  const gracefulShutdown = async (signal) => {
+    logger.info(`${signal} signal received: closing HTTP server and database connections...`);
+    server.close(async () => {
+      logger.info('HTTP server closed cleanly.');
+      try {
+        await prisma.$disconnect();
+        logger.info('Prisma database client disconnected.');
+        process.exit(0);
+      } catch (err) {
+        logger.error('Error during database disconnect:', err);
+        process.exit(1);
+      }
+    });
+  };
+
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 }

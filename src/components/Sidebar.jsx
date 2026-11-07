@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import logo from '../assets/img/hireiq-logo.png';
 import '../css/sidebar-common.css';
 
 export default function Sidebar({ activePage }) {
-  const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
   const isCandidate = user?.role === 'CANDIDATE';

@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { usePageSEO } from '../hooks/usePageSEO';
 import logo from '../assets/img/hireiq-logo.png';
 import '../css/landing.css';
 
 export default function LandingPage() {
-  const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const [activeNav, setActiveNav] = useState('home');
   const [openFaq, setOpenFaq] = useState(0); // First question open by default
@@ -59,12 +58,12 @@ export default function LandingPage() {
       a: 'HireIQ offers seamless REST API integration with popular ATS and HRIS platforms like Greenhouse, Lever, Workday, and standard webhook endpoints.',
     },
     {
-      q: 'Do you offer a free trial?',
-      a: 'Yes! You can get started for free with our Starter tier to screen initial resumes and explore the skill gap analysis dashboard with no credit card required.',
+      q: 'How is HireIQ deployed in an enterprise environment?',
+      a: 'HireIQ can be deployed via Docker container orchestration, Kubernetes, or hosted cloud environments (AWS, GCP, Azure) with dedicated PostgreSQL databases and isolated AI microservices.',
     },
     {
-      q: 'Can I upgrade my plan later?',
-      a: 'You can upgrade or adjust your team subscription anytime directly from the Settings or Upgrade section inside your account.',
+      q: 'What role-based access controls and audit capabilities are included?',
+      a: 'HireIQ enforces granular RBAC distinguishing Recruiters, Hiring Managers, and Candidates, with full tamper-evident audit logging for all candidate status transitions and resume evaluations.',
     },
   ];
 

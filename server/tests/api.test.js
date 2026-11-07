@@ -68,7 +68,7 @@ describe('HireIQ Core API Suite', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.success).toBe(true);
-    expect(res.body.data.content).toContain('HIREIQ ENTERPRISE REPORT');
+    expect(res.body.data.content).toContain('HIREIQ RECRUITMENT INTELLIGENCE');
   });
 
   it('POST /api/candidates/compare should return side-by-side comparison', async () => {

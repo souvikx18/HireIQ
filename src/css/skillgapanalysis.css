@@ -101,44 +101,6 @@ body {
     transform: translateX(4px);
 }
 
-.upgrade-card {
-    position: absolute;
-    left: 15px;
-    right: 15px;
-    bottom: 25px;
-    padding: 22px 15px;
-    background: linear-gradient(145deg, #202d70, #14235a);
-    border-radius: 10px;
-    text-align: center;
-}
-
-.upgrade-icon {
-    color: #d7b7ff;
-    font-size: 22px;
-}
-
-.upgrade-card h3 {
-    margin: 13px 0 8px;
-    font-size: 17px;
-}
-
-.upgrade-card p {
-    font-size: 12px;
-    line-height: 1.55;
-    color: #d5ddff;
-    margin-bottom: 18px;
-}
-
-.upgrade-card button {
-    border: 0;
-    width: 100%;
-    padding: 12px;
-    border-radius: 7px;
-    background: #2869e8;
-    color: #fff;
-    font: inherit;
-    cursor: pointer;
-}
 
 .main-content {
     margin-left: 250px;
@@ -715,10 +677,6 @@ td:first-child {
     .menu-item {
         padding: 11px 9px;
         font-size: 11px;
-    }
-
-    .upgrade-card {
-        display: none;
     }
 
     .main-content {

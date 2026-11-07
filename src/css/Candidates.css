@@ -165,43 +165,6 @@ body {
     }
 }
 
-.upgrade-card {
-    position: absolute;
-    left: 15px;
-    right: 15px;
-    bottom: 25px;
-    padding: 22px 15px;
-    background: linear-gradient(145deg, #202d70, #14235a);
-    border-radius: 10px;
-    text-align: center;
-}
-
-.upgrade-icon {
-    color: #d7b7ff;
-    font-size: 22px;
-}
-
-.upgrade-card h3 {
-    margin-top: 8px;
-    font-size: 15px;
-}
-
-.upgrade-card p {
-    color: #c2cbe0;
-    font-size: 11px;
-    line-height: 1.5;
-    margin: 9px 0 15px;
-}
-
-.upgrade-card button {
-    width: 100%;
-    border: none;
-    background: var(--primary);
-    color: white;
-    padding: 11px;
-    border-radius: 7px;
-    cursor: pointer;
-}
 
 
 
